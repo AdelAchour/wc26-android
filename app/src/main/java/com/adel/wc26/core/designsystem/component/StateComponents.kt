@@ -81,7 +81,7 @@ fun WC26ErrorState(
         verticalArrangement = Arrangement.Center,
     ) {
         Text(
-            text = stringResource(R.string.something_went_wrong),
+            text = stringResource(R.string.error_something_went_wrong),
             style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center,
         )

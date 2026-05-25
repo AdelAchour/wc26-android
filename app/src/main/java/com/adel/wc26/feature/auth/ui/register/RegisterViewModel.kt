@@ -2,9 +2,11 @@ package com.adel.wc26.feature.auth.ui.register
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.adel.wc26.core.result.AppError
 import com.adel.wc26.core.result.DataResult
 import com.adel.wc26.feature.auth.domain.AuthRepository
 import com.adel.wc26.feature.auth.ui.AuthValidation
+import com.adel.wc26.feature.auth.ui.ValidationError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,16 +15,23 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * UI state for the register screen.
+ *
+ * Per-field errors are [ValidationError]s; [formError] is an [AppError]
+ * from a failed submission. Both are semantic — the screen resolves them
+ * to text via stringResource.
+ */
 data class RegisterUiState(
     val email: String = "",
     val username: String = "",
     val displayName: String = "",
     val password: String = "",
-    val emailError: String? = null,
-    val usernameError: String? = null,
-    val displayNameError: String? = null,
-    val passwordError: String? = null,
-    val formError: String? = null,
+    val emailError: ValidationError? = null,
+    val usernameError: ValidationError? = null,
+    val displayNameError: ValidationError? = null,
+    val passwordError: ValidationError? = null,
+    val formError: AppError? = null,
     val loading: Boolean = false,
     val success: Boolean = false,
 ) {
@@ -87,7 +96,7 @@ class RegisterViewModel @Inject constructor(
                     _uiState.update { it.copy(loading = false, success = true) }
                 is DataResult.Error ->
                     _uiState.update {
-                        it.copy(loading = false, formError = result.message)
+                        it.copy(loading = false, formError = result.error)
                     }
             }
         }

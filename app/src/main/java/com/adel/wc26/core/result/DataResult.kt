@@ -4,13 +4,14 @@ package com.adel.wc26.core.result
  * A simple success/failure result for repository operations.
  *
  * Repositories return this instead of throwing — callers handle both
- * branches explicitly with a `when`. [Error] carries a user-presentable
- * message; the cause is kept for logging.
+ * branches explicitly with a `when`. [Error] carries a semantic [AppError]
+ * (not a string); the UI layer resolves it to localized text. The cause
+ * is kept for logging.
  */
 sealed interface DataResult<out T> {
     data class Success<T>(val data: T) : DataResult<T>
     data class Error(
-        val message: String,
+        val error: AppError,
         val cause: Throwable? = null,
     ) : DataResult<Nothing>
 }

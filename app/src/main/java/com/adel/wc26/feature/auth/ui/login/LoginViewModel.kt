@@ -2,9 +2,11 @@ package com.adel.wc26.feature.auth.ui.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.adel.wc26.core.result.AppError
 import com.adel.wc26.core.result.DataResult
 import com.adel.wc26.feature.auth.domain.AuthRepository
 import com.adel.wc26.feature.auth.ui.AuthValidation
+import com.adel.wc26.feature.auth.ui.ValidationError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,17 +18,18 @@ import javax.inject.Inject
 /**
  * UI state for the login screen.
  *
- * [emailError] / [passwordError] are inline per-field validation messages;
- * [formError] is for a failed submission (wrong credentials, network).
+ * [emailError] / [passwordError] are inline per-field validation errors;
+ * [formError] is the failed-submission error (wrong credentials, network).
+ * Both are semantic types, resolved to text by the screen via stringResource.
  * [success] flips true once login succeeds — the screen observes it to
  * navigate away.
  */
 data class LoginUiState(
     val email: String = "",
     val password: String = "",
-    val emailError: String? = null,
-    val passwordError: String? = null,
-    val formError: String? = null,
+    val emailError: ValidationError? = null,
+    val passwordError: ValidationError? = null,
+    val formError: AppError? = null,
     val loading: Boolean = false,
     val success: Boolean = false,
 ) {
@@ -53,8 +56,8 @@ class LoginViewModel @Inject constructor(
     fun submit() {
         val state = _uiState.value
 
-        // Light client-side check — just "is it filled in". The backend
-        // gives a generic "incorrect email or password" for the real check.
+        // Light client-side check — just "is it filled in / shaped right".
+        // The backend gives the real "incorrect email or password" check.
         val emailError = AuthValidation.emailError(state.email)
         val passwordError = AuthValidation.passwordError(state.password)
 
@@ -72,7 +75,7 @@ class LoginViewModel @Inject constructor(
                     _uiState.update { it.copy(loading = false, success = true) }
                 is DataResult.Error ->
                     _uiState.update {
-                        it.copy(loading = false, formError = result.message)
+                        it.copy(loading = false, formError = result.error)
                     }
             }
         }

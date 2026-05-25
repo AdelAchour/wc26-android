@@ -1,6 +1,5 @@
 package com.adel.wc26.feature.auth.ui.login
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,8 +16,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -27,10 +26,11 @@ import com.adel.wc26.core.designsystem.component.WC26PrimaryButton
 import com.adel.wc26.core.designsystem.component.WC26TextField
 import com.adel.wc26.core.designsystem.theme.Spacing
 import com.adel.wc26.core.designsystem.theme.WC26Theme
+import com.adel.wc26.core.ui.toStringRes
 
 /**
- * Login screen. On success it invokes [onLoggedIn] — the NavHost routes
- * into the app.
+ * Login screen — stateful entry point. Collects the ViewModel state and
+ * delegates rendering to [LoginContent].
  */
 @Composable
 fun LoginScreen(
@@ -41,11 +41,33 @@ fun LoginScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // React to a successful login exactly once.
     LaunchedEffect(state.success) {
         if (state.success) onLoggedIn()
     }
 
+    LoginContent(
+        state = state,
+        onEmailChange = viewModel::onEmailChange,
+        onPasswordChange = viewModel::onPasswordChange,
+        onSubmit = viewModel::submit,
+        onGoToRegister = onGoToRegister,
+        modifier = modifier,
+    )
+}
+
+/**
+ * Login screen — stateless content. A pure function of [LoginUiState];
+ * previewable without Hilt.
+ */
+@Composable
+fun LoginContent(
+    state: LoginUiState,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    onGoToRegister: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -55,11 +77,11 @@ fun LoginScreen(
         Spacer(Modifier.height(Spacing.xl))
 
         Text(
-            text = stringResource(R.string.welcome_back),
+            text = stringResource(R.string.login_title),
             style = MaterialTheme.typography.displaySmall,
         )
         Text(
-            text = stringResource(R.string.log_in_title),
+            text = stringResource(R.string.login_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = Spacing.xs),
@@ -69,27 +91,26 @@ fun LoginScreen(
 
         WC26TextField(
             value = state.email,
-            onValueChange = viewModel::onEmailChange,
-            label = stringResource(R.string.email),
+            onValueChange = onEmailChange,
+            label = stringResource(R.string.field_email),
             keyboardType = KeyboardType.Email,
-            errorText = state.emailError,
+            errorText = state.emailError?.let { stringResource(it.toStringRes()) },
         )
 
         Spacer(Modifier.height(Spacing.sm))
 
         WC26TextField(
             value = state.password,
-            onValueChange = viewModel::onPasswordChange,
-            label = stringResource(R.string.password),
+            onValueChange = onPasswordChange,
+            label = stringResource(R.string.field_password),
             isPassword = true,
-            errorText = state.passwordError,
+            errorText = state.passwordError?.let { stringResource(it.toStringRes()) },
         )
 
-        // Form-level error (wrong credentials, network).
         state.formError?.let { error ->
             Spacer(Modifier.height(Spacing.sm))
             Text(
-                text = error,
+                text = stringResource(error.toStringRes()),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
             )
@@ -98,8 +119,8 @@ fun LoginScreen(
         Spacer(Modifier.height(Spacing.xl))
 
         WC26PrimaryButton(
-            text = stringResource(R.string.log_in),
-            onClick = viewModel::submit,
+            text = stringResource(R.string.login_action),
+            onClick = onSubmit,
             enabled = state.canSubmit,
             loading = state.loading,
             modifier = Modifier.fillMaxWidth(),
@@ -112,7 +133,7 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             TextButton(onClick = onGoToRegister) {
-                Text(stringResource(R.string.new_here_title))
+                Text(stringResource(R.string.login_go_to_register))
             }
         }
     }
@@ -120,10 +141,13 @@ fun LoginScreen(
 
 @Preview(showBackground = true)
 @Composable
-fun LoginScreenPreview() {
+private fun LoginContentPreview() {
     WC26Theme {
-        LoginScreen(
-            onLoggedIn = {},
+        LoginContent(
+            state = LoginUiState(email = "fan@example.com", password = "secret123"),
+            onEmailChange = {},
+            onPasswordChange = {},
+            onSubmit = {},
             onGoToRegister = {},
         )
     }

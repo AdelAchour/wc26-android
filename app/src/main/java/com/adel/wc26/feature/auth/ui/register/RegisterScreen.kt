@@ -18,16 +18,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.adel.wc26.R
 import com.adel.wc26.core.designsystem.component.WC26PrimaryButton
 import com.adel.wc26.core.designsystem.component.WC26TextField
 import com.adel.wc26.core.designsystem.theme.Spacing
+import com.adel.wc26.core.designsystem.theme.WC26Theme
+import com.adel.wc26.core.ui.toStringRes
 
 /**
- * Register screen. On success the user is signed in immediately (the
- * backend returns a token on register) — [onRegistered] routes into the app.
+ * Register screen — stateful entry point.
  */
 @Composable
 fun RegisterScreen(
@@ -42,6 +44,32 @@ fun RegisterScreen(
         if (state.success) onRegistered()
     }
 
+    RegisterContent(
+        state = state,
+        onDisplayNameChange = viewModel::onDisplayNameChange,
+        onUsernameChange = viewModel::onUsernameChange,
+        onEmailChange = viewModel::onEmailChange,
+        onPasswordChange = viewModel::onPasswordChange,
+        onSubmit = viewModel::submit,
+        onGoToLogin = onGoToLogin,
+        modifier = modifier,
+    )
+}
+
+/**
+ * Register screen — stateless content. Previewable without Hilt.
+ */
+@Composable
+fun RegisterContent(
+    state: RegisterUiState,
+    onDisplayNameChange: (String) -> Unit,
+    onUsernameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    onGoToLogin: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -51,11 +79,11 @@ fun RegisterScreen(
         Spacer(Modifier.height(Spacing.xl))
 
         Text(
-            text = stringResource(R.string.create_your_account),
+            text = stringResource(R.string.register_title),
             style = MaterialTheme.typography.displaySmall,
         )
         Text(
-            text = stringResource(R.string.join_the_wc26_conversation),
+            text = stringResource(R.string.register_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = Spacing.xs),
@@ -65,41 +93,41 @@ fun RegisterScreen(
 
         WC26TextField(
             value = state.displayName,
-            onValueChange = viewModel::onDisplayNameChange,
-            label = stringResource(R.string.display_name),
-            errorText = state.displayNameError,
+            onValueChange = onDisplayNameChange,
+            label = stringResource(R.string.field_display_name),
+            errorText = state.displayNameError?.let { stringResource(it.toStringRes()) },
         )
         Spacer(Modifier.height(Spacing.sm))
 
         WC26TextField(
             value = state.username,
-            onValueChange = viewModel::onUsernameChange,
-            label = stringResource(R.string.username),
-            errorText = state.usernameError,
+            onValueChange = onUsernameChange,
+            label = stringResource(R.string.field_username),
+            errorText = state.usernameError?.let { stringResource(it.toStringRes()) },
         )
         Spacer(Modifier.height(Spacing.sm))
 
         WC26TextField(
             value = state.email,
-            onValueChange = viewModel::onEmailChange,
-            label = stringResource(R.string.email),
+            onValueChange = onEmailChange,
+            label = stringResource(R.string.field_email),
             keyboardType = KeyboardType.Email,
-            errorText = state.emailError,
+            errorText = state.emailError?.let { stringResource(it.toStringRes()) },
         )
         Spacer(Modifier.height(Spacing.sm))
 
         WC26TextField(
             value = state.password,
-            onValueChange = viewModel::onPasswordChange,
-            label = stringResource(R.string.password),
+            onValueChange = onPasswordChange,
+            label = stringResource(R.string.field_password),
             isPassword = true,
-            errorText = state.passwordError,
+            errorText = state.passwordError?.let { stringResource(it.toStringRes()) },
         )
 
         state.formError?.let { error ->
             Spacer(Modifier.height(Spacing.sm))
             Text(
-                text = error,
+                text = stringResource(error.toStringRes()),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
             )
@@ -108,8 +136,8 @@ fun RegisterScreen(
         Spacer(Modifier.height(Spacing.xl))
 
         WC26PrimaryButton(
-            text = stringResource(R.string.create_account),
-            onClick = viewModel::submit,
+            text = stringResource(R.string.register_action),
+            onClick = onSubmit,
             enabled = state.canSubmit,
             loading = state.loading,
             modifier = Modifier.fillMaxWidth(),
@@ -122,8 +150,29 @@ fun RegisterScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             TextButton(onClick = onGoToLogin) {
-                Text(stringResource(R.string.already_have_account_title))
+                Text(stringResource(R.string.register_go_to_login))
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun RegisterContentPreview() {
+    WC26Theme {
+        RegisterContent(
+            state = RegisterUiState(
+                displayName = "Adel",
+                username = "adel",
+                email = "adel@example.com",
+                password = "secret123",
+            ),
+            onDisplayNameChange = {},
+            onUsernameChange = {},
+            onEmailChange = {},
+            onPasswordChange = {},
+            onSubmit = {},
+            onGoToLogin = {},
+        )
     }
 }

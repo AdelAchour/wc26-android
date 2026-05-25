@@ -52,7 +52,7 @@ fun WelcomeScreen(
         Spacer(Modifier.height(Spacing.lg))
 
         Text(
-            text = stringResource(R.string.welcome_title),
+            text = stringResource(R.string.welcome_tagline),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -60,7 +60,7 @@ fun WelcomeScreen(
         Spacer(Modifier.weight(1f))
 
         WC26PrimaryButton(
-            text = stringResource(R.string.create_account),
+            text = stringResource(R.string.register_action),
             onClick = onCreateAccount,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -68,7 +68,7 @@ fun WelcomeScreen(
         Spacer(Modifier.height(Spacing.md))
 
         WC26SecondaryButton(
-            text = stringResource(R.string.log_in),
+            text = stringResource(R.string.welcome_log_in),
             onClick = onLogIn,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -76,7 +76,7 @@ fun WelcomeScreen(
         Spacer(Modifier.height(Spacing.sm))
 
         TextButton(onClick = onExplore) {
-            Text(stringResource(R.string.explore_without_account))
+            Text(stringResource(R.string.welcome_explore))
         }
 
         Spacer(Modifier.height(Spacing.lg))
