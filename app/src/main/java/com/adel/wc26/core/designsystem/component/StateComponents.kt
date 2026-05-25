@@ -93,7 +93,7 @@ fun WC26ErrorState(
             modifier = Modifier.padding(top = Spacing.sm, bottom = Spacing.lg),
         )
         WC26PrimaryButton(
-            text = stringResource(R.string.try_again),
+            text = stringResource(R.string.action_try_again),
             onClick = onRetry,
             modifier = Modifier.fillMaxWidth(0.6f),
         )

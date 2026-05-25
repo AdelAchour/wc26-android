@@ -19,6 +19,8 @@ import com.adel.wc26.feature.auth.ui.splash.SplashViewModel
 import com.adel.wc26.feature.auth.ui.welcome.WelcomeScreen
 import com.adel.wc26.feature.auth.ui.login.LoginScreen
 import com.adel.wc26.feature.auth.ui.register.RegisterScreen
+import com.adel.wc26.feature.profile.ui.ProfileScreen
+import com.adel.wc26.feature.settings.ui.SettingsScreen
 
 /**
  * The app's navigation host.
@@ -132,10 +134,21 @@ fun WC26NavHost(
                 PlaceholderScreen(title = "Feed")
             }
             composable<Destinations.Profile> {
-                PlaceholderScreen(title = "Profile")
+                ProfileScreen(
+                    onSignIn = {
+                        navController.navigate(Destinations.Login)
+                    },
+                )
             }
             composable<Destinations.Settings> {
-                PlaceholderScreen(title = "Settings")
+                SettingsScreen(
+                    onLoggedOut = {
+                        navController.navigate(Destinations.Welcome) {
+                            // Clear everything — fresh start at Welcome.
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
+                )
             }
 
             // --- Detail screens (bottom bar hidden) ---
