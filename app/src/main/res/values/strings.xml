@@ -3,4 +3,28 @@
 
     <string name="something_went_wrong">Something went wrong</string>
     <string name="try_again">Try again</string>
+    <string name="request_not_valid">That request wasn\'t valid</string>
+    <string name="incorrect_email_password">Incorrect email or password</string>
+    <string name="no_permission">You don\'t have permission to do that</string>
+    <string name="not_found">Not found</string>
+    <string name="already_taken">That\'s already taken</string>
+    <string name="server_problem">The server had a problem. Try again shortly</string>
+    <string name="request_failed">Request failed</string>
+
+    <string name="welcome_title">Every match of the 2026 World Cup — one thread, one conversation at a time.</string>
+    <string name="create_account">Create account</string>
+    <string name="log_in">Log in</string>
+    <string name="explore_without_account">Explore without an account</string>
+    <string name="welcome_back">Welcome back</string>
+    <string name="log_in_title">Log in to post, like, and join the conversation.</string>
+    <string name="create_your_account">Create your account</string>
+    <string name="join_the_wc26_conversation">">"Join the WC26 conversation."</string>
+    <string name="new_here_title">New here? Create an account</string>
+    <string name="already_have_account_title">Already have an account? Log in</string>
+
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="display_name">Display name</string>
+    <string name="username">Username</string>
+
 </resources>

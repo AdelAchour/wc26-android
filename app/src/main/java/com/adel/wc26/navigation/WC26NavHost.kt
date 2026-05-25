@@ -1,6 +1,5 @@
 package com.adel.wc26.navigation
 
-import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -17,6 +16,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.adel.wc26.feature.auth.ui.splash.SplashRoute
 import com.adel.wc26.feature.auth.ui.splash.SplashViewModel
+import com.adel.wc26.feature.auth.ui.welcome.WelcomeScreen
+import com.adel.wc26.feature.auth.ui.login.LoginScreen
+import com.adel.wc26.feature.auth.ui.register.RegisterScreen
 
 /**
  * The app's navigation host.
@@ -55,6 +57,7 @@ fun WC26NavHost(
             startDestination = Destinations.Splash,
             modifier = Modifier.padding(innerPadding),
         ) {
+
             // --- Splash / launch routing ---
             composable<Destinations.Splash> {
                 val splashViewModel: SplashViewModel = hiltViewModel()
@@ -81,13 +84,44 @@ fun WC26NavHost(
 
             // --- Auth flow (bottom bar hidden) ---
             composable<Destinations.Welcome> {
-                PlaceholderScreen(title = "Welcome")
+                WelcomeScreen(
+                    onCreateAccount = { navController.navigate(Destinations.Register) },
+                    onLogIn = { navController.navigate(Destinations.Login) },
+                    onExplore = {
+                        navController.navigate(Destinations.Matches) {
+                            popUpTo(Destinations.Welcome) { inclusive = true }
+                        }
+                    },
+                )
             }
             composable<Destinations.Login> {
-                PlaceholderScreen(title = "Log in")
+                LoginScreen(
+                    onLoggedIn = {
+                        navController.navigate(Destinations.Matches) {
+                            // Clear the whole auth flow from the back stack.
+                            popUpTo<Destinations.Welcome> { inclusive = true }
+                        }
+                    },
+                    onGoToRegister = {
+                        navController.navigate(Destinations.Register) {
+                            launchSingleTop = true
+                        }
+                    },
+                )
             }
             composable<Destinations.Register> {
-                PlaceholderScreen(title = "Create account")
+                RegisterScreen(
+                    onRegistered = {
+                        navController.navigate(Destinations.Matches) {
+                            popUpTo<Destinations.Welcome> { inclusive = true }
+                        }
+                    },
+                    onGoToLogin = {
+                        navController.navigate(Destinations.Login) {
+                            launchSingleTop = true
+                        }
+                    },
+                )
             }
 
             // --- Top-level tabs (bottom bar visible) ---
