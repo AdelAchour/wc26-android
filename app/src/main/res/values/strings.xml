@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">WC26 Thread</string>
+
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="try_again">Try again</string>
 </resources>
