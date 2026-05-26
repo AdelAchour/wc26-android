@@ -121,4 +121,11 @@
     <string name="composer_post">Post</string>
     <string name="composer_placeholder">Share your take on the match…</string>
 
+    <string name="post_detail_title">Post</string>
+    <string name="post_detail_comments_header">Comments (%1$d)</string>
+    <string name="post_detail_no_comments">No comments yet. Start the conversation.</string>
+    <string name="post_detail_comment_hint">Add a comment…</string>
+    <string name="post_detail_send_comment">Send comment</string>
+    <string name="post_detail_sign_in_to_comment">Sign in to join the conversation</string>
+
 </resources>

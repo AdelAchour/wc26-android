@@ -21,13 +21,13 @@ import retrofit2.http.Query
  */
 interface LikeApi {
 
-    @POST("posts/{postId}/likes")
+    @POST("posts/{postId}/like")
     suspend fun like(@Path("postId") postId: Long)
 
-    @DELETE("posts/{postId}/likes")
+    @DELETE("posts/{postId}/like")
     suspend fun unlike(@Path("postId") postId: Long)
 
-    @GET("posts/{postId}/likes")
+    @GET("posts/{postId}/like")
     suspend fun getLikers(
         @Path("postId") postId: Long,
         @Query("cursor") cursor: String? = null,

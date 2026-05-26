@@ -19,12 +19,13 @@ import com.adel.wc26.feature.auth.ui.splash.SplashViewModel
 import com.adel.wc26.feature.auth.ui.welcome.WelcomeScreen
 import com.adel.wc26.feature.auth.ui.login.LoginScreen
 import com.adel.wc26.feature.auth.ui.register.RegisterScreen
-import com.adel.wc26.feature.matches.ui.detail.MatchDetailScreen
-import com.adel.wc26.feature.matches.ui.list.MatchesScreen
-import com.adel.wc26.feature.posts.ui.composer.PostComposerScreen
-import com.adel.wc26.feature.posts.ui.feed.FeedScreen
 import com.adel.wc26.feature.profile.ui.ProfileScreen
 import com.adel.wc26.feature.settings.ui.SettingsScreen
+import com.adel.wc26.feature.matches.ui.list.MatchesScreen
+import com.adel.wc26.feature.matches.ui.detail.MatchDetailScreen
+import com.adel.wc26.feature.posts.ui.feed.FeedScreen
+import com.adel.wc26.feature.posts.ui.composer.PostComposerScreen
+import com.adel.wc26.feature.posts.ui.detail.PostDetailScreen
 
 /**
  * The app's navigation host.
@@ -167,9 +168,7 @@ fun WC26NavHost(
             }
 
             // --- Detail screens (bottom bar hidden) ---
-            composable<Destinations.MatchDetail> { backStack ->
-                val args = backStack.toRoute<Destinations.MatchDetail>()
-                PlaceholderScreen(title = "Match #${args.matchId}")
+            composable<Destinations.MatchDetail> {
                 MatchDetailScreen(
                     onBack = { navController.popBackStack() },
                     onPostClick = { postId ->
@@ -192,9 +191,16 @@ fun WC26NavHost(
                     onPosted = { navController.popBackStack() },
                 )
             }
-            composable<Destinations.PostDetail> { backStack ->
-                val args = backStack.toRoute<Destinations.PostDetail>()
-                PlaceholderScreen(title = "Post #${args.postId}")
+            composable<Destinations.PostDetail> {
+                PostDetailScreen(
+                    onBack = { navController.popBackStack() },
+                    onAuthorClick = { userId ->
+                        navController.navigate(Destinations.UserProfile(userId))
+                    },
+                    onSignInPrompt = {
+                        navController.navigate(Destinations.Login)
+                    },
+                )
             }
             composable<Destinations.UserProfile> { backStack ->
                 val args = backStack.toRoute<Destinations.UserProfile>()

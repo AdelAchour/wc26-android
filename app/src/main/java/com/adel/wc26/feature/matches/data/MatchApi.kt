@@ -14,7 +14,7 @@ import retrofit2.http.Query
  *   GET /matches/{id}
  *
  * The [status] filter is nullable — omitted means all matches.
- * Confirm the exact accepted status values (e.g. "upcoming", "live",
+ * Match the exact accepted status values (e.g. "upcoming", "live",
  * "finished") with the backend's MatchStatus enum.
  */
 interface MatchApi {

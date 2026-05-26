@@ -9,7 +9,7 @@ import com.adel.wc26.feature.matches.domain.model.Match
  */
 enum class MatchFilter(val apiValue: String?) {
     ALL(null),
-    UPCOMING("upcoming"),
+    UPCOMING("scheduled"),
     LIVE("live"),
     FINISHED("finished"),
 }
