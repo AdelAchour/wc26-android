@@ -20,6 +20,7 @@ import com.adel.wc26.feature.auth.ui.welcome.WelcomeScreen
 import com.adel.wc26.feature.auth.ui.login.LoginScreen
 import com.adel.wc26.feature.auth.ui.register.RegisterScreen
 import com.adel.wc26.feature.profile.ui.ProfileScreen
+import com.adel.wc26.feature.profile.ui.userprofile.UserProfileScreen
 import com.adel.wc26.feature.settings.ui.SettingsScreen
 import com.adel.wc26.feature.matches.ui.list.MatchesScreen
 import com.adel.wc26.feature.matches.ui.detail.MatchDetailScreen
@@ -151,6 +152,12 @@ fun WC26NavHost(
             }
             composable<Destinations.Profile> {
                 ProfileScreen(
+                    onPostClick = { postId ->
+                        navController.navigate(Destinations.PostDetail(postId))
+                    },
+                    onAuthorClick = { userId ->
+                        navController.navigate(Destinations.UserProfile(userId))
+                    },
                     onSignIn = {
                         navController.navigate(Destinations.Login)
                     },
@@ -202,9 +209,16 @@ fun WC26NavHost(
                     },
                 )
             }
-            composable<Destinations.UserProfile> { backStack ->
-                val args = backStack.toRoute<Destinations.UserProfile>()
-                PlaceholderScreen(title = "User #${args.userId}")
+            composable<Destinations.UserProfile> {
+                UserProfileScreen(
+                    onBack = { navController.popBackStack() },
+                    onPostClick = { postId ->
+                        navController.navigate(Destinations.PostDetail(postId))
+                    },
+                    onAuthorClick = { userId ->
+                        navController.navigate(Destinations.UserProfile(userId))
+                    },
+                )
             }
             composable<Destinations.Likers> { backStack ->
                 val args = backStack.toRoute<Destinations.Likers>()

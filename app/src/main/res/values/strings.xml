@@ -128,4 +128,15 @@
     <string name="post_detail_send_comment">Send comment</string>
     <string name="post_detail_sign_in_to_comment">Sign in to join the conversation</string>
 
+    <!-- Own profile tabs -->
+    <string name="profile_tab_posts">Posts</string>
+    <string name="profile_tab_likes">Likes</string>
+
+    <!-- Shared profile header -->
+    <string name="profile_joined_on">Joined %1$s</string>
+
+    <!-- Public user profile -->
+    <string name="user_profile_title">Profile</string>
+    <string name="user_profile_posts_header">Posts</string>
+
 </resources>
