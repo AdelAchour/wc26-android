@@ -19,6 +19,10 @@ import com.adel.wc26.feature.auth.ui.splash.SplashViewModel
 import com.adel.wc26.feature.auth.ui.welcome.WelcomeScreen
 import com.adel.wc26.feature.auth.ui.login.LoginScreen
 import com.adel.wc26.feature.auth.ui.register.RegisterScreen
+import com.adel.wc26.feature.matches.ui.detail.MatchDetailScreen
+import com.adel.wc26.feature.matches.ui.list.MatchesScreen
+import com.adel.wc26.feature.posts.ui.composer.PostComposerScreen
+import com.adel.wc26.feature.posts.ui.feed.FeedScreen
 import com.adel.wc26.feature.profile.ui.ProfileScreen
 import com.adel.wc26.feature.settings.ui.SettingsScreen
 
@@ -128,10 +132,21 @@ fun WC26NavHost(
 
             // --- Top-level tabs (bottom bar visible) ---
             composable<Destinations.Matches> {
-                PlaceholderScreen(title = "Matches")
+                MatchesScreen(
+                    onMatchClick = { matchId ->
+                        navController.navigate(Destinations.MatchDetail(matchId))
+                    },
+                )
             }
             composable<Destinations.Feed> {
-                PlaceholderScreen(title = "Feed")
+                FeedScreen(
+                    onPostClick = { postId ->
+                        navController.navigate(Destinations.PostDetail(postId))
+                    },
+                    onAuthorClick = { userId ->
+                        navController.navigate(Destinations.UserProfile(userId))
+                    },
+                )
             }
             composable<Destinations.Profile> {
                 ProfileScreen(
@@ -155,6 +170,27 @@ fun WC26NavHost(
             composable<Destinations.MatchDetail> { backStack ->
                 val args = backStack.toRoute<Destinations.MatchDetail>()
                 PlaceholderScreen(title = "Match #${args.matchId}")
+                MatchDetailScreen(
+                    onBack = { navController.popBackStack() },
+                    onPostClick = { postId ->
+                        navController.navigate(Destinations.PostDetail(postId))
+                    },
+                    onAuthorClick = { userId ->
+                        navController.navigate(Destinations.UserProfile(userId))
+                    },
+                    onComposeClick = { matchId ->
+                        navController.navigate(Destinations.PostComposer(matchId))
+                    },
+                    onSignInPrompt = {
+                        navController.navigate(Destinations.Login)
+                    },
+                )
+            }
+            composable<Destinations.PostComposer> {
+                PostComposerScreen(
+                    onClose = { navController.popBackStack() },
+                    onPosted = { navController.popBackStack() },
+                )
             }
             composable<Destinations.PostDetail> { backStack ->
                 val args = backStack.toRoute<Destinations.PostDetail>()

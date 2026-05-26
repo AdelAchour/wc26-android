@@ -4,6 +4,7 @@
     <!-- Shared actions -->
     <string name="action_cancel">Cancel</string>
     <string name="action_try_again">Try again</string>
+    <string name="action_back">Back</string>
 
     <!-- Generic errors -->
     <string name="error_something_went_wrong">Something went wrong</string>
@@ -76,5 +77,48 @@
     <string name="time_minutes">%1$dm</string>
     <string name="time_hours">%1$dh</string>
     <string name="time_days">%1$dd</string>
+
+    <!-- Matches -->
+    <string name="matches_title">Matches</string>
+
+    <!-- Filter labels -->
+    <string name="match_filter_all">All</string>
+    <string name="match_filter_upcoming">Upcoming</string>
+    <string name="match_filter_live">Live</string>
+    <string name="match_filter_finished">Finished</string>
+
+    <!-- Empty state -->
+    <string name="matches_empty_title">No matches here</string>
+    <string name="matches_empty_desc">There are no matches for this filter right now.</string>
+
+    <!-- Match card -->
+    <string name="match_full_time">Full time</string>
+    <string name="match_vs">vs</string>
+    <string name="match_live">LIVE</string>
+
+    <!-- Match detail -->
+    <string name="match_detail_title">Match</string>
+    <string name="match_detail_thread">Thread</string>
+    <string name="match_detail_compose">Post</string>
+
+    <!-- Feed -->
+    <string name="feed_title">Feed</string>
+    <string name="feed_empty_title">No posts yet</string>
+    <string name="feed_empty_desc">Be the first to post a take.</string>
+
+    <!-- Post card -->
+    <plurals name="post_comment_count">
+        <item quantity="one">%d comment</item>
+        <item quantity="other">%d comments</item>
+    </plurals>
+
+    <!-- Thread footer -->
+    <string name="thread_load_more_error">Couldn\'t load more.</string>
+    <string name="thread_caught_up">You\'re all caught up.</string>
+
+    <!-- Composer -->
+    <string name="composer_title">New post</string>
+    <string name="composer_post">Post</string>
+    <string name="composer_placeholder">Share your take on the match…</string>
 
 </resources>

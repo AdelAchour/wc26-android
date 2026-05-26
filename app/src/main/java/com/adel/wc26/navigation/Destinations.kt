@@ -54,4 +54,8 @@ object Destinations {
 
     @Serializable
     data class Likers(val postId: Long)
+
+    /** The post composer for a given match. */
+    @Serializable
+    data class PostComposer(val matchId: Long)
 }
