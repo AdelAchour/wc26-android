@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.temporal.ChronoUnit
 import java.util.Locale
+import java.time.OffsetDateTime
 
 /**
  * The result of a relative-time calculation — a value, NOT a string.
@@ -43,7 +44,7 @@ object WC26DateTime {
     private val zone: ZoneId get() = ZoneId.systemDefault()
 
     private fun parse(iso: String): Instant? =
-        runCatching { Instant.parse(iso) }.getOrNull()
+        runCatching { OffsetDateTime.parse(iso).toInstant() }.getOrNull()
 
     /** A localized calendar date — e.g. "1 May 2026". */
     fun calendarDate(iso: String): String {

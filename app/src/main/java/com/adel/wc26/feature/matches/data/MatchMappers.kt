@@ -4,6 +4,7 @@ import com.adel.wc26.feature.matches.data.dto.MatchDto
 import com.adel.wc26.feature.matches.domain.model.Match
 import com.adel.wc26.feature.matches.domain.model.MatchStatus
 import java.time.Instant
+import java.time.OffsetDateTime
 
 /**
  * Maps MatchDto (wire format) -> Match (domain model).
@@ -24,7 +25,7 @@ fun MatchDto.toDomain(): Match = Match(
     stage = stage,
     venue = venue,
     countryCode = countryCode,
-    kickoffAt = runCatching { Instant.parse(kickoffAt) }
+    kickoffAt = runCatching { OffsetDateTime.parse(kickoffAt).toInstant() }
         .getOrDefault(Instant.EPOCH),
     status = MatchStatus.fromApi(status),
     homeScore = homeScore?.toInt(),
