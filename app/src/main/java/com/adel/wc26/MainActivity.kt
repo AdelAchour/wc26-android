@@ -10,12 +10,17 @@ import androidx.compose.ui.Modifier
 import com.adel.wc26.core.designsystem.theme.WC26Theme
 import com.adel.wc26.navigation.WC26NavHost
 import dagger.hilt.android.AndroidEntryPoint
+import com.adel.wc26.core.datastore.TokenStore
+import javax.inject.Inject
 
 /**
  * The single Activity. Hosts the entire Compose UI and the navigation graph.
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var tokenStore: TokenStore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,7 +30,7 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                 ) {
-                    WC26NavHost()
+                    WC26NavHost(tokenStore = tokenStore)
                 }
             }
         }

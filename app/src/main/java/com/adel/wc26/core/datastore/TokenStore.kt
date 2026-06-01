@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
+import android.util.Base64
+import org.json.JSONObject
+import java.time.Instant
 
 // Single DataStore instance for the whole app, scoped to the Context.
 private val Context.dataStore by preferencesDataStore(name = "wc26_prefs")
@@ -57,5 +60,35 @@ class TokenStore @Inject constructor(
     /** Clears the session on logout. */
     suspend fun clear() {
         context.dataStore.edit { it.clear() }
+    }
+
+    /**
+     * Checks if the stored session is present and has not expired.
+     */
+    suspend fun hasValidSession(): Boolean {
+        val token = getToken() ?: return false
+        return !isTokenExpired(token)
+    }
+
+    /**
+     * Decodes the JWT payload locally and compares the "exp" claim with the current time.
+     */
+    fun isTokenExpired(token: String): Boolean {
+        return try {
+            val parts = token.split(".")
+            if (parts.size < 2) return true // Invalid JWT structure
+
+            // JWT payload is Base64 URL-encoded (second part of the string)
+            val payloadBytes = Base64.decode(parts[1], Base64.URL_SAFE or Base64.NO_PADDING)
+            val payloadString = String(payloadBytes)
+            val json = JSONObject(payloadString)
+
+            val expTimeSeconds = json.optLong("exp", 0)
+            val currentTimeSeconds = Instant.now().epochSecond
+
+            currentTimeSeconds >= expTimeSeconds
+        } catch (e: Exception) {
+            true // If parsing fails, fail-safe and treat it as expired
+        }
     }
 }

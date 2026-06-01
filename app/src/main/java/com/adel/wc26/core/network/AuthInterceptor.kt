@@ -34,6 +34,15 @@ class AuthInterceptor @Inject constructor(
             chain.request()
         }
 
-        return chain.proceed(request)
+        val response = chain.proceed(request)
+
+        // If the server explicitly rejects the token with a 401 Unauthorized
+        if (response.code == 401 && token != null) {
+            runBlocking {
+                tokenStore.clear() // Evict session persistently
+            }
+        }
+
+        return response
     }
 }

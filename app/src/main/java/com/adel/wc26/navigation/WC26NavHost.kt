@@ -8,12 +8,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.adel.wc26.core.datastore.TokenStore
 import com.adel.wc26.feature.auth.ui.splash.SplashRoute
 import com.adel.wc26.feature.auth.ui.splash.SplashViewModel
 import com.adel.wc26.feature.auth.ui.welcome.WelcomeScreen
@@ -42,9 +44,28 @@ import com.adel.wc26.feature.posts.ui.detail.PostDetailScreen
  */
 @Composable
 fun WC26NavHost(
+    tokenStore: TokenStore,
     modifier: Modifier = Modifier,
 ) {
     val navController = rememberNavController()
+
+    // 1. Reactively observe the authentication status flow
+    val isLoggedIn by tokenStore.isLoggedInFlow.collectAsStateWithLifecycle(initialValue = true)
+    // 2. Automatically navigate to Welcome if the session is evicted mid-use
+    LaunchedEffect(isLoggedIn) {
+        if (!isLoggedIn) {
+            val currentDest = navController.currentBackStackEntry?.destination
+
+            // Check if we are currently inside the auth flow. If yes, do not redirect.
+            val inAuthFlow = isInAuthFlow(currentDest)
+            if (!inAuthFlow) {
+                // Clear the back stack and force-navigate to Welcome
+                navController.navigate(Destinations.Welcome) {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
+        }
+    }
 
     // Which destinations show the bottom bar — the four tabs only.
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -227,3 +248,8 @@ fun WC26NavHost(
         }
     }
 }
+
+private fun isInAuthFlow(currentDest: NavDestination?) : Boolean = currentDest?.hasRoute(Destinations.Splash::class) == true ||
+        currentDest?.hasRoute(Destinations.Welcome::class) == true ||
+        currentDest?.hasRoute(Destinations.Login::class) == true ||
+        currentDest?.hasRoute(Destinations.Register::class) == true

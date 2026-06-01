@@ -80,6 +80,12 @@ fun ProfileContent(
     onAuthorClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Determine the empty message based on the active tab
+    val emptyMessage = when (state.selectedTab) {
+        ProfileTab.POSTS -> stringResource(R.string.profile_empty_posts)
+        ProfileTab.LIKES -> stringResource(R.string.profile_empty_likes)
+    }
+
     when {
         state.loggedOut -> LoggedOutProfile(onSignIn = onSignIn, modifier = modifier)
 
@@ -130,6 +136,7 @@ fun ProfileContent(
                     posts = active,
                     onPostClick = onPostClick,
                     onAuthorClick = onAuthorClick,
+                    emptyMessage = emptyMessage,
                 )
             }
         }

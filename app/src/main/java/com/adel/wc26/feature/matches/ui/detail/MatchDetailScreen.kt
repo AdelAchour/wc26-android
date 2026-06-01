@@ -121,6 +121,8 @@ fun MatchDetailContent(
     onAuthorClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val emptyMessage = stringResource(R.string.match_detail_thread_empty)
+
     when {
         state.loading -> WC26LoadingState(modifier = modifier)
 
@@ -149,6 +151,7 @@ fun MatchDetailContent(
                 posts = posts,
                 onPostClick = onPostClick,
                 onAuthorClick = onAuthorClick,
+                emptyMessage = emptyMessage
             )
         }
     }

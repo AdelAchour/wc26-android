@@ -100,6 +100,7 @@
     <string name="match_detail_title">Match</string>
     <string name="match_detail_thread">Thread</string>
     <string name="match_detail_compose">Post</string>
+    <string name="match_detail_thread_empty">Be the first to talk about the game!</string>
 
     <!-- Feed -->
     <string name="feed_title">Feed</string>
@@ -138,5 +139,9 @@
     <!-- Public user profile -->
     <string name="user_profile_title">Profile</string>
     <string name="user_profile_posts_header">Posts</string>
+
+    <!-- Profile empty states -->
+    <string name="profile_empty_posts">No posts yet.</string>
+    <string name="profile_empty_likes">No liked posts yet.</string>
 
 </resources>

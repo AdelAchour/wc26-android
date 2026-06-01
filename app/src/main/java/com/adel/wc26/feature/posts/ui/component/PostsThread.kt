@@ -27,10 +27,12 @@ import com.adel.wc26.feature.posts.domain.post.Post
  * an end-of-list message, and a simple empty hint. (The initial full-screen
  * loading/error is handled by the host screen.)
  */
+
 fun LazyListScope.postsThread(
     posts: LazyPagingItems<Post>,
     onPostClick: (Long) -> Unit,
     onAuthorClick: (Long) -> Unit,
+    emptyMessage: String? = null,
 ) {
     items(
         count = posts.itemCount,
@@ -55,8 +57,12 @@ fun LazyListScope.postsThread(
             ThreadFooterMessage(text = stringResource(R.string.thread_load_more_error))
         }
         is LoadState.NotLoading ->
-            if (append.endOfPaginationReached && posts.itemCount > 0) {
-                item { ThreadFooterMessage(text = stringResource(R.string.thread_caught_up)) }
+            if (append.endOfPaginationReached) {
+                if (posts.itemCount > 0) {
+                    item { ThreadFooterMessage(text = stringResource(R.string.thread_caught_up)) }
+                } else if (emptyMessage != null) {
+                    item { ThreadFooterMessage(text = emptyMessage) }
+                }
             }
     }
 }

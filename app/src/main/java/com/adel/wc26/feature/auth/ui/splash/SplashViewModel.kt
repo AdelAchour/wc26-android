@@ -28,10 +28,14 @@ class SplashViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val token = tokenStore.getToken()
-            _route.value =
-                if (token != null) SplashRoute.LoggedIn
-                else SplashRoute.LoggedOut
+            val isValid = tokenStore.hasValidSession()
+            if (!isValid) {
+                // If a token exists but is expired, evict it immediately from storage
+                tokenStore.clear()
+                _route.value = SplashRoute.LoggedOut
+            } else {
+                _route.value = SplashRoute.LoggedIn
+            }
         }
     }
 }

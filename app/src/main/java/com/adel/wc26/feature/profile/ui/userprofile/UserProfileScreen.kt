@@ -90,6 +90,8 @@ fun UserProfileContent(
     onAuthorClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val emptyMessage = stringResource(R.string.profile_empty_posts)
+
     when {
         state.loading -> WC26LoadingState(modifier = modifier)
 
@@ -121,6 +123,7 @@ fun UserProfileContent(
                 posts = posts,
                 onPostClick = onPostClick,
                 onAuthorClick = onAuthorClick,
+                emptyMessage = emptyMessage,
             )
         }
     }
