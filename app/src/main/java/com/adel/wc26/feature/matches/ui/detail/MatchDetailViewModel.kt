@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 import androidx.navigation.toRoute
 import androidx.paging.filter
 import androidx.paging.map
+import com.adel.wc26.feature.posts.data.PostCreationNotifier
 import com.adel.wc26.feature.posts.data.PostDeletionManager
 import com.adel.wc26.feature.posts.data.PostLikeManager
 import kotlinx.coroutines.flow.combine
@@ -50,6 +51,7 @@ class MatchDetailViewModel @Inject constructor(
     private val postRepository: PostRepository,
     private val postLikeManager: PostLikeManager,
     private val postDeletionManager: PostDeletionManager,
+    private val postCreationNotifier: PostCreationNotifier,
     private val tokenStore: TokenStore,
 ) : ViewModel() {
 
@@ -65,6 +67,8 @@ class MatchDetailViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(MatchDetailUiState())
     val uiState: StateFlow<MatchDetailUiState> = _uiState.asStateFlow()
 
+    private var currentPagingSource: PostPagingSource? = null
+
     /**
      * The match's posts thread, as a paged Flow. cachedIn keeps the paged
      * data alive across configuration changes.
@@ -72,9 +76,11 @@ class MatchDetailViewModel @Inject constructor(
     private val pagingFlow = Pager(
         config = PagingConfig(pageSize = 20, enablePlaceholders = false),
         pagingSourceFactory = {
-            PostPagingSource { cursor ->
+            val source = PostPagingSource { cursor ->
                 postRepository.getMatchPosts(matchId, cursor)
             }
+            currentPagingSource = source
+            source
         },
     ).flow.cachedIn(viewModelScope)
 
@@ -99,6 +105,15 @@ class MatchDetailViewModel @Inject constructor(
             _uiState.update { it.copy(isLoggedIn = tokenStore.getToken() != null) }
         }
         loadMatch()
+
+        // Listen for new posts and refresh if they belong to this match
+        viewModelScope.launch {
+            postCreationNotifier.postCreated.collect { post ->
+                if (post.matchId == matchId) {
+                    currentPagingSource?.invalidate()
+                }
+            }
+        }
     }
 
     fun loadMatch() {

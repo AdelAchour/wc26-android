@@ -9,6 +9,7 @@ import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.map
 import com.adel.wc26.core.datastore.TokenStore
+import com.adel.wc26.feature.posts.data.PostCreationNotifier
 import com.adel.wc26.feature.posts.data.PostDeletionManager
 import com.adel.wc26.feature.posts.data.PostLikeManager
 import com.adel.wc26.feature.posts.data.post.PostPagingSource
@@ -18,6 +19,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -28,6 +30,7 @@ class FeedViewModel @Inject constructor(
     private val postRepository: PostRepository,
     private val postLikeManager: PostLikeManager,
     private val postDeletionManager: PostDeletionManager,
+    private val postCreationNotifier: PostCreationNotifier,
     private val tokenStore: TokenStore,
 ) : ViewModel() {
 
@@ -36,13 +39,18 @@ class FeedViewModel @Inject constructor(
         emit(tokenStore.getUserId())
     }
 
+    // Keep track of the active paging source to invalidate it
+    private var currentPagingSource: PostPagingSource? = null
+
     // Cache the raw pager stream
     private val pagingFlow = Pager(
         config = PagingConfig(pageSize = 20, enablePlaceholders = false),
         pagingSourceFactory = {
-            PostPagingSource { cursor ->
+            val source = PostPagingSource { cursor ->
                 postRepository.getGlobalFeed(cursor)
             }
+            currentPagingSource = source
+            source
         },
     ).flow.cachedIn(viewModelScope)
 
@@ -62,6 +70,14 @@ class FeedViewModel @Inject constructor(
             // Filter out deleted posts dynamically
             pagingData.filter { post -> post.id !in deletedIds }
         }
+
+    init {
+        viewModelScope.launch {
+            postCreationNotifier.postCreated.collect {
+                currentPagingSource?.invalidate()
+            }
+        }
+    }
 
 
     fun toggleLike(post: Post) {

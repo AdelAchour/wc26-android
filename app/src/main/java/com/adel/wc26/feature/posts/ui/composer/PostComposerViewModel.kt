@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.adel.wc26.core.result.AppError
 import com.adel.wc26.core.result.DataResult
+import com.adel.wc26.feature.posts.data.PostCreationNotifier
 import com.adel.wc26.feature.posts.domain.post.PostRepository
 import com.adel.wc26.navigation.Destinations
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -41,6 +42,7 @@ data class ComposerUiState(
 class PostComposerViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val postRepository: PostRepository,
+    private val postCreationNotifier: PostCreationNotifier
 ) : ViewModel() {
 
     private val matchId: Long =
@@ -63,10 +65,17 @@ class PostComposerViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(submitting = true, error = null) }
             when (val result = postRepository.createPost(matchId, state.text.trim())) {
-                is DataResult.Success ->
+                // Success
+                is DataResult.Success -> {
+                    postCreationNotifier.notifyPostCreated(result.data)
                     _uiState.update { it.copy(submitting = false, done = true) }
-                is DataResult.Error ->
+                }
+
+                // Failure/Error
+                is DataResult.Error -> {
                     _uiState.update { it.copy(submitting = false, error = result.error) }
+                }
+
             }
         }
     }

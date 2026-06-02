@@ -11,6 +11,7 @@ import androidx.paging.map
 import com.adel.wc26.core.datastore.TokenStore
 import com.adel.wc26.core.result.AppError
 import com.adel.wc26.core.result.DataResult
+import com.adel.wc26.feature.posts.data.PostCreationNotifier
 import com.adel.wc26.feature.posts.data.PostDeletionManager
 import com.adel.wc26.feature.posts.data.PostLikeManager
 import com.adel.wc26.feature.posts.data.post.PostPagingSource
@@ -55,6 +56,7 @@ class ProfileViewModel @Inject constructor(
     private val tokenStore: TokenStore,
     private val postLikeManager: PostLikeManager,
     private val postDeletionManager: PostDeletionManager,
+    private val postCreationNotifier: PostCreationNotifier,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -71,6 +73,13 @@ class ProfileViewModel @Inject constructor(
 
     init {
         load()
+
+        // Listen for new posts created by the current user and refresh the profile feed
+        viewModelScope.launch {
+            postCreationNotifier.postCreated.collect {
+                currentPagingSource?.invalidate()
+            }
+        }
     }
 
     fun load() {
@@ -99,15 +108,19 @@ class ProfileViewModel @Inject constructor(
         _uiState.update { it.copy(selectedTab = tab) }
     }
 
+    private var currentPagingSource: PostPagingSource? = null
+
     /** Build the Posts and Likes pagers once the user's id is known. */
     private fun buildPagers(userId: Long) {
         if (_posts == null) {
             val rawPosts = Pager(
                 config = PagingConfig(pageSize = 20, enablePlaceholders = false),
                 pagingSourceFactory = {
-                    PostPagingSource { cursor ->
+                    val source = PostPagingSource { cursor ->
                         userRepository.getUserPosts(userId, cursor)
                     }
+                    currentPagingSource = source
+                    source
                 },
             ).flow.cachedIn(viewModelScope)
 
