@@ -60,6 +60,7 @@ fun ProfileScreen(
         onSignIn = onSignIn,
         onPostClick = onPostClick,
         onAuthorClick = onAuthorClick,
+        onLikeClick = viewModel::toggleLike,
         modifier = modifier,
     )
 }
@@ -78,6 +79,7 @@ fun ProfileContent(
     onSignIn: () -> Unit,
     onPostClick: (Long) -> Unit,
     onAuthorClick: (Long) -> Unit,
+    onLikeClick: (Post) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // Determine the empty message based on the active tab
@@ -135,6 +137,7 @@ fun ProfileContent(
                 postsThread(
                     posts = active,
                     onPostClick = onPostClick,
+                    onLikeClick = onLikeClick,
                     onAuthorClick = onAuthorClick,
                     emptyMessage = emptyMessage,
                 )

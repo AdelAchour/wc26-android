@@ -73,6 +73,7 @@ fun UserProfileScreen(
             onRetry = viewModel::loadProfile,
             onPostClick = onPostClick,
             onAuthorClick = onAuthorClick,
+            onLikeClick = viewModel::toggleLike,
             modifier = Modifier.padding(padding),
         )
     }
@@ -88,6 +89,7 @@ fun UserProfileContent(
     onRetry: () -> Unit,
     onPostClick: (Long) -> Unit,
     onAuthorClick: (Long) -> Unit,
+    onLikeClick: (Post) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val emptyMessage = stringResource(R.string.profile_empty_posts)
@@ -122,6 +124,7 @@ fun UserProfileContent(
             postsThread(
                 posts = posts,
                 onPostClick = onPostClick,
+                onLikeClick = onLikeClick,
                 onAuthorClick = onAuthorClick,
                 emptyMessage = emptyMessage,
             )

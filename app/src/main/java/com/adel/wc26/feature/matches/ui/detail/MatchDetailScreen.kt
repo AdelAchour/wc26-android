@@ -103,6 +103,7 @@ fun MatchDetailScreen(
             onRetryMatch = viewModel::loadMatch,
             onPostClick = onPostClick,
             onAuthorClick = onAuthorClick,
+            onLikeClick = viewModel::toggleLike,
             modifier = Modifier.padding(padding),
         )
     }
@@ -119,6 +120,7 @@ fun MatchDetailContent(
     onRetryMatch: () -> Unit,
     onPostClick: (Long) -> Unit,
     onAuthorClick: (Long) -> Unit,
+    onLikeClick: (Post) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val emptyMessage = stringResource(R.string.match_detail_thread_empty)
@@ -150,6 +152,7 @@ fun MatchDetailContent(
             postsThread(
                 posts = posts,
                 onPostClick = onPostClick,
+                onLikeClick = onLikeClick,
                 onAuthorClick = onAuthorClick,
                 emptyMessage = emptyMessage
             )

@@ -24,6 +24,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import androidx.navigation.toRoute
+import androidx.paging.map
+import com.adel.wc26.feature.posts.data.PostLikeManager
+import kotlinx.coroutines.flow.combine
 import javax.inject.Inject
 
 /**
@@ -42,6 +45,7 @@ class MatchDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val matchRepository: MatchRepository,
     private val postRepository: PostRepository,
+    private val postLikeManager: PostLikeManager,
     tokenStore: TokenStore,
 ) : ViewModel() {
 
@@ -56,7 +60,7 @@ class MatchDetailViewModel @Inject constructor(
      * The match's posts thread, as a paged Flow. cachedIn keeps the paged
      * data alive across configuration changes.
      */
-    val posts: Flow<PagingData<Post>> = Pager(
+    private val pagingFlow = Pager(
         config = PagingConfig(pageSize = 20, enablePlaceholders = false),
         pagingSourceFactory = {
             PostPagingSource { cursor ->
@@ -64,6 +68,17 @@ class MatchDetailViewModel @Inject constructor(
             }
         },
     ).flow.cachedIn(viewModelScope)
+    val posts: Flow<PagingData<Post>> = pagingFlow
+        .combine(postLikeManager.likedStates) { pagingData, likedStates ->
+            pagingData.map { post ->
+                likedStates[post.id]?.let { status ->
+                    post.copy(
+                        likedByCurrentUser = status.likedByCurrentUser,
+                        likeCount = status.likeCount
+                    )
+                } ?: post
+            }
+        }
 
     init {
         viewModelScope.launch {
@@ -82,5 +97,9 @@ class MatchDetailViewModel @Inject constructor(
                     _uiState.update { it.copy(loading = false, error = result.error) }
             }
         }
+    }
+
+    fun toggleLike(post: Post) {
+        postLikeManager.toggleLike(post, viewModelScope)
     }
 }

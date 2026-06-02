@@ -36,6 +36,7 @@ fun FeedScreen(
         posts = posts,
         onPostClick = onPostClick,
         onAuthorClick = onAuthorClick,
+        onLikeClick = viewModel::toggleLike,
         modifier = modifier,
     )
 }
@@ -49,6 +50,7 @@ fun FeedContent(
     posts: LazyPagingItems<Post>,
     onPostClick: (Long) -> Unit,
     onAuthorClick: (Long) -> Unit,
+    onLikeClick: (Post) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -78,6 +80,7 @@ fun FeedContent(
                         postsThread(
                             posts = posts,
                             onPostClick = onPostClick,
+                            onLikeClick = onLikeClick,
                             onAuthorClick = onAuthorClick,
                         )
                     }

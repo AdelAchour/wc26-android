@@ -31,6 +31,7 @@ import com.adel.wc26.feature.posts.domain.post.Post
 fun LazyListScope.postsThread(
     posts: LazyPagingItems<Post>,
     onPostClick: (Long) -> Unit,
+    onLikeClick: (Post) -> Unit,
     onAuthorClick: (Long) -> Unit,
     emptyMessage: String? = null,
 ) {
@@ -43,7 +44,7 @@ fun LazyListScope.postsThread(
             PostCard(
                 post = post,
                 onClick = { onPostClick(post.id) },
-                onLikeClick = { /* like handled in detail screens */ },
+                onLikeClick = { onLikeClick(post) },
                 onAuthorClick = { onAuthorClick(post.author.id) },
             )
             HorizontalDivider()

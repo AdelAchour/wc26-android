@@ -6,11 +6,14 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.map
+import com.adel.wc26.feature.posts.data.PostLikeManager
 import com.adel.wc26.feature.posts.data.post.PostPagingSource
 import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.posts.domain.post.PostRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import javax.inject.Inject
 
 /**
@@ -19,9 +22,11 @@ import javax.inject.Inject
 @HiltViewModel
 class FeedViewModel @Inject constructor(
     private val postRepository: PostRepository,
+    private val postLikeManager: PostLikeManager,
 ) : ViewModel() {
 
-    val posts: Flow<PagingData<Post>> = Pager(
+    // Cache the raw pager stream
+    private val pagingFlow = Pager(
         config = PagingConfig(pageSize = 20, enablePlaceholders = false),
         pagingSourceFactory = {
             PostPagingSource { cursor ->
@@ -29,4 +34,20 @@ class FeedViewModel @Inject constructor(
             }
         },
     ).flow.cachedIn(viewModelScope)
+    // Combine with liked states flow so changes recompose dynamically in-place
+    val posts: Flow<PagingData<Post>> = pagingFlow
+        .combine(postLikeManager.likedStates) { pagingData, likedStates ->
+            pagingData.map { post ->
+                likedStates[post.id]?.let { status ->
+                    post.copy(
+                        likedByCurrentUser = status.likedByCurrentUser,
+                        likeCount = status.likeCount
+                    )
+                } ?: post
+            }
+        }
+    fun toggleLike(post: Post) {
+        postLikeManager.toggleLike(post, viewModelScope)
+    }
+
 }

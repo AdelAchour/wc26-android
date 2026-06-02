@@ -7,6 +7,7 @@ import androidx.navigation.toRoute
 import com.adel.wc26.core.datastore.TokenStore
 import com.adel.wc26.core.result.AppError
 import com.adel.wc26.core.result.DataResult
+import com.adel.wc26.feature.posts.data.PostLikeManager
 import com.adel.wc26.feature.posts.domain.comment.Comment
 import com.adel.wc26.feature.posts.domain.comment.CommentRepository
 import com.adel.wc26.feature.posts.domain.like.LikeRepository
@@ -59,6 +60,7 @@ class PostDetailViewModel @Inject constructor(
     private val postRepository: PostRepository,
     private val commentRepository: CommentRepository,
     private val likeRepository: LikeRepository,
+    private val postLikeManager: PostLikeManager,
     tokenStore: TokenStore,
 ) : ViewModel() {
 
@@ -74,6 +76,23 @@ class PostDetailViewModel @Inject constructor(
         }
         loadPost()
         loadComments()
+
+        // Dynamically synchronize local post details with global like updates
+        viewModelScope.launch {
+            postLikeManager.likedStates.collect { likedStates ->
+                _uiState.update { state ->
+                    val currentPost = state.post ?: return@update state
+                    likedStates[currentPost.id]?.let { status ->
+                        state.copy(
+                            post = currentPost.copy(
+                                likedByCurrentUser = status.likedByCurrentUser,
+                                likeCount = status.likeCount
+                            )
+                        )
+                    } ?: state
+                }
+            }
+        }
     }
 
     fun loadPost() {
@@ -116,27 +135,7 @@ class PostDetailViewModel @Inject constructor(
      */
     fun toggleLike() {
         val current = _uiState.value.post ?: return
-        val wasLiked = current.likedByCurrentUser
-
-        // 1. Optimistic update.
-        val optimistic = current.copy(
-            likedByCurrentUser = !wasLiked,
-            likeCount = current.likeCount + if (wasLiked) -1 else 1,
-        )
-        _uiState.update { it.copy(post = optimistic) }
-
-        // 2. Fire the API; roll back on failure.
-        viewModelScope.launch {
-            val result = if (wasLiked) {
-                likeRepository.unlike(postId)
-            } else {
-                likeRepository.like(postId)
-            }
-            if (result is DataResult.Error) {
-                // Roll back to the pre-tap state.
-                _uiState.update { it.copy(post = current) }
-            }
-        }
+        postLikeManager.toggleLike(current, viewModelScope)
     }
 
     fun onCommentInputChange(value: String) {

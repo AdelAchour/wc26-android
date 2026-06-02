@@ -6,9 +6,11 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.map
 import com.adel.wc26.core.datastore.TokenStore
 import com.adel.wc26.core.result.AppError
 import com.adel.wc26.core.result.DataResult
+import com.adel.wc26.feature.posts.data.PostLikeManager
 import com.adel.wc26.feature.posts.data.post.PostPagingSource
 import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.profile.domain.UserProfile
@@ -18,6 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -48,6 +51,7 @@ data class ProfileUiState(
 class ProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val tokenStore: TokenStore,
+    private val postLikeManager: PostLikeManager,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -95,7 +99,7 @@ class ProfileViewModel @Inject constructor(
     /** Build the Posts and Likes pagers once the user's id is known. */
     private fun buildPagers(userId: Long) {
         if (_posts == null) {
-            _posts = Pager(
+            val rawPosts = Pager(
                 config = PagingConfig(pageSize = 20, enablePlaceholders = false),
                 pagingSourceFactory = {
                     PostPagingSource { cursor ->
@@ -103,9 +107,20 @@ class ProfileViewModel @Inject constructor(
                     }
                 },
             ).flow.cachedIn(viewModelScope)
+
+            _posts = rawPosts.combine(postLikeManager.likedStates) { pagingData, likedStates ->
+                pagingData.map { post ->
+                    likedStates[post.id]?.let { status ->
+                        post.copy(
+                            likedByCurrentUser = status.likedByCurrentUser,
+                            likeCount = status.likeCount
+                        )
+                    } ?: post
+                }
+            }
         }
         if (_likes == null) {
-            _likes = Pager(
+            val rawLikes = Pager(
                 config = PagingConfig(pageSize = 20, enablePlaceholders = false),
                 pagingSourceFactory = {
                     PostPagingSource { cursor ->
@@ -113,6 +128,21 @@ class ProfileViewModel @Inject constructor(
                     }
                 },
             ).flow.cachedIn(viewModelScope)
+
+            _likes = rawLikes.combine(postLikeManager.likedStates) { pagingData, likedStates ->
+                pagingData.map { post ->
+                    likedStates[post.id]?.let { status ->
+                        post.copy(
+                            likedByCurrentUser = status.likedByCurrentUser,
+                            likeCount = status.likeCount
+                        )
+                    } ?: post
+                }
+            }
         }
+    }
+
+    fun toggleLike(post: Post) {
+        postLikeManager.toggleLike(post, viewModelScope)
     }
 }

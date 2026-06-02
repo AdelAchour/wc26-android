@@ -8,8 +8,10 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.map
 import com.adel.wc26.core.result.AppError
 import com.adel.wc26.core.result.DataResult
+import com.adel.wc26.feature.posts.data.PostLikeManager
 import com.adel.wc26.feature.posts.data.post.PostPagingSource
 import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.profile.domain.PublicProfile
@@ -20,6 +22,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -38,6 +41,7 @@ data class UserProfileUiState(
 class UserProfileViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val userRepository: UserRepository,
+    private val postLikeManager: PostLikeManager,
 ) : ViewModel() {
 
     private val userId: Long =
@@ -47,7 +51,7 @@ class UserProfileViewModel @Inject constructor(
     val uiState: StateFlow<UserProfileUiState> = _uiState.asStateFlow()
 
     /** The user's posts, paged. */
-    val posts: Flow<PagingData<Post>> = Pager(
+    private val pagingFlow = Pager(
         config = PagingConfig(pageSize = 20, enablePlaceholders = false),
         pagingSourceFactory = {
             PostPagingSource { cursor ->
@@ -55,6 +59,17 @@ class UserProfileViewModel @Inject constructor(
             }
         },
     ).flow.cachedIn(viewModelScope)
+    val posts: Flow<PagingData<Post>> = pagingFlow
+        .combine(postLikeManager.likedStates) { pagingData, likedStates ->
+            pagingData.map { post ->
+                likedStates[post.id]?.let { status ->
+                    post.copy(
+                        likedByCurrentUser = status.likedByCurrentUser,
+                        likeCount = status.likeCount
+                    )
+                } ?: post
+            }
+        }
 
     init {
         loadProfile()
@@ -70,5 +85,9 @@ class UserProfileViewModel @Inject constructor(
                     _uiState.update { it.copy(loading = false, error = result.error) }
             }
         }
+    }
+
+    fun toggleLike(post: Post) {
+        postLikeManager.toggleLike(post, viewModelScope)
     }
 }
