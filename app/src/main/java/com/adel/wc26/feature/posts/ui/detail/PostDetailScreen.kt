@@ -39,8 +39,16 @@ import com.adel.wc26.core.designsystem.component.WC26ErrorState
 import com.adel.wc26.core.designsystem.component.WC26LoadingState
 import com.adel.wc26.core.designsystem.theme.Spacing
 import com.adel.wc26.core.ui.toStringRes
-import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.posts.ui.component.PostCard
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+
 
 /**
  * Post detail — stateful entry point. Shows a post, its comments, and an
@@ -55,7 +63,20 @@ fun PostDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: PostDetailViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
+
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // Dialog state management
+    var showPostDeleteConfirm by remember { mutableStateOf(false) }
+    var commentIdToDelete by remember { mutableStateOf<Long?>(null) }
+
+    // If the post is optimistically deleted, navigate back automatically!
+    LaunchedEffect(state.post) {
+        if (!state.loading && state.post == null && state.error == null) {
+            onBack()
+        }
+    }
 
     Scaffold(
         modifier = modifier,
@@ -73,7 +94,6 @@ fun PostDetailScreen(
             )
         },
         bottomBar = {
-            // Inline comment composer — only for signed-in users.
             if (state.isLoggedIn) {
                 CommentComposerBar(
                     input = state.commentInput,
@@ -93,8 +113,72 @@ fun PostDetailScreen(
             onRetry = viewModel::loadPost,
             onLikeClick = viewModel::toggleLike,
             onAuthorClick = onAuthorClick,
+            onDeletePostClick = { showPostDeleteConfirm = true },
+            onDeleteCommentClick = { commentIdToDelete = it },
             modifier = Modifier.padding(padding),
         )
+
+        // Post Deletion Confirmation Dialog
+        if (showPostDeleteConfirm) {
+            AlertDialog(
+                onDismissRequest = { showPostDeleteConfirm = false },
+                title = { Text(stringResource(R.string.post_delete_title)) },
+                text = { Text(stringResource(R.string.post_delete_title)) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showPostDeleteConfirm = false
+                            val errorMsg = context.getString(R.string.post_delete_error)
+                            viewModel.deletePost(
+                                onFailure = {
+                                    Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
+                                }
+                            )
+                        }
+                    ) {
+                        Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showPostDeleteConfirm = false }) {
+                        Text(stringResource(R.string.action_cancel))
+                    }
+                }
+            )
+        }
+
+        // Comment Deletion Confirmation Dialog
+        if (commentIdToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { commentIdToDelete = null },
+                title = { Text(stringResource(R.string.comment_delete_title)) },
+                text = { Text(stringResource(R.string.comment_delete_message)) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val id = commentIdToDelete
+                            commentIdToDelete = null
+                            val errorMsg = context.getString(R.string.comment_delete_error)
+                            if (id != null) {
+                                viewModel.deleteComment(
+                                    commentId = id,
+                                    onFailure = {
+                                        Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
+                                    }
+                                )
+                            }
+                        }
+                    ) {
+                        Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { commentIdToDelete = null }) {
+                        Text(stringResource(R.string.action_cancel))
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -107,6 +191,8 @@ fun PostDetailContent(
     onRetry: () -> Unit,
     onLikeClick: () -> Unit,
     onAuthorClick: (Long) -> Unit,
+    onDeletePostClick: () -> Unit,
+    onDeleteCommentClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when {
@@ -121,13 +207,14 @@ fun PostDetailContent(
         state.post != null -> LazyColumn(
             modifier = modifier.fillMaxSize(),
         ) {
-            // The post itself.
             item {
                 PostCard(
                     post = state.post,
                     onClick = { /* already on detail */ },
                     onLikeClick = onLikeClick,
                     onAuthorClick = { onAuthorClick(state.post.author.id) },
+                    canDelete = state.currentUserId == state.post.author.id,
+                    onDeleteClick = onDeletePostClick
                 )
                 HorizontalDivider()
                 Text(
@@ -140,7 +227,6 @@ fun PostDetailContent(
                 )
             }
 
-            // Comments.
             if (state.comments.isEmpty() && !state.commentsLoading) {
                 item {
                     Text(
@@ -158,9 +244,15 @@ fun PostDetailContent(
                     items = state.comments,
                     key = { it.id },
                 ) { comment ->
+                    // Comment owner OR parent post owner can delete
+                    val canDelete = state.currentUserId == comment.author.id ||
+                            state.currentUserId == state.post.author.id
+
                     CommentRow(
                         comment = comment,
                         onAuthorClick = { onAuthorClick(comment.author.id) },
+                        canDelete = canDelete,
+                        onDeleteClick = { onDeleteCommentClick(comment.id) }
                     )
                     HorizontalDivider()
                 }

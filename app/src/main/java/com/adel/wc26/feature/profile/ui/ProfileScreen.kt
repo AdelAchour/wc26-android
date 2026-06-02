@@ -27,6 +27,11 @@ import com.adel.wc26.core.ui.toStringRes
 import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.posts.ui.component.postsThread
 import com.adel.wc26.feature.profile.ui.component.ProfileHeader
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 /**
  * Profile tab — stateful entry point. The signed-in user's own profile:
@@ -46,10 +51,10 @@ fun ProfileScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // The paged flows are null until the profile (and thus the user id)
-    // has loaded; collect them only when present.
     val posts = viewModel.posts?.collectAsLazyPagingItems()
     val likes = viewModel.likes?.collectAsLazyPagingItems()
+
+    var postToDelete by remember { mutableStateOf<Post?>(null) }
 
     ProfileContent(
         state = state,
@@ -61,8 +66,35 @@ fun ProfileScreen(
         onPostClick = onPostClick,
         onAuthorClick = onAuthorClick,
         onLikeClick = viewModel::toggleLike,
+        onDeleteClick = { postToDelete = it },
         modifier = modifier,
     )
+
+    if (postToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { postToDelete = null },
+            title = { Text(stringResource(R.string.post_delete_title)) },
+            text = { Text(stringResource(R.string.post_delete_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val post = postToDelete
+                        postToDelete = null
+                        if (post != null) {
+                            viewModel.deletePost(post)
+                        }
+                    }
+                ) {
+                    Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { postToDelete = null }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            }
+        )
+    }
 }
 
 /**
@@ -80,9 +112,9 @@ fun ProfileContent(
     onPostClick: (Long) -> Unit,
     onAuthorClick: (Long) -> Unit,
     onLikeClick: (Post) -> Unit,
+    onDeleteClick: (Post) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // Determine the empty message based on the active tab
     val emptyMessage = when (state.selectedTab) {
         ProfileTab.POSTS -> stringResource(R.string.profile_empty_posts)
         ProfileTab.LIKES -> stringResource(R.string.profile_empty_likes)
@@ -102,7 +134,6 @@ fun ProfileContent(
         state.profile != null -> LazyColumn(
             modifier = modifier.fillMaxSize(),
         ) {
-            // Identity header.
             item {
                 ProfileHeader(
                     displayName = state.profile.displayName,
@@ -112,7 +143,6 @@ fun ProfileContent(
                 )
             }
 
-            // Posts / Likes tab row.
             item {
                 TabRow(selectedTabIndex = state.selectedTab.ordinal) {
                     Tab(
@@ -128,7 +158,6 @@ fun ProfileContent(
                 }
             }
 
-            // The selected tab's paged list.
             val active = when (state.selectedTab) {
                 ProfileTab.POSTS -> posts
                 ProfileTab.LIKES -> likes
@@ -140,6 +169,8 @@ fun ProfileContent(
                     onLikeClick = onLikeClick,
                     onAuthorClick = onAuthorClick,
                     emptyMessage = emptyMessage,
+                    currentUserId = state.profile.id, // Logged in profile ID matches the current user
+                    onDeleteClick = onDeleteClick,
                 )
             }
         }

@@ -24,9 +24,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import androidx.navigation.toRoute
+import androidx.paging.filter
 import androidx.paging.map
+import com.adel.wc26.feature.posts.data.PostDeletionManager
 import com.adel.wc26.feature.posts.data.PostLikeManager
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 /**
@@ -46,8 +49,14 @@ class MatchDetailViewModel @Inject constructor(
     private val matchRepository: MatchRepository,
     private val postRepository: PostRepository,
     private val postLikeManager: PostLikeManager,
-    tokenStore: TokenStore,
+    private val postDeletionManager: PostDeletionManager,
+    private val tokenStore: TokenStore,
 ) : ViewModel() {
+
+    // Expose the current user's ID for showing delete actions
+    val currentUserId: Flow<Long?> = flow {
+        emit(tokenStore.getUserId())
+    }
 
     /** The matchId comes from the type-safe MatchDetail route. */
     private val matchId: Long =
@@ -68,6 +77,7 @@ class MatchDetailViewModel @Inject constructor(
             }
         },
     ).flow.cachedIn(viewModelScope)
+
     val posts: Flow<PagingData<Post>> = pagingFlow
         .combine(postLikeManager.likedStates) { pagingData, likedStates ->
             pagingData.map { post ->
@@ -78,6 +88,10 @@ class MatchDetailViewModel @Inject constructor(
                     )
                 } ?: post
             }
+        }
+        .combine(postDeletionManager.deletedPostIds) { pagingData, deletedIds ->
+            // Filter out deleted posts dynamically
+            pagingData.filter { post -> post.id !in deletedIds }
         }
 
     init {
@@ -101,5 +115,9 @@ class MatchDetailViewModel @Inject constructor(
 
     fun toggleLike(post: Post) {
         postLikeManager.toggleLike(post, viewModelScope)
+    }
+
+    fun deletePost(post: Post) {
+        postDeletionManager.deletePost(post.id, viewModelScope)
     }
 }

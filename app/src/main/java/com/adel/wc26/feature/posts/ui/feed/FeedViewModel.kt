@@ -6,7 +6,10 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.filter
 import androidx.paging.map
+import com.adel.wc26.core.datastore.TokenStore
+import com.adel.wc26.feature.posts.data.PostDeletionManager
 import com.adel.wc26.feature.posts.data.PostLikeManager
 import com.adel.wc26.feature.posts.data.post.PostPagingSource
 import com.adel.wc26.feature.posts.domain.post.Post
@@ -14,6 +17,7 @@ import com.adel.wc26.feature.posts.domain.post.PostRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 /**
@@ -23,7 +27,14 @@ import javax.inject.Inject
 class FeedViewModel @Inject constructor(
     private val postRepository: PostRepository,
     private val postLikeManager: PostLikeManager,
+    private val postDeletionManager: PostDeletionManager,
+    private val tokenStore: TokenStore,
 ) : ViewModel() {
+
+    // Expose the current user's ID for showing delete actions
+    val currentUserId: Flow<Long?> = flow {
+        emit(tokenStore.getUserId())
+    }
 
     // Cache the raw pager stream
     private val pagingFlow = Pager(
@@ -34,6 +45,7 @@ class FeedViewModel @Inject constructor(
             }
         },
     ).flow.cachedIn(viewModelScope)
+
     // Combine with liked states flow so changes recompose dynamically in-place
     val posts: Flow<PagingData<Post>> = pagingFlow
         .combine(postLikeManager.likedStates) { pagingData, likedStates ->
@@ -46,8 +58,17 @@ class FeedViewModel @Inject constructor(
                 } ?: post
             }
         }
+        .combine(postDeletionManager.deletedPostIds) { pagingData, deletedIds ->
+            // Filter out deleted posts dynamically
+            pagingData.filter { post -> post.id !in deletedIds }
+        }
+
+
     fun toggleLike(post: Post) {
         postLikeManager.toggleLike(post, viewModelScope)
     }
 
+    fun deletePost(post: Post, onFailure: () -> Unit = {}) {
+        postDeletionManager.deletePost(post.id, viewModelScope, onFailure)
+    }
 }

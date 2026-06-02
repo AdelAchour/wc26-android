@@ -22,6 +22,21 @@ import com.adel.wc26.core.ui.format
 import com.adel.wc26.core.util.WC26DateTime
 import com.adel.wc26.feature.posts.domain.comment.Comment
 import com.adel.wc26.feature.posts.domain.post.PostAuthor
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
+import com.adel.wc26.R
 
 /**
  * A single comment — avatar, author line, body. Tapping the avatar/name
@@ -29,9 +44,11 @@ import com.adel.wc26.feature.posts.domain.post.PostAuthor
  */
 @Composable
 fun CommentRow(
+    modifier: Modifier = Modifier,
     comment: Comment,
     onAuthorClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    canDelete: Boolean = false,
+    onDeleteClick: () -> Unit = {},
 ) {
     Row(
         modifier = modifier
@@ -48,7 +65,10 @@ fun CommentRow(
         Spacer(Modifier.width(Spacing.md))
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text(
                     text = comment.author.displayName,
                     style = MaterialTheme.typography.titleSmall,
@@ -60,6 +80,52 @@ fun CommentRow(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+
+                if (canDelete) {
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    var showMenu by remember { mutableStateOf(false) }
+
+                    Box {
+                        IconButton(
+                            onClick = { showMenu = true },
+                            modifier = Modifier.size(18.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "Comment options",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.error,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(Spacing.sm))
+                                        Text(
+                                            text = stringResource(R.string.action_delete),
+                                            color = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    showMenu = false
+                                    onDeleteClick()
+                                }
+                            )
+                        }
+                    }
+                }
             }
             Spacer(Modifier.padding(top = Spacing.xxs))
             Text(
@@ -83,6 +149,7 @@ private fun CommentRowPreview() {
                 createdAt = "2026-06-14T19:45:00Z",
             ),
             onAuthorClick = {},
+            canDelete = true,
         )
     }
 }

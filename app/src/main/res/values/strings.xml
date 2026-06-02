@@ -5,6 +5,7 @@
     <string name="action_cancel">Cancel</string>
     <string name="action_try_again">Try again</string>
     <string name="action_back">Back</string>
+    <string name="action_delete">Delete</string>
 
     <!-- Generic errors -->
     <string name="error_something_went_wrong">Something went wrong</string>
@@ -112,6 +113,17 @@
         <item quantity="one">%d comment</item>
         <item quantity="other">%d comments</item>
     </plurals>
+
+    <!-- Post/Comment deletion -->
+    <string name="post_delete_title">Delete Post?</string>
+    <string name="post_delete_message">Are you sure you want to permanently delete this post? This cannot be undone.</string>
+
+    <string name="comment_delete_title">Delete Comment?</string>
+    <string name="comment_delete_message">Are you sure you want to permanently delete this comment? This cannot be undone.</string>
+
+    <string name="post_delete_error">Failed to delete post. Please try again.</string>
+    <string name="comment_delete_error">Failed to delete comment. Please try again.</string>
+
 
     <!-- Thread footer -->
     <string name="thread_load_more_error">Couldn\'t load more.</string>

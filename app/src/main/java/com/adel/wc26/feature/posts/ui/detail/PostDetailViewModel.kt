@@ -7,6 +7,7 @@ import androidx.navigation.toRoute
 import com.adel.wc26.core.datastore.TokenStore
 import com.adel.wc26.core.result.AppError
 import com.adel.wc26.core.result.DataResult
+import com.adel.wc26.feature.posts.data.PostDeletionManager
 import com.adel.wc26.feature.posts.data.PostLikeManager
 import com.adel.wc26.feature.posts.domain.comment.Comment
 import com.adel.wc26.feature.posts.domain.comment.CommentRepository
@@ -41,6 +42,7 @@ data class PostDetailUiState(
     val sendingComment: Boolean = false,
     // Auth
     val isLoggedIn: Boolean = false,
+    val currentUserId: Long? = null,
 ) {
     val canSendComment: Boolean
         get() = commentInput.isNotBlank() &&
@@ -59,8 +61,8 @@ class PostDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val postRepository: PostRepository,
     private val commentRepository: CommentRepository,
-    private val likeRepository: LikeRepository,
     private val postLikeManager: PostLikeManager,
+    private val postDeletionManager: PostDeletionManager,
     tokenStore: TokenStore,
 ) : ViewModel() {
 
@@ -72,7 +74,12 @@ class PostDetailViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoggedIn = tokenStore.getToken() != null) }
+            _uiState.update {
+                it.copy(
+                    isLoggedIn = tokenStore.getToken() != null,
+                    currentUserId = tokenStore.getUserId()
+                )
+            }
         }
         loadPost()
         loadComments()
@@ -90,6 +97,30 @@ class PostDetailViewModel @Inject constructor(
                             )
                         )
                     } ?: state
+                }
+            }
+        }
+        // Dynamically synchronize local comments with global deletions
+        viewModelScope.launch {
+            postDeletionManager.deletedCommentIds.collect { deletedCommentIds ->
+                _uiState.update { state ->
+                    val updatedComments = state.comments.filter { it.id !in deletedCommentIds }
+                    val diff = state.comments.size - updatedComments.size
+                    state.copy(
+                        comments = updatedComments,
+                        post = if (diff > 0) state.post?.copy(
+                            commentCount = (state.post.commentCount - diff).coerceAtLeast(0)
+                        ) else state.post
+                    )
+                }
+            }
+        }
+
+        // Dynamically monitor if this parent post itself gets deleted
+        viewModelScope.launch {
+            postDeletionManager.deletedPostIds.collect { deletedPostIds ->
+                if (postId in deletedPostIds) {
+                    _uiState.update { it.copy(post = null) }
                 }
             }
         }
@@ -173,5 +204,13 @@ class PostDetailViewModel @Inject constructor(
                     }
             }
         }
+    }
+
+    fun deletePost(onFailure: () -> Unit = {}) {
+        postDeletionManager.deletePost(postId, viewModelScope, onFailure)
+    }
+
+    fun deleteComment(commentId: Long, onFailure: () -> Unit = {}) {
+        postDeletionManager.deleteComment(commentId, viewModelScope, onFailure)
     }
 }

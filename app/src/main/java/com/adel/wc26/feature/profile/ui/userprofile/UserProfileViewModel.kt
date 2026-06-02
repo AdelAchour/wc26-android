@@ -8,9 +8,12 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.filter
 import androidx.paging.map
+import com.adel.wc26.core.datastore.TokenStore
 import com.adel.wc26.core.result.AppError
 import com.adel.wc26.core.result.DataResult
+import com.adel.wc26.feature.posts.data.PostDeletionManager
 import com.adel.wc26.feature.posts.data.PostLikeManager
 import com.adel.wc26.feature.posts.data.post.PostPagingSource
 import com.adel.wc26.feature.posts.domain.post.Post
@@ -23,6 +26,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -42,7 +46,14 @@ class UserProfileViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val userRepository: UserRepository,
     private val postLikeManager: PostLikeManager,
+    private val postDeletionManager: PostDeletionManager,
+    private val tokenStore: TokenStore,
 ) : ViewModel() {
+
+    // Expose the current user's ID for showing delete actions
+    val currentUserId: Flow<Long?> = flow {
+        emit(tokenStore.getUserId())
+    }
 
     private val userId: Long =
         savedStateHandle.toRoute<Destinations.UserProfile>().userId
@@ -70,6 +81,10 @@ class UserProfileViewModel @Inject constructor(
                 } ?: post
             }
         }
+        .combine(postDeletionManager.deletedPostIds) { pagingData, deletedIds ->
+            // Filter out deleted posts dynamically
+            pagingData.filter { post -> post.id !in deletedIds }
+        }
 
     init {
         loadProfile()
@@ -89,5 +104,9 @@ class UserProfileViewModel @Inject constructor(
 
     fun toggleLike(post: Post) {
         postLikeManager.toggleLike(post, viewModelScope)
+    }
+
+    fun deletePost(post: Post, onFailure: () -> Unit = {}) {
+        postDeletionManager.deletePost(post.id, viewModelScope, onFailure)
     }
 }

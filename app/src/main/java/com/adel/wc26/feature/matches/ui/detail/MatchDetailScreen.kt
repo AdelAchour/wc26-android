@@ -46,8 +46,14 @@ import com.adel.wc26.core.util.WC26DateTime
 import com.adel.wc26.feature.matches.domain.model.Match
 import com.adel.wc26.feature.matches.domain.model.MatchStatus
 import com.adel.wc26.feature.posts.domain.post.Post
-import com.adel.wc26.feature.posts.ui.component.PostCard
 import com.adel.wc26.feature.posts.ui.component.postsThread
+import android.widget.Toast
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 
 /**
  * Match detail — stateful entry point.
@@ -68,6 +74,10 @@ fun MatchDetailScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val posts = viewModel.posts.collectAsLazyPagingItems()
+    val currentUserId by viewModel.currentUserId.collectAsStateWithLifecycle(initialValue = null)
+    val context = LocalContext.current
+
+    var postToDelete by remember { mutableStateOf<Post?>(null) }
 
     Scaffold(
         modifier = modifier,
@@ -100,12 +110,40 @@ fun MatchDetailScreen(
         MatchDetailContent(
             state = state,
             posts = posts,
+            currentUserId = currentUserId,
             onRetryMatch = viewModel::loadMatch,
             onPostClick = onPostClick,
             onAuthorClick = onAuthorClick,
             onLikeClick = viewModel::toggleLike,
+            onDeleteClick = { postToDelete = it },
             modifier = Modifier.padding(padding),
         )
+
+        if (postToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { postToDelete = null },
+                title = { Text(stringResource(R.string.post_delete_title)) },
+                text = { Text(stringResource(R.string.post_delete_message)) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val post = postToDelete
+                            postToDelete = null
+                            if (post != null) {
+                                viewModel.deletePost(post)
+                            }
+                        }
+                    ) {
+                        Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { postToDelete = null }) {
+                        Text(stringResource(R.string.action_cancel))
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -117,10 +155,12 @@ fun MatchDetailScreen(
 fun MatchDetailContent(
     state: MatchDetailUiState,
     posts: LazyPagingItems<Post>,
+    currentUserId: Long?,
     onRetryMatch: () -> Unit,
     onPostClick: (Long) -> Unit,
     onAuthorClick: (Long) -> Unit,
     onLikeClick: (Post) -> Unit,
+    onDeleteClick: (Post) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val emptyMessage = stringResource(R.string.match_detail_thread_empty)
@@ -154,7 +194,9 @@ fun MatchDetailContent(
                 onPostClick = onPostClick,
                 onLikeClick = onLikeClick,
                 onAuthorClick = onAuthorClick,
-                emptyMessage = emptyMessage
+                emptyMessage = emptyMessage,
+                currentUserId = currentUserId,
+                onDeleteClick = onDeleteClick,
             )
         }
     }

@@ -20,6 +20,15 @@ import com.adel.wc26.core.designsystem.component.WC26LoadingState
 import com.adel.wc26.core.designsystem.theme.Spacing
 import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.posts.ui.component.postsThread
+import android.widget.Toast
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 /**
  * Feed tab — stateful entry point. The global stream of all posts.
@@ -32,13 +41,47 @@ fun FeedScreen(
     viewModel: FeedViewModel = hiltViewModel(),
 ) {
     val posts = viewModel.posts.collectAsLazyPagingItems()
+    val currentUserId by viewModel.currentUserId.collectAsStateWithLifecycle(initialValue = null)
+    val context = LocalContext.current
+
+    var postToDelete by remember { mutableStateOf<Post?>(null) }
+
     FeedContent(
         posts = posts,
+        currentUserId = currentUserId,
         onPostClick = onPostClick,
         onAuthorClick = onAuthorClick,
         onLikeClick = viewModel::toggleLike,
+        onDeleteClick = { postToDelete = it },
         modifier = modifier,
     )
+
+    if (postToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { postToDelete = null },
+            title = { Text(stringResource(R.string.post_delete_title)) },
+            text = { Text(stringResource(R.string.post_delete_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val post = postToDelete
+                        postToDelete = null
+                        val errorMsg = context.getString(R.string.post_delete_error)
+                        if (post != null) {
+                            viewModel.deletePost(post, onFailure = { Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show() })
+                        }
+                    }
+                ) {
+                    Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { postToDelete = null }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            }
+        )
+    }
 }
 
 /**
@@ -48,9 +91,11 @@ fun FeedScreen(
 @Composable
 fun FeedContent(
     posts: LazyPagingItems<Post>,
+    currentUserId: Long?,
     onPostClick: (Long) -> Unit,
     onAuthorClick: (Long) -> Unit,
     onLikeClick: (Post) -> Unit,
+    onDeleteClick: (Post) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -82,6 +127,8 @@ fun FeedContent(
                             onPostClick = onPostClick,
                             onLikeClick = onLikeClick,
                             onAuthorClick = onAuthorClick,
+                            currentUserId = currentUserId,
+                            onDeleteClick = onDeleteClick,
                         )
                     }
                 }

@@ -29,6 +29,11 @@ import com.adel.wc26.core.ui.toStringRes
 import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.posts.ui.component.postsThread
 import com.adel.wc26.feature.profile.ui.component.ProfileHeader
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 /**
  * UserProfile — stateful entry point. The public profile of another user:
@@ -45,6 +50,9 @@ fun UserProfileScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val posts = viewModel.posts.collectAsLazyPagingItems()
+    val currentUserId by viewModel.currentUserId.collectAsStateWithLifecycle(initialValue = null)
+
+    var postToDelete by remember { mutableStateOf<Post?>(null) }
 
     Scaffold(
         modifier = modifier,
@@ -70,12 +78,40 @@ fun UserProfileScreen(
         UserProfileContent(
             state = state,
             posts = posts,
+            currentUserId = currentUserId,
             onRetry = viewModel::loadProfile,
             onPostClick = onPostClick,
             onAuthorClick = onAuthorClick,
             onLikeClick = viewModel::toggleLike,
+            onDeleteClick = { postToDelete = it },
             modifier = Modifier.padding(padding),
         )
+
+        if (postToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { postToDelete = null },
+                title = { Text(stringResource(R.string.post_delete_title)) },
+                text = { Text(stringResource(R.string.post_delete_message)) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val post = postToDelete
+                            postToDelete = null
+                            if (post != null) {
+                                viewModel.deletePost(post)
+                            }
+                        }
+                    ) {
+                        Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { postToDelete = null }) {
+                        Text(stringResource(R.string.action_cancel))
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -86,10 +122,12 @@ fun UserProfileScreen(
 fun UserProfileContent(
     state: UserProfileUiState,
     posts: LazyPagingItems<Post>,
+    currentUserId: Long?,
     onRetry: () -> Unit,
     onPostClick: (Long) -> Unit,
     onAuthorClick: (Long) -> Unit,
     onLikeClick: (Post) -> Unit,
+    onDeleteClick: (Post) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val emptyMessage = stringResource(R.string.profile_empty_posts)
@@ -127,6 +165,8 @@ fun UserProfileContent(
                 onLikeClick = onLikeClick,
                 onAuthorClick = onAuthorClick,
                 emptyMessage = emptyMessage,
+                currentUserId = currentUserId,
+                onDeleteClick = onDeleteClick,
             )
         }
     }

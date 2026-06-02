@@ -34,6 +34,8 @@ fun LazyListScope.postsThread(
     onLikeClick: (Post) -> Unit,
     onAuthorClick: (Long) -> Unit,
     emptyMessage: String? = null,
+    currentUserId: Long? = null,
+    onDeleteClick: ((Post) -> Unit)? = null,
 ) {
     items(
         count = posts.itemCount,
@@ -46,6 +48,8 @@ fun LazyListScope.postsThread(
                 onClick = { onPostClick(post.id) },
                 onLikeClick = { onLikeClick(post) },
                 onAuthorClick = { onAuthorClick(post.author.id) },
+                canDelete = currentUserId != null && currentUserId == post.author.id,
+                onDeleteClick = { onDeleteClick?.invoke(post) },
             )
             HorizontalDivider()
         }

@@ -31,6 +31,17 @@ import com.adel.wc26.core.ui.format
 import com.adel.wc26.core.util.WC26DateTime
 import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.posts.domain.post.PostAuthor
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 
 /**
  * A single post, rendered as a row. Used in the match thread, the global
@@ -42,11 +53,13 @@ import com.adel.wc26.feature.posts.domain.post.PostAuthor
  */
 @Composable
 fun PostCard(
+    modifier: Modifier = Modifier,
     post: Post,
     onClick: () -> Unit,
     onLikeClick: () -> Unit,
     onAuthorClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    canDelete: Boolean = false,
+    onDeleteClick: () -> Unit = {},
 ) {
     Surface(
         modifier = modifier
@@ -67,8 +80,11 @@ fun PostCard(
 
             Column(modifier = Modifier.fillMaxWidth()) {
 
-                // Author line: display name · @username · time
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                // Author line: display name · @username · time + 3-dots Menu
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text(
                         text = post.author.displayName,
                         style = MaterialTheme.typography.titleSmall,
@@ -86,6 +102,52 @@ fun PostCard(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+
+                    if (canDelete) {
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        var showMenu by remember { mutableStateOf(false) }
+
+                        Box {
+                            IconButton(
+                                onClick = { showMenu = true },
+                                modifier = Modifier.size(18.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.MoreVert,
+                                    contentDescription = "Post options",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            DropdownMenu(
+                                expanded = showMenu,
+                                onDismissRequest = { showMenu = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                imageVector = Icons.Default.Delete,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.error,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(Spacing.sm))
+                                            Text(
+                                                text = stringResource(R.string.action_delete),
+                                                color = MaterialTheme.colorScheme.error
+                                            )
+                                        }
+                                    },
+                                    onClick = {
+                                        showMenu = false
+                                        onDeleteClick()
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
 
                 Spacer(Modifier.padding(top = Spacing.xs))
@@ -171,6 +233,7 @@ private fun PostCardPreview() {
             onClick = {},
             onLikeClick = {},
             onAuthorClick = {},
+            canDelete = true
         )
     }
 }

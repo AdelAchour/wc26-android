@@ -6,10 +6,12 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.filter
 import androidx.paging.map
 import com.adel.wc26.core.datastore.TokenStore
 import com.adel.wc26.core.result.AppError
 import com.adel.wc26.core.result.DataResult
+import com.adel.wc26.feature.posts.data.PostDeletionManager
 import com.adel.wc26.feature.posts.data.PostLikeManager
 import com.adel.wc26.feature.posts.data.post.PostPagingSource
 import com.adel.wc26.feature.posts.domain.post.Post
@@ -52,6 +54,7 @@ class ProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val tokenStore: TokenStore,
     private val postLikeManager: PostLikeManager,
+    private val postDeletionManager: PostDeletionManager,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -118,6 +121,9 @@ class ProfileViewModel @Inject constructor(
                     } ?: post
                 }
             }
+                .combine(postDeletionManager.deletedPostIds) { pagingData, deletedIds ->
+                    pagingData.filter { post -> post.id !in deletedIds }
+                }
         }
         if (_likes == null) {
             val rawLikes = Pager(
@@ -139,10 +145,17 @@ class ProfileViewModel @Inject constructor(
                     } ?: post
                 }
             }
+                .combine(postDeletionManager.deletedPostIds) { pagingData, deletedIds ->
+                    pagingData.filter { post -> post.id !in deletedIds }
+                }
         }
     }
 
     fun toggleLike(post: Post) {
         postLikeManager.toggleLike(post, viewModelScope)
+    }
+
+    fun deletePost(post: Post) {
+        postDeletionManager.deletePost(post.id, viewModelScope)
     }
 }
