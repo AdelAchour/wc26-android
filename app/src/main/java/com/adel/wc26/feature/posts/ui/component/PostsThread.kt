@@ -9,9 +9,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -33,6 +33,7 @@ fun LazyListScope.postsThread(
     onPostClick: (Long) -> Unit,
     onLikeClick: (Post) -> Unit,
     onAuthorClick: (Long) -> Unit,
+    onMatchClick: ((Long) -> Unit)? = null,
     emptyMessage: String? = null,
     currentUserId: Long? = null,
     onDeleteClick: ((Post) -> Unit)? = null,
@@ -48,6 +49,7 @@ fun LazyListScope.postsThread(
                 onClick = { onPostClick(post.id) },
                 onLikeClick = { onLikeClick(post) },
                 onAuthorClick = { onAuthorClick(post.author.id) },
+                onMatchClick = if (onMatchClick != null) { { onMatchClick(post.matchId) } } else null,
                 canDelete = currentUserId != null && currentUserId == post.author.id,
                 onDeleteClick = { onDeleteClick?.invoke(post) },
             )

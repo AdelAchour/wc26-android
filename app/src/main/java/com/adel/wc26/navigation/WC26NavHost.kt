@@ -169,6 +169,9 @@ fun WC26NavHost(
                     onAuthorClick = { userId ->
                         navController.navigate(Destinations.UserProfile(userId))
                     },
+                    onMatchClick = { matchId ->
+                        navController.navigate(Destinations.MatchDetail(matchId))
+                    },
                 )
             }
             composable<Destinations.Profile> {
@@ -178,6 +181,9 @@ fun WC26NavHost(
                     },
                     onAuthorClick = { userId ->
                         navController.navigate(Destinations.UserProfile(userId))
+                    },
+                    onMatchClick = { matchId ->
+                        navController.navigate(Destinations.MatchDetail(matchId))
                     },
                     onSignIn = {
                         navController.navigate(Destinations.Login)
@@ -225,6 +231,9 @@ fun WC26NavHost(
                     onAuthorClick = { userId ->
                         navController.navigate(Destinations.UserProfile(userId))
                     },
+                    onMatchClick = { matchId ->
+                        navController.navigate(Destinations.MatchDetail(matchId))
+                    },
                     onSignInPrompt = {
                         navController.navigate(Destinations.Login)
                     },
@@ -238,6 +247,9 @@ fun WC26NavHost(
                     },
                     onAuthorClick = { userId ->
                         navController.navigate(Destinations.UserProfile(userId))
+                    },
+                    onMatchClick = { matchId ->
+                        navController.navigate(Destinations.MatchDetail(matchId))
                     },
                 )
             }

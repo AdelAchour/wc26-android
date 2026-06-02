@@ -1,7 +1,9 @@
 package com.adel.wc26.feature.posts.ui.component
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,39 +11,44 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.adel.wc26.R
+import com.adel.wc26.core.designsystem.component.LiveBadge
 import com.adel.wc26.core.designsystem.component.WC26Avatar
 import com.adel.wc26.core.designsystem.theme.Spacing
 import com.adel.wc26.core.designsystem.theme.WC26Theme
 import com.adel.wc26.core.ui.format
 import com.adel.wc26.core.util.WC26DateTime
+import com.adel.wc26.feature.matches.domain.model.Match
+import com.adel.wc26.feature.matches.domain.model.MatchStatus
 import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.posts.domain.post.PostAuthor
-import androidx.compose.foundation.layout.Box
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.IconButton
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.res.stringResource
+import java.time.Instant
 
 /**
  * A single post, rendered as a row. Used in the match thread, the global
@@ -50,6 +57,7 @@ import androidx.compose.ui.res.stringResource
  * @param onClick        opens the post detail.
  * @param onLikeClick    toggles like (optimistic UI is handled by the caller).
  * @param onAuthorClick  opens the author's profile.
+ * @param onMatchClick   opens the match details (optional banner).
  */
 @Composable
 fun PostCard(
@@ -58,6 +66,7 @@ fun PostCard(
     onClick: () -> Unit,
     onLikeClick: () -> Unit,
     onAuthorClick: () -> Unit,
+    onMatchClick: (() -> Unit)? = null,
     canDelete: Boolean = false,
     onDeleteClick: () -> Unit = {},
 ) {
@@ -67,110 +76,204 @@ fun PostCard(
             .clickable(onClick = onClick),
         color = MaterialTheme.colorScheme.surface,
     ) {
-        Row(modifier = Modifier.padding(Spacing.lg)) {
+        Column(modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.md)) {
 
-            WC26Avatar(
-                displayName = post.author.displayName,
-                avatarUrl = post.author.avatarUrl,
-                size = 44.dp,
-                modifier = Modifier.clickable(onClick = onAuthorClick),
-            )
+            // 1. Thread Header Banner (placed at the absolute top of the card)
+            if (post.match != null && onMatchClick != null) {
+                MatchThreadHeader(
+                    match = post.match,
+                    onClick = onMatchClick,
+                    modifier = Modifier.padding(bottom = Spacing.xs)
+                )
+            }
 
-            Spacer(Modifier.width(Spacing.md))
+            // 2. Main Row (Avatar + Content)
+            Row(modifier = Modifier.fillMaxWidth()) {
+                WC26Avatar(
+                    displayName = post.author.displayName,
+                    avatarUrl = post.author.avatarUrl,
+                    size = 44.dp,
+                    modifier = Modifier.clickable(onClick = onAuthorClick),
+                )
 
-            Column(modifier = Modifier.fillMaxWidth()) {
+                Spacer(Modifier.width(Spacing.md))
 
-                // Author line: display name · @username · time + 3-dots Menu
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = post.author.displayName,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                    Spacer(Modifier.width(Spacing.xs))
-                    Text(
-                        text = "@${post.author.username}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(Modifier.width(Spacing.xs))
-                    Text(
-                        text = "· ${WC26DateTime.relative(post.createdAt)?.format() ?: ""}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                Column(modifier = Modifier.fillMaxWidth()) {
 
-                    if (canDelete) {
-                        Spacer(modifier = Modifier.weight(1f))
+                    // Author line: display name · @username · time + 3-dots Menu
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = post.author.displayName,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Spacer(Modifier.width(Spacing.xs))
+                        Text(
+                            text = "@${post.author.username}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(Modifier.width(Spacing.xs))
+                        Text(
+                            text = "· ${WC26DateTime.relative(post.createdAt)?.format() ?: ""}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
 
-                        var showMenu by remember { mutableStateOf(false) }
+                        if (canDelete) {
+                            Spacer(modifier = Modifier.weight(1f))
 
-                        Box {
-                            IconButton(
-                                onClick = { showMenu = true },
-                                modifier = Modifier.size(18.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.MoreVert,
-                                    contentDescription = "Post options",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+                            var showMenu by remember { mutableStateOf(false) }
 
-                            DropdownMenu(
-                                expanded = showMenu,
-                                onDismissRequest = { showMenu = false }
-                            ) {
-                                DropdownMenuItem(
-                                    text = {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(
-                                                imageVector = Icons.Default.Delete,
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.error,
-                                                modifier = Modifier.size(18.dp)
-                                            )
-                                            Spacer(modifier = Modifier.width(Spacing.sm))
-                                            Text(
-                                                text = stringResource(R.string.action_delete),
-                                                color = MaterialTheme.colorScheme.error
-                                            )
+                            Box {
+                                IconButton(
+                                    onClick = { showMenu = true },
+                                    modifier = Modifier.size(18.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.MoreVert,
+                                        contentDescription = "Post options",
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+
+                                DropdownMenu(
+                                    expanded = showMenu,
+                                    onDismissRequest = { showMenu = false }
+                                ) {
+                                    DropdownMenuItem(
+                                        text = {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Delete,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.error,
+                                                    modifier = Modifier.size(18.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(Spacing.sm))
+                                                Text(
+                                                    text = stringResource(R.string.action_delete),
+                                                    color = MaterialTheme.colorScheme.error
+                                                )
+                                            }
+                                        },
+                                        onClick = {
+                                            showMenu = false
+                                            onDeleteClick()
                                         }
-                                    },
-                                    onClick = {
-                                        showMenu = false
-                                        onDeleteClick()
-                                    }
-                                )
+                                    )
+                                }
                             }
                         }
                     }
-                }
 
-                Spacer(Modifier.padding(top = Spacing.xs))
+                    Spacer(Modifier.padding(top = Spacing.xs))
 
-                // Body
-                Text(
-                    text = post.content,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-
-                Spacer(Modifier.padding(top = Spacing.sm))
-
-                // Action row: like + comment counts
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
-                ) {
-                    LikeAction(
-                        liked = post.likedByCurrentUser,
-                        count = post.likeCount,
-                        onClick = onLikeClick,
+                    // Body Text
+                    Text(
+                        text = post.content,
+                        style = MaterialTheme.typography.bodyLarge,
                     )
-                    CommentCount(count = post.commentCount)
+
+                    Spacer(Modifier.padding(top = Spacing.sm))
+
+                    // Action row: like + comment counts
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
+                    ) {
+                        LikeAction(
+                            liked = post.likedByCurrentUser,
+                            count = post.likeCount,
+                            onClick = onLikeClick,
+                        )
+                        CommentCount(count = post.commentCount)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * A highly polished, clean mini-banner representing the parent match thread.
+ */
+@Composable
+private fun MatchThreadHeader(
+    match: Match,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        onClick = onClick,
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+        ),
+        shape = RoundedCornerShape(8.dp),
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.md, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
+            ) {
+                Spacer(Modifier.width(Spacing.xs))
+                Text(
+                    text = "${match.homeTeam} vs ${match.awayTeam}",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Spacer(Modifier.width(Spacing.sm))
+
+            // Score / Live Badge status
+            when (match.status) {
+                MatchStatus.LIVE -> {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
+                    ) {
+                        if (match.hasScore) {
+                            Text(
+                                text = "${match.homeScore} - ${match.awayScore}",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                        LiveBadge(label = stringResource(R.string.match_live))
+                    }
+                }
+                MatchStatus.FINISHED -> {
+                    Text(
+                        text = if (match.hasScore) "${match.homeScore} - ${match.awayScore} FT" else "FT",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                else -> {
+                    Text(
+                        text = "Upcoming",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.outline,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
         }
@@ -215,6 +318,20 @@ private fun CommentCount(count: Int) {
 
 // ---- Preview ----
 
+private fun previewMatch(status: MatchStatus, home: Int? = null, away: Int? = null) = Match(
+    id = 1,
+    gameNumber = 12,
+    homeTeam = "Spain",
+    awayTeam = "Germany",
+    stage = "Group E",
+    venue = "Al Bayt Stadium",
+    countryCode = "QA",
+    kickoffAt = Instant.parse("2026-11-27T19:00:00Z"),
+    status = status,
+    homeScore = home,
+    awayScore = away
+)
+
 @Preview(showBackground = true)
 @Composable
 private fun PostCardPreview() {
@@ -223,8 +340,9 @@ private fun PostCardPreview() {
             post = Post(
                 id = 1,
                 matchId = 1,
+                match = previewMatch(MatchStatus.LIVE, 1, 1),
                 author = PostAuthor(1, "adel", "Adel", null),
-                content = "What a goal! Canada looking sharp tonight. This is the kind of football we came for.",
+                content = "What a goal! Spain looking sharp tonight. This is the kind of football we came for.",
                 likeCount = 24,
                 commentCount = 5,
                 likedByCurrentUser = true,
@@ -233,6 +351,7 @@ private fun PostCardPreview() {
             onClick = {},
             onLikeClick = {},
             onAuthorClick = {},
+            onMatchClick = {},
             canDelete = true
         )
     }

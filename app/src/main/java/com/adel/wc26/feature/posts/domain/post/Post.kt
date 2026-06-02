@@ -1,5 +1,7 @@
 package com.adel.wc26.feature.posts.domain.post
 
+import com.adel.wc26.feature.matches.domain.model.Match
+
 /**
  * The author of a post or comment — public identity only.
  */
@@ -20,6 +22,7 @@ data class PostAuthor(
 data class Post(
     val id: Long,
     val matchId: Long,
+    val match: Match? = null,
     val author: PostAuthor,
     val content: String,
     val likeCount: Int,

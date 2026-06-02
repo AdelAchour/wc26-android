@@ -45,6 +45,7 @@ import androidx.compose.runtime.setValue
 fun ProfileScreen(
     onPostClick: (Long) -> Unit,
     onAuthorClick: (Long) -> Unit,
+    onMatchClick: (Long) -> Unit,
     onSignIn: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ProfileViewModel = hiltViewModel(),
@@ -65,6 +66,7 @@ fun ProfileScreen(
         onSignIn = onSignIn,
         onPostClick = onPostClick,
         onAuthorClick = onAuthorClick,
+        onMatchClick = onMatchClick,
         onLikeClick = viewModel::toggleLike,
         onDeleteClick = { postToDelete = it },
         modifier = modifier,
@@ -111,6 +113,7 @@ fun ProfileContent(
     onSignIn: () -> Unit,
     onPostClick: (Long) -> Unit,
     onAuthorClick: (Long) -> Unit,
+    onMatchClick: (Long) -> Unit,
     onLikeClick: (Post) -> Unit,
     onDeleteClick: (Post) -> Unit,
     modifier: Modifier = Modifier,
@@ -168,6 +171,7 @@ fun ProfileContent(
                     onPostClick = onPostClick,
                     onLikeClick = onLikeClick,
                     onAuthorClick = onAuthorClick,
+                    onMatchClick = onMatchClick,
                     emptyMessage = emptyMessage,
                     currentUserId = state.profile.id, // Logged in profile ID matches the current user
                     onDeleteClick = onDeleteClick,

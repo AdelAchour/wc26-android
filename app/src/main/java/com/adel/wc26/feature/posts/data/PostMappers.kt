@@ -1,5 +1,6 @@
 package com.adel.wc26.feature.posts.data
 
+import com.adel.wc26.feature.matches.data.toDomain
 import com.adel.wc26.feature.posts.data.comment.dto.CommentDto
 import com.adel.wc26.feature.posts.data.post.dto.PostAuthorDto
 import com.adel.wc26.feature.posts.data.post.dto.PostDto
@@ -21,6 +22,7 @@ fun PostAuthorDto.toDomain(): PostAuthor = PostAuthor(
 fun PostDto.toDomain(): Post = Post(
     id = id,
     matchId = matchId,
+    match = match?.toDomain(),
     author = author.toDomain(),
     content = content,
     likeCount = likeCount,

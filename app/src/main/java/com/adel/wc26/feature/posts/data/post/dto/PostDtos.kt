@@ -1,5 +1,6 @@
 package com.adel.wc26.feature.posts.data.post.dto
 
+import com.adel.wc26.feature.matches.data.dto.MatchDto
 import kotlinx.serialization.Serializable
 
 /**
@@ -19,6 +20,7 @@ data class PostAuthorDto(
 data class PostDto(
     val id: Long,
     val matchId: Long,
+    val match: MatchDto? = null,
     val author: PostAuthorDto,
     val content: String,
     val likeCount: Int,

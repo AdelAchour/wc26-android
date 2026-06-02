@@ -59,6 +59,7 @@ import androidx.compose.ui.platform.LocalContext
 fun PostDetailScreen(
     onBack: () -> Unit,
     onAuthorClick: (Long) -> Unit,
+    onMatchClick: (Long) -> Unit,
     onSignInPrompt: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: PostDetailViewModel = hiltViewModel(),
@@ -113,6 +114,7 @@ fun PostDetailScreen(
             onRetry = viewModel::loadPost,
             onLikeClick = viewModel::toggleLike,
             onAuthorClick = onAuthorClick,
+            onMatchClick = onMatchClick,
             onDeletePostClick = { showPostDeleteConfirm = true },
             onDeleteCommentClick = { commentIdToDelete = it },
             modifier = Modifier.padding(padding),
@@ -191,6 +193,7 @@ fun PostDetailContent(
     onRetry: () -> Unit,
     onLikeClick: () -> Unit,
     onAuthorClick: (Long) -> Unit,
+    onMatchClick: (Long) -> Unit,
     onDeletePostClick: () -> Unit,
     onDeleteCommentClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
@@ -213,6 +216,7 @@ fun PostDetailContent(
                     onClick = { /* already on detail */ },
                     onLikeClick = onLikeClick,
                     onAuthorClick = { onAuthorClick(state.post.author.id) },
+                    onMatchClick = { onMatchClick(state.post.matchId) },
                     canDelete = state.currentUserId == state.post.author.id,
                     onDeleteClick = onDeletePostClick
                 )
