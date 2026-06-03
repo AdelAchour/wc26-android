@@ -34,6 +34,8 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.Alignment
 
 /**
  * Feed tab — stateful entry point. The global stream of all posts.
@@ -55,19 +57,7 @@ fun FeedScreen(
 
     var postToDelete by remember { mutableStateOf<Post?>(null) }
 
-    Scaffold(
-        modifier = modifier,
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                text = { Text(stringResource(R.string.match_detail_compose)) },
-                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                onClick = {
-                    if (isLoggedIn) onComposeClick()
-                    else onSignInPrompt()
-                },
-            )
-        }
-    ) { padding ->
+    Box(modifier = modifier.fillMaxSize()) {
         FeedContent(
             posts = posts,
             currentUserId = currentUserId,
@@ -76,7 +66,19 @@ fun FeedScreen(
             onMatchClick = onMatchClick,
             onLikeClick = viewModel::toggleLike,
             onDeleteClick = { postToDelete = it },
-            modifier = Modifier.padding(padding),
+            modifier = Modifier.fillMaxSize(),
+        )
+
+        ExtendedFloatingActionButton(
+            text = { Text(stringResource(R.string.match_detail_compose)) },
+            icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+            onClick = {
+                if (isLoggedIn) onComposeClick()
+                else onSignInPrompt()
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(Spacing.lg), // Standard FAB margin
         )
 
         if (postToDelete != null) {
