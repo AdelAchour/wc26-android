@@ -83,6 +83,7 @@
 
     <!-- Matches -->
     <string name="matches_title">Matches</string>
+    <string name="matches_picker_title">Choose a match</string>
 
     <!-- Filter labels -->
     <string name="match_filter_all">All</string>

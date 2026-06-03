@@ -29,6 +29,11 @@ import com.adel.wc26.core.designsystem.component.WC26LoadingState
 import com.adel.wc26.core.designsystem.theme.Spacing
 import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.posts.ui.component.postsThread
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 
 /**
  * Feed tab — stateful entry point. The global stream of all posts.
@@ -38,52 +43,70 @@ fun FeedScreen(
     onPostClick: (Long) -> Unit,
     onAuthorClick: (Long) -> Unit,
     onMatchClick: (Long) -> Unit,
+    onComposeClick: () -> Unit,
+    onSignInPrompt: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: FeedViewModel = hiltViewModel(),
 ) {
     val posts = viewModel.posts.collectAsLazyPagingItems()
     val currentUserId by viewModel.currentUserId.collectAsStateWithLifecycle(initialValue = null)
     val context = LocalContext.current
+    val isLoggedIn = currentUserId != null
 
     var postToDelete by remember { mutableStateOf<Post?>(null) }
 
-    FeedContent(
-        posts = posts,
-        currentUserId = currentUserId,
-        onPostClick = onPostClick,
-        onAuthorClick = onAuthorClick,
-        onMatchClick = onMatchClick,
-        onLikeClick = viewModel::toggleLike,
-        onDeleteClick = { postToDelete = it },
+    Scaffold(
         modifier = modifier,
-    )
-
-    if (postToDelete != null) {
-        AlertDialog(
-            onDismissRequest = { postToDelete = null },
-            title = { Text(stringResource(R.string.post_delete_title)) },
-            text = { Text(stringResource(R.string.post_delete_message)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        val post = postToDelete
-                        postToDelete = null
-                        val errorMsg = context.getString(R.string.post_delete_error)
-                        if (post != null) {
-                            viewModel.deletePost(post, onFailure = { Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show() })
-                        }
-                    }
-                ) {
-                    Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { postToDelete = null }) {
-                    Text(stringResource(R.string.action_cancel))
-                }
-            }
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                text = { Text(stringResource(R.string.match_detail_compose)) },
+                icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                onClick = {
+                    if (isLoggedIn) onComposeClick()
+                    else onSignInPrompt()
+                },
+            )
+        }
+    ) { padding ->
+        FeedContent(
+            posts = posts,
+            currentUserId = currentUserId,
+            onPostClick = onPostClick,
+            onAuthorClick = onAuthorClick,
+            onMatchClick = onMatchClick,
+            onLikeClick = viewModel::toggleLike,
+            onDeleteClick = { postToDelete = it },
+            modifier = Modifier.padding(padding),
         )
+
+        if (postToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { postToDelete = null },
+                title = { Text(stringResource(R.string.post_delete_title)) },
+                text = { Text(stringResource(R.string.post_delete_message)) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val post = postToDelete
+                            postToDelete = null
+                            val errorMsg = context.getString(R.string.post_delete_error)
+                            if (post != null) {
+                                viewModel.deletePost(post, onFailure = { Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show() })
+                            }
+                        }
+                    ) {
+                        Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { postToDelete = null }) {
+                        Text(stringResource(R.string.action_cancel))
+                    }
+                }
+            )
+        }
     }
+
 }
 
 /**

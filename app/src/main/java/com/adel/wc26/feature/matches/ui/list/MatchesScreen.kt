@@ -29,6 +29,14 @@ import com.adel.wc26.feature.matches.domain.MatchFilter
 import com.adel.wc26.feature.matches.domain.model.Match
 import com.adel.wc26.feature.matches.domain.model.MatchStatus
 import java.time.Instant
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.Alignment
 
 /**
  * Matches tab — stateful entry point. Collects the ViewModel state and
@@ -41,6 +49,8 @@ fun MatchesScreen(
     onMatchClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MatchesViewModel = hiltViewModel(),
+    isPickerMode: Boolean = false,
+    onBackClick: () -> Unit = {},
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     MatchesContent(
@@ -48,6 +58,8 @@ fun MatchesScreen(
         onFilterSelected = viewModel::onFilterSelected,
         onRetry = viewModel::retry,
         onMatchClick = onMatchClick,
+        isPickerMode = isPickerMode,
+        onBackClick = onBackClick,
         modifier = modifier,
     )
 }
@@ -63,20 +75,41 @@ fun MatchesContent(
     onRetry: () -> Unit,
     onMatchClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
+    isPickerMode: Boolean = false,
+    onBackClick: () -> Unit = {},
 ) {
     Column(modifier = modifier.fillMaxSize()) {
 
-        // Screen title.
-        Text(
-            text = stringResource(R.string.matches_title),
-            style = MaterialTheme.typography.displaySmall,
-            modifier = Modifier.padding(
-                start = Spacing.lg,
-                end = Spacing.lg,
-                top = Spacing.lg,
-                bottom = Spacing.md,
-            ),
-        )
+        // Title row with optional back arrow
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = if (isPickerMode) Spacing.md else Spacing.lg,
+                    end = Spacing.lg,
+                    top = Spacing.lg,
+                    bottom = Spacing.md,
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (isPickerMode) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.action_back),
+                    )
+                }
+                Spacer(Modifier.width(Spacing.sm))
+            }
+            Text(
+                text = if (isPickerMode) {
+                    stringResource(R.string.matches_picker_title)
+                } else {
+                    stringResource(R.string.matches_title)
+                },
+                style = MaterialTheme.typography.displaySmall,
+            )
+        }
 
         // Filter row.
         MatchFilterRow(

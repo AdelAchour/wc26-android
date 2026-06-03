@@ -26,7 +26,7 @@ enum class TopLevelTab(
     val icon: ImageVector,
     val route: Any,
 ) {
-    MATCHES("Matches", Icons.Outlined.DateRange, Destinations.Matches),
+    MATCHES("Matches", Icons.Outlined.DateRange, Destinations.Matches()),
     FEED("Feed", Icons.Outlined.Home, Destinations.Feed),
     PROFILE("Profile", Icons.Outlined.AccountCircle, Destinations.Profile),
     SETTINGS("Settings", Icons.Outlined.Settings, Destinations.Settings),

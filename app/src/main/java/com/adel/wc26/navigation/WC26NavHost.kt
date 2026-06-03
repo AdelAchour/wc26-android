@@ -70,7 +70,15 @@ fun WC26NavHost(
     // Which destinations show the bottom bar — the four tabs only.
     val backStackEntry by navController.currentBackStackEntryAsState()
     val showBottomBar = TopLevelTab.entries.any { tab ->
-        backStackEntry?.destination?.hasRoute(tab.route::class) == true
+        val dest = backStackEntry?.destination
+        if (dest?.hasRoute(Destinations.Matches::class) == true) {
+            val isPickerMode = runCatching {
+                backStackEntry?.toRoute<Destinations.Matches>()?.isPickerMode == true
+            }.getOrDefault(false)
+            !isPickerMode
+        } else {
+            dest?.hasRoute(tab.route::class) == true
+        }
     }
 
     Scaffold(
@@ -96,7 +104,7 @@ fun WC26NavHost(
                     when (route) {
                         SplashRoute.Undecided -> Unit // wait
                         SplashRoute.LoggedIn -> {
-                            navController.navigate(Destinations.Matches) {
+                            navController.navigate(Destinations.Matches()) {
                                 popUpTo(Destinations.Splash) { inclusive = true }
                             }
                         }
@@ -154,10 +162,17 @@ fun WC26NavHost(
             }
 
             // --- Top-level tabs (bottom bar visible) ---
-            composable<Destinations.Matches> {
+            composable<Destinations.Matches> { backStackEntry ->
+                val args = backStackEntry.toRoute<Destinations.Matches>()
                 MatchesScreen(
+                    isPickerMode = args.isPickerMode,
+                    onBackClick = { navController.popBackStack() },
                     onMatchClick = { matchId ->
-                        navController.navigate(Destinations.MatchDetail(matchId))
+                        if (args.isPickerMode) {
+                            navController.navigate(Destinations.PostComposer(matchId))
+                        } else {
+                            navController.navigate(Destinations.MatchDetail(matchId))
+                        }
                     },
                 )
             }
@@ -171,6 +186,12 @@ fun WC26NavHost(
                     },
                     onMatchClick = { matchId ->
                         navController.navigate(Destinations.MatchDetail(matchId))
+                    },
+                    onComposeClick = {
+                        navController.navigate(Destinations.Matches(isPickerMode = true))
+                    },
+                    onSignInPrompt = {
+                        navController.navigate(Destinations.Login)
                     },
                 )
             }
@@ -222,7 +243,16 @@ fun WC26NavHost(
             composable<Destinations.PostComposer> {
                 PostComposerScreen(
                     onClose = { navController.popBackStack() },
-                    onPosted = { navController.popBackStack() },
+                    onPosted = {
+                        val isFromPicker = runCatching {
+                            navController.previousBackStackEntry?.toRoute<Destinations.Matches>()?.isPickerMode == true
+                        }.getOrDefault(false)
+                        if (isFromPicker) {
+                            navController.popBackStack<Destinations.Feed>(inclusive = false)
+                        } else {
+                            navController.popBackStack()
+                        }
+                    },
                 )
             }
             composable<Destinations.PostDetail> {

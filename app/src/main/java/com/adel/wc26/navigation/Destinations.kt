@@ -31,7 +31,7 @@ object Destinations {
 
     // --- Top-level tabs (bottom nav) ---
     @Serializable
-    data object Matches
+    data class Matches(val isPickerMode: Boolean = false)
 
     @Serializable
     data object Feed
