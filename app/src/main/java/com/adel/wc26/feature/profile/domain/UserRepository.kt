@@ -14,7 +14,7 @@ data class UserProfile(
     val username: String,
     val displayName: String,
     val avatarUrl: String?,
-    val role: String,
+    val role: UserRole,
     val joinedAt: String,
 )
 

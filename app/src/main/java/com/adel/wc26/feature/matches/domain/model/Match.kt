@@ -6,23 +6,16 @@ import java.time.Instant
  * Match status. The backend sends a raw string; the mapper parses it into
  * this enum so the UI works with a closed, exhaustive type.
  *
- * [UNKNOWN] is a safety net — if the backend ever adds a status the app
- * doesn't know, it degrades gracefully rather than crashing.
+ *
  */
-enum class MatchStatus {
-    UPCOMING,
-    LIVE,
-    FINISHED,
-    UNKNOWN;
-
+enum class MatchStatus(val value: String) {
+    SCHEDULED("scheduled"),
+    LIVE("live"),
+    FINISHED("finished");
     companion object {
-        /** Parse the backend's status string. Case-insensitive, null-safe. */
-        fun fromApi(value: String): MatchStatus = when (value.lowercase()) {
-            "upcoming", "scheduled" -> UPCOMING
-            "live", "in_progress" -> LIVE
-            "finished", "completed", "final" -> FINISHED
-            else -> UNKNOWN
-        }
+        fun fromString(value: String): MatchStatus =
+            entries.find { it.value.equals(value, ignoreCase = true) }
+                ?: throw IllegalArgumentException("Unknown match status: $value")
     }
 }
 

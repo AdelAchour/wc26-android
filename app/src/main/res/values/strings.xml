@@ -162,4 +162,14 @@
     <string name="profile_empty_posts">No posts yet.</string>
     <string name="profile_empty_likes">No liked posts yet.</string>
 
+    <!-- Admin Edit Match -->
+    <string name="admin_edit_match_title">Edit Match</string>
+    <string name="admin_edit_match_status">Match Status</string>
+    <string name="admin_edit_match_scores">Update Match Scores</string>
+    <string name="admin_edit_match_scores_info">Both scores must be set and non-negative"</string>
+    <string name="admin_edit_match_home_score">%1$s Score</string>
+    <string name="admin_edit_match_away_score">%1$s Score</string>
+    <string name="admin_edit_match_save">Save Changes</string>
+    <string name="admin_edit_match_success">Match updated successfully</string>
+
 </resources>

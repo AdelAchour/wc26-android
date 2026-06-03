@@ -54,6 +54,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 
 /**
  * Match detail — stateful entry point.
@@ -69,6 +73,7 @@ fun MatchDetailScreen(
     onAuthorClick: (Long) -> Unit,
     onComposeClick: (matchId: Long) -> Unit,
     onSignInPrompt: () -> Unit,
+    onEditClick: (matchId: Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MatchDetailViewModel = hiltViewModel(),
 ) {
@@ -92,6 +97,37 @@ fun MatchDetailScreen(
                         )
                     }
                 },
+                actions = {
+                    if (state.isAdmin && state.match != null) {
+                        var showMenu by remember { mutableStateOf(false) }
+                        Box {
+                            IconButton(onClick = { showMenu = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.MoreVert,
+                                    contentDescription = "Match options"
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = showMenu,
+                                onDismissRequest = { showMenu = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.admin_edit_match_title)) },
+                                    onClick = {
+                                        showMenu = false
+                                        onEditClick(state.match!!.id)
+                                    },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.Edit,
+                                            contentDescription = null
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
             )
         },
         floatingActionButton = {

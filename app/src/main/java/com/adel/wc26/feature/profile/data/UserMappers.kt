@@ -4,6 +4,7 @@ import com.adel.wc26.feature.profile.data.dto.UserDto
 import com.adel.wc26.feature.profile.data.dto.UserPublicDto
 import com.adel.wc26.feature.profile.domain.PublicProfile
 import com.adel.wc26.feature.profile.domain.UserProfile
+import com.adel.wc26.feature.profile.domain.UserRole
 
 /**
  * Mappers: wire DTOs -> domain models.
@@ -16,7 +17,7 @@ fun UserDto.toDomain(): UserProfile = UserProfile(
     username = username,
     displayName = displayName,
     avatarUrl = avatarUrl,
-    role = role,
+    role = UserRole.fromString(role),
     joinedAt = createdAt,
 )
 

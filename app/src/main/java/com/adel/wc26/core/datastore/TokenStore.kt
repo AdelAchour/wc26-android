@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 import android.util.Base64
+import com.adel.wc26.feature.profile.domain.UserRole
 import org.json.JSONObject
 import java.time.Instant
 
@@ -31,6 +32,7 @@ class TokenStore @Inject constructor(
     private companion object {
         val KEY_TOKEN = stringPreferencesKey("auth_token")
         val KEY_USER_ID = stringPreferencesKey("auth_user_id")
+        val KEY_ROLE = stringPreferencesKey("auth_user_role")
     }
 
     /** Emits the current token, or null when signed out. */
@@ -41,15 +43,27 @@ class TokenStore @Inject constructor(
     val isLoggedInFlow: Flow<Boolean> =
         context.dataStore.data.map { prefs -> prefs[KEY_TOKEN] != null }
 
+    /** Emits the user's role (e.g. "admin" or "user"), or null. */
+    val roleFlow: Flow<String?> =
+        context.dataStore.data.map { prefs -> prefs[KEY_ROLE] }
+
     /** One-shot read of the current token — used by the auth interceptor. */
     suspend fun getToken(): String? =
         context.dataStore.data.first()[KEY_TOKEN]
 
     /** Stores the token and user id after a successful login/register. */
-    suspend fun saveSession(token: String, userId: Long) {
+    suspend fun saveSession(token: String, userId: Long, role: String = UserRole.USER.value) {
         context.dataStore.edit { prefs ->
             prefs[KEY_TOKEN] = token
             prefs[KEY_USER_ID] = userId.toString()
+            prefs[KEY_ROLE] = role
+        }
+    }
+
+    /** Updates just the user role (useful when refreshing profile info). */
+    suspend fun saveRole(role: String) {
+        context.dataStore.edit { prefs ->
+            prefs[KEY_ROLE] = role
         }
     }
 

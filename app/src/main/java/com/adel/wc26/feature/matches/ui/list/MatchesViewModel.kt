@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.adel.wc26.core.result.AppError
 import com.adel.wc26.core.result.DataResult
+import com.adel.wc26.feature.matches.data.MatchUpdateNotifier
 import com.adel.wc26.feature.matches.domain.MatchFilter
 import com.adel.wc26.feature.matches.domain.MatchRepository
 import com.adel.wc26.feature.matches.domain.model.Match
+import com.adel.wc26.feature.matches.domain.model.MatchStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +37,7 @@ data class MatchesUiState(
 @HiltViewModel
 class MatchesViewModel @Inject constructor(
     private val matchRepository: MatchRepository,
+    private val matchUpdateNotifier: MatchUpdateNotifier,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MatchesUiState())
@@ -42,6 +45,28 @@ class MatchesViewModel @Inject constructor(
 
     init {
         load(MatchFilter.UPCOMING)
+
+        // Listen for live updates and update the matching item in the list
+        // Listen for live updates and update the matching item in the list
+        viewModelScope.launch {
+            matchUpdateNotifier.matchUpdated.collect { updatedMatch ->
+                _uiState.update { state ->
+                    val updatedList = state.matches.mapNotNull { match ->
+                        if (match.id == updatedMatch.id) {
+                            // Only keep the match in the list if it matches the current filter
+                            if (state.filter.matchesStatus(updatedMatch.status)) {
+                                updatedMatch
+                            } else {
+                                null // Removed from list
+                            }
+                        } else {
+                            match
+                        }
+                    }
+                    state.copy(matches = updatedList)
+                }
+            }
+        }
     }
 
     /** Switch the filter and reload. No-op if already on that filter. */
@@ -75,4 +100,11 @@ class MatchesViewModel @Inject constructor(
             }
         }
     }
+}
+
+private fun MatchFilter.matchesStatus(status: MatchStatus): Boolean = when (this) {
+    MatchFilter.ALL -> true
+    MatchFilter.UPCOMING -> status == MatchStatus.SCHEDULED
+    MatchFilter.LIVE -> status == MatchStatus.LIVE
+    MatchFilter.FINISHED -> status == MatchStatus.FINISHED
 }

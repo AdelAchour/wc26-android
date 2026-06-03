@@ -180,7 +180,7 @@ private fun sampleMatch(
 @Composable
 private fun MatchCardUpcomingPreview() {
     WC26Theme {
-        MatchCard(match = sampleMatch(MatchStatus.UPCOMING), onClick = {},
+        MatchCard(match = sampleMatch(MatchStatus.SCHEDULED), onClick = {},
             modifier = Modifier.padding(Spacing.lg))
     }
 }

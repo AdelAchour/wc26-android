@@ -1,5 +1,6 @@
 package com.adel.wc26.feature.profile.data
 
+import com.adel.wc26.core.datastore.TokenStore
 import com.adel.wc26.core.network.apiCall
 import com.adel.wc26.core.result.CursorPage
 import com.adel.wc26.core.result.DataResult
@@ -24,6 +25,7 @@ import javax.inject.Singleton
 class UserRepositoryImpl @Inject constructor(
     private val authApi: AuthApi,
     private val userApi: UserApi,
+    private val tokenStore: TokenStore,
 ) : UserRepository {
 
     private companion object {
@@ -31,7 +33,11 @@ class UserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getMyProfile(): DataResult<UserProfile> =
-        apiCall { authApi.me() }.map { it.toDomain() }
+        apiCall { authApi.me() }.map { dto ->
+            val domain = dto.toDomain()
+            tokenStore.saveRole(domain.role.value)
+            domain
+        }
 
     override suspend fun getPublicProfile(userId: Long): DataResult<PublicProfile> =
         apiCall { userApi.getUser(userId) }.map { it.toDomain() }

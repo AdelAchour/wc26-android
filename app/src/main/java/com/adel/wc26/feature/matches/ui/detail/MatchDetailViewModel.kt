@@ -26,9 +26,11 @@ import kotlinx.coroutines.launch
 import androidx.navigation.toRoute
 import androidx.paging.filter
 import androidx.paging.map
+import com.adel.wc26.feature.matches.data.MatchUpdateNotifier
 import com.adel.wc26.feature.posts.data.PostCreationNotifier
 import com.adel.wc26.feature.posts.data.PostDeletionManager
 import com.adel.wc26.feature.posts.data.PostLikeManager
+import com.adel.wc26.feature.profile.domain.UserRole
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -42,6 +44,7 @@ data class MatchDetailUiState(
     val match: Match? = null,
     val error: AppError? = null,
     val isLoggedIn: Boolean = false,
+    val isAdmin: Boolean = false,
 )
 
 @HiltViewModel
@@ -53,6 +56,7 @@ class MatchDetailViewModel @Inject constructor(
     private val postDeletionManager: PostDeletionManager,
     private val postCreationNotifier: PostCreationNotifier,
     private val tokenStore: TokenStore,
+    private val matchUpdateNotifier: MatchUpdateNotifier,
 ) : ViewModel() {
 
     // Expose the current user's ID for showing delete actions
@@ -102,7 +106,15 @@ class MatchDetailViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoggedIn = tokenStore.getToken() != null) }
+            tokenStore.tokenFlow.collect { token ->
+                _uiState.update { it.copy(isLoggedIn = token != null) }
+            }
+        }
+        viewModelScope.launch {
+            tokenStore.roleFlow.collect { roleString ->
+                val role = roleString?.let { UserRole.fromString(it) } ?: UserRole.USER
+                _uiState.update { it.copy(isAdmin = role == UserRole.ADMIN) }
+            }
         }
         loadMatch()
 
@@ -111,6 +123,14 @@ class MatchDetailViewModel @Inject constructor(
             postCreationNotifier.postCreated.collect { post ->
                 if (post.matchId == matchId) {
                     currentPagingSource?.invalidate()
+                }
+            }
+        }
+        // Listen for match updates from other screens/notifications
+        viewModelScope.launch {
+            matchUpdateNotifier.matchUpdated.collect { updatedMatch ->
+                if (updatedMatch.id == matchId) {
+                    _uiState.update { it.copy(match = updatedMatch) }
                 }
             }
         }

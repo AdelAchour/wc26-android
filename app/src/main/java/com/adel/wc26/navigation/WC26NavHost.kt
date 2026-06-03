@@ -26,6 +26,7 @@ import com.adel.wc26.feature.profile.ui.userprofile.UserProfileScreen
 import com.adel.wc26.feature.settings.ui.SettingsScreen
 import com.adel.wc26.feature.matches.ui.list.MatchesScreen
 import com.adel.wc26.feature.matches.ui.detail.MatchDetailScreen
+import com.adel.wc26.feature.matches.ui.edit.MatchEditScreen
 import com.adel.wc26.feature.posts.ui.feed.FeedScreen
 import com.adel.wc26.feature.posts.ui.composer.PostComposerScreen
 import com.adel.wc26.feature.posts.ui.detail.PostDetailScreen
@@ -238,6 +239,14 @@ fun WC26NavHost(
                     onSignInPrompt = {
                         navController.navigate(Destinations.Login)
                     },
+                    onEditClick = { matchId ->
+                        navController.navigate(Destinations.MatchEdit(matchId))
+                    },
+                )
+            }
+            composable<Destinations.MatchEdit> {
+                MatchEditScreen(
+                    onBack = { navController.popBackStack() },
                 )
             }
             composable<Destinations.PostComposer> {

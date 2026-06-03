@@ -27,7 +27,7 @@ fun MatchDto.toDomain(): Match = Match(
     countryCode = countryCode,
     kickoffAt = runCatching { OffsetDateTime.parse(kickoffAt).toInstant() }
         .getOrDefault(Instant.EPOCH),
-    status = MatchStatus.fromApi(status),
+    status = MatchStatus.fromString(status),
     homeScore = homeScore?.toInt(),
     awayScore = awayScore?.toInt(),
 )

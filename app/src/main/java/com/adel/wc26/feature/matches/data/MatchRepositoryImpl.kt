@@ -6,6 +6,7 @@ import com.adel.wc26.core.result.map
 import com.adel.wc26.feature.matches.domain.MatchFilter
 import com.adel.wc26.feature.matches.domain.MatchRepository
 import com.adel.wc26.feature.matches.domain.model.Match
+import com.adel.wc26.feature.matches.domain.model.MatchStatus
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,6 +20,7 @@ import javax.inject.Singleton
 @Singleton
 class MatchRepositoryImpl @Inject constructor(
     private val matchApi: MatchApi,
+    private val matchUpdateNotifier: MatchUpdateNotifier,
 ) : MatchRepository {
 
     private companion object {
@@ -39,4 +41,26 @@ class MatchRepositoryImpl @Inject constructor(
 
     override suspend fun getMatch(id: Long): DataResult<Match> =
         apiCall { matchApi.getMatch(id) }.map { it.toDomain() }
+
+    override suspend fun updateMatch(
+        id: Long,
+        homeScore: Int?,
+        awayScore: Int?,
+        status: MatchStatus?,
+    ): DataResult<Match> =
+        apiCall {
+            matchApi.updateMatch(
+                id = id,
+                body = MatchUpdateRequest(
+                    homeScore = homeScore,
+                    awayScore = awayScore,
+                    status = status?.value,
+                )
+            )
+        }.map { dto ->
+            val domainMatch = dto.toDomain()
+            // Notify screens of the update live!
+            matchUpdateNotifier.notifyMatchUpdated(domainMatch)
+            domainMatch
+        }
 }

@@ -2,6 +2,7 @@ package com.adel.wc26.feature.matches.domain
 
 import com.adel.wc26.core.result.DataResult
 import com.adel.wc26.feature.matches.domain.model.Match
+import com.adel.wc26.feature.matches.domain.model.MatchStatus
 
 /**
  * The filter the matches list can apply. ALL means no status filter.
@@ -29,4 +30,12 @@ interface MatchRepository {
 
     /** Fetch a single match by id. */
     suspend fun getMatch(id: Long): DataResult<Match>
+
+    /** Update a match's status and/or scores. Only accessible by admins. */
+    suspend fun updateMatch(
+        id: Long,
+        homeScore: Int?,
+        awayScore: Int?,
+        status: MatchStatus?,
+    ): DataResult<Match>
 }

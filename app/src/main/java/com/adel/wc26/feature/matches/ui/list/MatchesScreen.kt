@@ -163,7 +163,7 @@ private fun previewMatches(): List<Match> = listOf(
         id = 1, gameNumber = 1, homeTeam = "Canada", awayTeam = "Mexico",
         stage = "Group A", venue = "BMO Field, Toronto", countryCode = "CA",
         kickoffAt = Instant.parse("2026-06-14T19:00:00Z"),
-        status = MatchStatus.UPCOMING, homeScore = null, awayScore = null,
+        status = MatchStatus.SCHEDULED, homeScore = null, awayScore = null,
     ),
     Match(
         id = 2, gameNumber = 2, homeTeam = "USA", awayTeam = "Wales",

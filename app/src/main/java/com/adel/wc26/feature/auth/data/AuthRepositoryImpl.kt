@@ -9,6 +9,7 @@ import com.adel.wc26.feature.auth.data.dto.RegisterRequest
 import com.adel.wc26.feature.auth.data.dto.AuthResponse
 import com.adel.wc26.feature.auth.domain.AuthRepository
 import com.adel.wc26.feature.auth.domain.AuthUser
+import com.adel.wc26.feature.profile.domain.UserRole
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -61,7 +62,17 @@ class AuthRepositoryImpl @Inject constructor(
      */
     private suspend fun DataResult<AuthResponse>.persistThenMap(): DataResult<AuthUser> {
         if (this is DataResult.Success) {
-            tokenStore.saveSession(token = data.token, userId = data.userId)
+            // Save initial session
+            tokenStore.saveSession(token = data.token, userId = data.userId, role = UserRole.USER.value)
+            // Instantly query profile to cache user role
+            val profile = try {
+                authApi.me()
+            } catch (e: Exception) {
+                null
+            }
+            if (profile != null) {
+                tokenStore.saveRole(profile.role)
+            }
         }
         return map { response ->
             AuthUser(

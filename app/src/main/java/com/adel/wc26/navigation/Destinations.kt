@@ -58,4 +58,8 @@ object Destinations {
     /** The post composer for a given match. */
     @Serializable
     data class PostComposer(val matchId: Long)
+
+    /** The admin edit screen for a match. */
+    @Serializable
+    data class MatchEdit(val matchId: Long)
 }
