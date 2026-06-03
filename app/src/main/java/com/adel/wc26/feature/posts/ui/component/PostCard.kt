@@ -51,9 +51,11 @@ import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.posts.domain.post.PostAuthor
 import java.time.Instant
 import android.content.Intent
+import androidx.compose.foundation.layout.height
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material3.HorizontalDivider
 
 /**
  * A single post, rendered as a row. Used in the match thread, the global
@@ -100,7 +102,7 @@ fun PostCard(
                 WC26Avatar(
                     displayName = post.author.displayName,
                     avatarUrl = post.author.avatarUrl,
-                    size = 44.dp,
+                    size = 36.dp,
                     modifier = Modifier.clickable(onClick = onAuthorClick),
                 )
 
@@ -186,7 +188,7 @@ fun PostCard(
                         style = MaterialTheme.typography.bodyLarge,
                     )
 
-                    Spacer(Modifier.padding(top = Spacing.sm))
+                    Spacer(Modifier.padding(top = Spacing.lg))
 
                     // Action row: like + comment, and share
                     Row(
@@ -227,6 +229,185 @@ fun PostCard(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * A detailed post view designed specifically for the Post Detail screen.
+ * Places the avatar and names on top, and displays content and full timestamp vertically.
+ */
+@Composable
+fun DetailedPostCard(
+    modifier: Modifier = Modifier,
+    post: Post,
+    onLikeClick: () -> Unit,
+    onAuthorClick: () -> Unit,
+    onMatchClick: (() -> Unit)? = null,
+    canDelete: Boolean = false,
+    onDeleteClick: () -> Unit = {},
+    onShareClick: (() -> Unit)? = null,
+    onCommentClick: () -> Unit = {},
+) {
+    val context = LocalContext.current
+
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surface,
+    ) {
+        Column(modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.md)) {
+
+            // 1. Thread Header Banner (placed at the absolute top of the card)
+            if (post.match != null && onMatchClick != null) {
+                MatchThreadHeader(
+                    match = post.match,
+                    onClick = onMatchClick,
+                    modifier = Modifier.padding(bottom = Spacing.md)
+                )
+            }
+
+            // 2. Main Row (Avatar + Column with Display Name & Username centered)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                WC26Avatar(
+                    displayName = post.author.displayName,
+                    avatarUrl = post.author.avatarUrl,
+                    size = 40.dp, // Slightly larger avatar for detail view
+                    modifier = Modifier.clickable(onClick = onAuthorClick),
+                )
+
+                Spacer(Modifier.width(Spacing.md))
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = post.author.displayName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.clickable(onClick = onAuthorClick),
+                    )
+                    Text(
+                        text = "@${post.author.username}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.clickable(onClick = onAuthorClick),
+                    )
+                }
+
+                if (canDelete) {
+                    var showMenu by remember { mutableStateOf(false) }
+
+                    Box {
+                        IconButton(
+                            onClick = { showMenu = true },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "Post options",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.error,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(Spacing.sm))
+                                        Text(
+                                            text = stringResource(R.string.action_delete),
+                                            color = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    showMenu = false
+                                    onDeleteClick()
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(Spacing.md))
+
+            // 3. Body Text (Starts at the same padding level as Avatar)
+            Text(
+                text = post.content,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(Modifier.height(Spacing.md))
+
+            // 4. Full Detailed Time
+            Text(
+                text = WC26DateTime.detailedTimestamp(post.createdAt),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Spacer(Modifier.height(Spacing.md))
+
+            // 5. Divider matching the content padding limits
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+            )
+
+            Spacer(Modifier.height(Spacing.sm))
+
+            // 6. Action row: like + comment, and share
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = Spacing.xs),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                LikeAction(
+                    liked = post.likedByCurrentUser,
+                    count = post.likeCount,
+                    onClick = onLikeClick,
+                )
+                CommentAction(
+                    count = post.commentCount,
+                    onClick = onCommentClick,
+                )
+                ShareAction(
+                    onClick = {
+                        if (onShareClick != null) {
+                            onShareClick()
+                        } else {
+                            val postUrl = "https://wc26.adelash.dev/posts/${post.id}"
+                            val shareText = context.getString(
+                                R.string.post_share_template,
+                                post.content,
+                                post.author.username,
+                                postUrl
+                            )
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, shareText)
+                                type = "text/plain"
+                            }
+                            val shareIntent = Intent.createChooser(sendIntent, null)
+                            context.startActivity(shareIntent)
+                        }
+                    }
+                )
             }
         }
     }
@@ -415,6 +596,30 @@ private fun PostCardPreview() {
                 createdAt = "2026-05-25T19:30:00Z",
             ),
             onClick = {},
+            onLikeClick = {},
+            onAuthorClick = {},
+            onMatchClick = {},
+            canDelete = true
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DetailedPostCardPreview() {
+    WC26Theme {
+        DetailedPostCard(
+            post = Post(
+                id = 1,
+                matchId = 1,
+                match = previewMatch(MatchStatus.LIVE, 1, 1),
+                author = PostAuthor(1, "adel", "Adel", null),
+                content = "What a goal! Spain looking sharp tonight. This is the kind of football we came for.",
+                likeCount = 24,
+                commentCount = 5,
+                likedByCurrentUser = true,
+                createdAt = "2026-05-25T19:30:00Z",
+            ),
             onLikeClick = {},
             onAuthorClick = {},
             onMatchClick = {},

@@ -76,6 +76,14 @@ object WC26DateTime {
         return instant.atZone(zone).format(formatter)
     }
 
+    /** Full detailed timestamp — e.g. "14:51 · 3 Jun 2026". */
+    fun detailedTimestamp(iso: String): String {
+        val instant = parse(iso) ?: return ""
+        val formatter = DateTimeFormatter
+            .ofPattern("HH:mm · d MMM yyyy", Locale.getDefault())
+        return instant.atZone(zone).format(formatter)
+    }
+
     /**
      * Relative time as a [RelativeTime] value — the UI maps it to text.
      * Returns null for an unparseable input.

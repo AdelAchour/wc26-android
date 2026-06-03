@@ -48,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
+import com.adel.wc26.feature.posts.ui.component.DetailedPostCard
 
 
 /**
@@ -211,14 +212,14 @@ fun PostDetailContent(
             modifier = modifier.fillMaxSize(),
         ) {
             item {
-                PostCard(
+                DetailedPostCard(
                     post = state.post,
-                    onClick = { /* already on detail */ },
                     onLikeClick = onLikeClick,
                     onAuthorClick = { onAuthorClick(state.post.author.id) },
                     onMatchClick = { onMatchClick(state.post.matchId) },
                     canDelete = state.currentUserId == state.post.author.id,
-                    onDeleteClick = onDeletePostClick
+                    onDeleteClick = onDeletePostClick,
+                    onCommentClick = { /* Optional: focus comment input or no-op */ }
                 )
                 HorizontalDivider()
                 Text(
