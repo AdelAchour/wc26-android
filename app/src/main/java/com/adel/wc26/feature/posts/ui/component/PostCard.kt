@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +50,10 @@ import com.adel.wc26.feature.matches.domain.model.MatchStatus
 import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.posts.domain.post.PostAuthor
 import java.time.Instant
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
+import androidx.compose.material.icons.outlined.Share
 
 /**
  * A single post, rendered as a row. Used in the match thread, the global
@@ -69,7 +74,10 @@ fun PostCard(
     onMatchClick: (() -> Unit)? = null,
     canDelete: Boolean = false,
     onDeleteClick: () -> Unit = {},
+    onShareClick: (() -> Unit)? = null,
 ) {
+    val context = LocalContext.current
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -180,17 +188,43 @@ fun PostCard(
 
                     Spacer(Modifier.padding(top = Spacing.sm))
 
-                    // Action row: like + comment counts
+                    // Action row: like + comment, and share
                     Row(
+                        modifier = Modifier.fillMaxWidth(0.85f),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         LikeAction(
                             liked = post.likedByCurrentUser,
                             count = post.likeCount,
                             onClick = onLikeClick,
                         )
-                        CommentCount(count = post.commentCount)
+                        CommentAction(
+                            count = post.commentCount,
+                            onClick = onClick,
+                        )
+                        ShareAction(
+                            onClick = {
+                                if (onShareClick != null) {
+                                    onShareClick()
+                                } else {
+                                    val postUrl = "https://wc26.adelash.dev/posts/${post.id}"
+                                    val shareText = context.getString(
+                                        R.string.post_share_template,
+                                        post.content,
+                                        post.author.username,
+                                        postUrl
+                                    )
+                                    val sendIntent = Intent().apply {
+                                        action = Intent.ACTION_SEND
+                                        putExtra(Intent.EXTRA_TEXT, shareText)
+                                        type = "text/plain"
+                                    }
+                                    val shareIntent = Intent.createChooser(sendIntent, null)
+                                    context.startActivity(shareIntent)
+                                }
+                            }
+                        )
                     }
                 }
             }
@@ -308,12 +342,44 @@ private fun LikeAction(
 }
 
 @Composable
-private fun CommentCount(count: Int) {
-    Text(
-        text = pluralStringResource(R.plurals.post_comment_count, count, count),
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
+private fun CommentAction(
+    count: Int,
+    onClick: () -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clickable(onClick = onClick),
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.ChatBubbleOutline,
+            contentDescription = "Comments",
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(18.dp),
+        )
+        Spacer(Modifier.width(Spacing.xs))
+        Text(
+            text = count.toString(),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun ShareAction(
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier.clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Share,
+            contentDescription = "Share Post",
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(18.dp),
+        )
+    }
 }
 
 // ---- Preview ----

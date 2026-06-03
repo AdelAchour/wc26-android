@@ -141,6 +141,9 @@
     <string name="post_detail_send_comment">Send comment</string>
     <string name="post_detail_sign_in_to_comment">Sign in to join the conversation</string>
 
+    <!-- Post card actions -->
+    <string name="post_share_template">\"%1$s\"\n\n— Post by @%2$s on WC26\n%3$s</string>
+
     <!-- Own profile tabs -->
     <string name="profile_tab_posts">Posts</string>
     <string name="profile_tab_likes">Likes</string>
