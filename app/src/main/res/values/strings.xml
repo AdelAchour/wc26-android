@@ -166,7 +166,8 @@
     <string name="admin_edit_match_title">Edit Match</string>
     <string name="admin_edit_match_status">Match Status</string>
     <string name="admin_edit_match_scores">Update Match Scores</string>
-    <string name="admin_edit_match_scores_info">Both scores must be set and non-negative"</string>
+    <string name="admin_edit_match_scores_rules">Both scores must be set and non-negative</string>
+    <string name="admin_edit_match_scores_upcoming_match_rules">Upcoming matches cannot have scores</string>
     <string name="admin_edit_match_home_score">%1$s Score</string>
     <string name="admin_edit_match_away_score">%1$s Score</string>
     <string name="admin_edit_match_save">Save Changes</string>

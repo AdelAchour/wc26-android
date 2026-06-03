@@ -241,9 +241,9 @@ private fun MatchEditContent(
                         )
                         Text(
                             text = if (selectedStatus == MatchStatus.SCHEDULED) {
-                                "Upcoming matches cannot have scores"
+                                stringResource(R.string.admin_edit_match_scores_upcoming_match_rules)
                             } else {
-                                "Both scores must be set and non-negative"
+                                stringResource(R.string.admin_edit_match_scores_rules)
                             },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
