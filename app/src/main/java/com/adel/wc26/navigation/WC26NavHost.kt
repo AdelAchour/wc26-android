@@ -126,7 +126,7 @@ fun WC26NavHost(
                     onCreateAccount = { navController.navigate(Destinations.Register) },
                     onLogIn = { navController.navigate(Destinations.Login) },
                     onExplore = {
-                        navController.navigate(Destinations.Matches) {
+                        navController.navigate(Destinations.Matches()) {
                             popUpTo(Destinations.Welcome) { inclusive = true }
                         }
                     },
@@ -135,7 +135,7 @@ fun WC26NavHost(
             composable<Destinations.Login> {
                 LoginScreen(
                     onLoggedIn = {
-                        navController.navigate(Destinations.Matches) {
+                        navController.navigate(Destinations.Matches()) {
                             // Clear the whole auth flow from the back stack.
                             popUpTo<Destinations.Welcome> { inclusive = true }
                         }
@@ -150,7 +150,7 @@ fun WC26NavHost(
             composable<Destinations.Register> {
                 RegisterScreen(
                     onRegistered = {
-                        navController.navigate(Destinations.Matches) {
+                        navController.navigate(Destinations.Matches()) {
                             popUpTo<Destinations.Welcome> { inclusive = true }
                         }
                     },
