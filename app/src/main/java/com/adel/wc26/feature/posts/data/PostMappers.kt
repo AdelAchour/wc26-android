@@ -36,5 +36,7 @@ fun CommentDto.toDomain(): Comment = Comment(
     postId = postId,
     author = author.toDomain(),
     content = content,
+    likeCount = likeCount,
+    likedByCurrentUser = likedByCurrentUser,
     createdAt = createdAt,
 )

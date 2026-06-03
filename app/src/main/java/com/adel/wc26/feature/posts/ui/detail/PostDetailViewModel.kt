@@ -9,6 +9,7 @@ import com.adel.wc26.core.result.AppError
 import com.adel.wc26.core.result.DataResult
 import com.adel.wc26.feature.posts.data.PostDeletionManager
 import com.adel.wc26.feature.posts.data.PostLikeManager
+import com.adel.wc26.feature.posts.data.comment.CommentLikeManager
 import com.adel.wc26.feature.posts.domain.comment.Comment
 import com.adel.wc26.feature.posts.domain.comment.CommentRepository
 import com.adel.wc26.feature.posts.domain.like.LikeRepository
@@ -63,6 +64,7 @@ class PostDetailViewModel @Inject constructor(
     private val commentRepository: CommentRepository,
     private val postLikeManager: PostLikeManager,
     private val postDeletionManager: PostDeletionManager,
+    private val commentLikeManager: CommentLikeManager,
     tokenStore: TokenStore,
 ) : ViewModel() {
 
@@ -115,7 +117,22 @@ class PostDetailViewModel @Inject constructor(
                 }
             }
         }
-
+        // Dynamically synchronize local comments with global like updates
+        viewModelScope.launch {
+            commentLikeManager.likedStates.collect { likedStates ->
+                _uiState.update { state ->
+                    val updatedComments = state.comments.map { comment ->
+                        likedStates[comment.id]?.let { status ->
+                            comment.copy(
+                                likedByCurrentUser = status.likedByCurrentUser,
+                                likeCount = status.likeCount
+                            )
+                        } ?: comment
+                    }
+                    state.copy(comments = updatedComments)
+                }
+            }
+        }
         // Dynamically monitor if this parent post itself gets deleted
         viewModelScope.launch {
             postDeletionManager.deletedPostIds.collect { deletedPostIds ->
@@ -212,5 +229,9 @@ class PostDetailViewModel @Inject constructor(
 
     fun deleteComment(commentId: Long, onFailure: () -> Unit = {}) {
         postDeletionManager.deleteComment(commentId, viewModelScope, onFailure)
+    }
+
+    fun toggleLikeComment(comment: Comment) {
+        commentLikeManager.toggleLike(comment, viewModelScope)
     }
 }

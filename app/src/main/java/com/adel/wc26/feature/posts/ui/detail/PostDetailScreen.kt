@@ -48,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
+import com.adel.wc26.feature.posts.domain.comment.Comment
 import com.adel.wc26.feature.posts.ui.component.DetailedPostCard
 
 
@@ -118,6 +119,7 @@ fun PostDetailScreen(
             onMatchClick = onMatchClick,
             onDeletePostClick = { showPostDeleteConfirm = true },
             onDeleteCommentClick = { commentIdToDelete = it },
+            onLikeCommentClick = viewModel::toggleLikeComment,
             modifier = Modifier.padding(padding),
         )
 
@@ -197,6 +199,7 @@ fun PostDetailContent(
     onMatchClick: (Long) -> Unit,
     onDeletePostClick: () -> Unit,
     onDeleteCommentClick: (Long) -> Unit,
+    onLikeCommentClick: (Comment) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when {
@@ -257,7 +260,8 @@ fun PostDetailContent(
                         comment = comment,
                         onAuthorClick = { onAuthorClick(comment.author.id) },
                         canDelete = canDelete,
-                        onDeleteClick = { onDeleteCommentClick(comment.id) }
+                        onDeleteClick = { onDeleteCommentClick(comment.id) },
+                        onLikeClick = { onLikeCommentClick(comment) },
                     )
                     HorizontalDivider()
                 }

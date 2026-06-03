@@ -13,6 +13,8 @@ data class CommentDto(
     val postId: Long,
     val author: PostAuthorDto,
     val content: String,
+    val likeCount: Int,
+    val likedByCurrentUser: Boolean,
     val createdAt: String,
 )
 

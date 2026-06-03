@@ -29,7 +29,6 @@ import com.adel.wc26.core.designsystem.component.WC26LoadingState
 import com.adel.wc26.core.designsystem.theme.Spacing
 import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.posts.ui.component.postsThread
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons

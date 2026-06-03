@@ -10,5 +10,7 @@ data class Comment(
     val postId: Long,
     val author: PostAuthor,
     val content: String,
+    val likeCount: Int,
+    val likedByCurrentUser: Boolean,
     val createdAt: String,
 )

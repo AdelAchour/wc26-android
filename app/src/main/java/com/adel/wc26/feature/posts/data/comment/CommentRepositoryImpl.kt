@@ -34,6 +34,12 @@ class CommentRepositoryImpl @Inject constructor(
             commentApi.createComment(postId, CreateCommentRequest(content = content))
         }.map { it.toDomain() }
 
+    override suspend fun likeComment(commentId: Long): DataResult<Unit> =
+        apiCall { commentApi.likeComment(commentId) }
+
+    override suspend fun unlikeComment(commentId: Long): DataResult<Unit> =
+        apiCall { commentApi.unlikeComment(commentId) }
+
     override suspend fun deleteComment(commentId: Long): DataResult<Unit> =
         apiCall { commentApi.deleteComment(commentId) }
 }

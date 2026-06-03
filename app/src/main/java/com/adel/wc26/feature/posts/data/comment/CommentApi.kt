@@ -32,6 +32,12 @@ interface CommentApi {
         @Body body: CreateCommentRequest,
     ): CommentDto
 
+    @POST("comments/{commentId}/like")
+    suspend fun likeComment(@Path("commentId") commentId: Long)
+
+    @DELETE("comments/{commentId}/like")
+    suspend fun unlikeComment(@Path("commentId") commentId: Long)
+
     @DELETE("comments/{id}")
     suspend fun deleteComment(@Path("id") id: Long)
 }

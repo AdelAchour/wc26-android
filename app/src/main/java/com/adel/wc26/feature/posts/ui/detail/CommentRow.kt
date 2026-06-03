@@ -36,6 +36,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import com.adel.wc26.R
 
 /**
@@ -49,6 +52,7 @@ fun CommentRow(
     onAuthorClick: () -> Unit,
     canDelete: Boolean = false,
     onDeleteClick: () -> Unit = {},
+    onLikeClick: () -> Unit = {},
 ) {
     Row(
         modifier = modifier
@@ -128,11 +132,48 @@ fun CommentRow(
                 }
             }
             Spacer(Modifier.padding(top = Spacing.xxs))
+
+            Spacer(Modifier.padding(top = Spacing.xxs))
+
             Text(
                 text = comment.content,
                 style = MaterialTheme.typography.bodyMedium,
             )
+
+            Spacer(Modifier.height(Spacing.sm))
+            CommentLikeAction(
+                liked = comment.likedByCurrentUser,
+                count = comment.likeCount,
+                onClick = onLikeClick,
+            )
         }
+    }
+}
+
+@Composable
+private fun CommentLikeAction(
+    liked: Boolean,
+    count: Int,
+    onClick: () -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clickable(onClick = onClick),
+    ) {
+        Icon(
+            imageVector = if (liked) Icons.Filled.Favorite
+            else Icons.Outlined.FavoriteBorder,
+            contentDescription = null,
+            tint = if (liked) MaterialTheme.colorScheme.secondary
+            else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(16.dp),
+        )
+        Spacer(Modifier.width(Spacing.xs))
+        Text(
+            text = count.toString(),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -146,6 +187,8 @@ private fun CommentRowPreview() {
                 postId = 1,
                 author = PostAuthor(2, "sara", "Sara M.", null),
                 content = "Totally agree — that midfield press was relentless.",
+                likeCount = 3,
+                likedByCurrentUser = true,
                 createdAt = "2026-06-14T19:45:00Z",
             ),
             onAuthorClick = {},

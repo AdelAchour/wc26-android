@@ -18,6 +18,12 @@ interface CommentRepository {
     /** Create a comment on a post. Returns the created comment. */
     suspend fun createComment(postId: Long, content: String): DataResult<Comment>
 
+    /** Like a comment (idempotent). */
+    suspend fun likeComment(commentId: Long): DataResult<Unit>
+
+    /** Unlike a comment (idempotent). */
+    suspend fun unlikeComment(commentId: Long): DataResult<Unit>
+
     /** Delete a comment. */
     suspend fun deleteComment(commentId: Long): DataResult<Unit>
 }
