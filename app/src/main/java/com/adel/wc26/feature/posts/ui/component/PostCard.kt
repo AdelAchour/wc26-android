@@ -412,7 +412,7 @@ private fun PostCardPreview() {
                 likeCount = 24,
                 commentCount = 5,
                 likedByCurrentUser = true,
-                createdAt = "2026-06-14T19:30:00Z",
+                createdAt = "2026-05-25T19:30:00Z",
             ),
             onClick = {},
             onLikeClick = {},

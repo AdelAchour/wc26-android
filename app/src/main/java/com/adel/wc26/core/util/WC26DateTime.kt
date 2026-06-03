@@ -18,8 +18,8 @@ sealed interface RelativeTime {
     data class Minutes(val value: Long) : RelativeTime
     data class Hours(val value: Long) : RelativeTime
     data class Days(val value: Long) : RelativeTime
-    /** Older than a week — render as a calendar date instead. */
-    data class OlderThanWeek(val isoDate: String) : RelativeTime
+    data class Months(val value: Long) : RelativeTime
+    data class Years(val value: Long) : RelativeTime
 }
 
 /**
@@ -40,6 +40,11 @@ sealed interface RelativeTime {
  * lives in string resources, reached through the RelativeTime type.
  */
 object WC26DateTime {
+
+    private const val MINUTES_PER_HOUR = 60L
+    private const val MINUTES_PER_DAY = 24L * MINUTES_PER_HOUR
+    private const val MINUTES_PER_MONTH = 31L * MINUTES_PER_DAY
+    private const val MINUTES_PER_YEAR = 12L * MINUTES_PER_MONTH
 
     private val zone: ZoneId get() = ZoneId.systemDefault()
 
@@ -80,10 +85,11 @@ object WC26DateTime {
         val minutes = ChronoUnit.MINUTES.between(instant, Instant.now())
         return when {
             minutes < 1 -> RelativeTime.JustNow
-            minutes < 60 -> RelativeTime.Minutes(minutes)
-            minutes < 60 * 24 -> RelativeTime.Hours(minutes / 60)
-            minutes < 60 * 24 * 7 -> RelativeTime.Days(minutes / (60 * 24))
-            else -> RelativeTime.OlderThanWeek(iso)
+            minutes < MINUTES_PER_HOUR -> RelativeTime.Minutes(minutes)
+            minutes < MINUTES_PER_DAY -> RelativeTime.Hours(minutes / MINUTES_PER_HOUR)
+            minutes < MINUTES_PER_MONTH -> RelativeTime.Days(minutes / MINUTES_PER_DAY)
+            minutes < MINUTES_PER_YEAR -> RelativeTime.Months(minutes / MINUTES_PER_MONTH)
+            else -> RelativeTime.Years(minutes / MINUTES_PER_YEAR)
         }
     }
 }

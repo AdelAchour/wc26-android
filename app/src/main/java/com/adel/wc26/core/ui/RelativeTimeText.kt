@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.adel.wc26.R
 import com.adel.wc26.core.util.RelativeTime
-import com.adel.wc26.core.util.WC26DateTime
 
 /**
  * Maps a [RelativeTime] value to localized display text.
@@ -14,9 +13,10 @@ import com.adel.wc26.core.util.WC26DateTime
  */
 @Composable
 fun RelativeTime.format(): String = when (this) {
-    RelativeTime.JustNow -> stringResource(R.string.time_just_now)
+    is RelativeTime.JustNow -> stringResource(R.string.time_just_now)
     is RelativeTime.Minutes -> stringResource(R.string.time_minutes, value)
     is RelativeTime.Hours -> stringResource(R.string.time_hours, value)
     is RelativeTime.Days -> stringResource(R.string.time_days, value)
-    is RelativeTime.OlderThanWeek -> WC26DateTime.calendarDate(isoDate)
+    is RelativeTime.Months -> stringResource(R.string.time_months, value)
+    is RelativeTime.Years -> stringResource(R.string.time_years, value)
 }

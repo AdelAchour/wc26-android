@@ -78,6 +78,8 @@
     <string name="time_minutes">%1$dm</string>
     <string name="time_hours">%1$dh</string>
     <string name="time_days">%1$dd</string>
+    <string name="time_months">%1$dmo</string>
+    <string name="time_years">%1$dy</string>
 
     <!-- Matches -->
     <string name="matches_title">Matches</string>
