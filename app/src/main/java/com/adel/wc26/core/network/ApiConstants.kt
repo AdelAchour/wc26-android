@@ -13,7 +13,7 @@ object ApiConstants {
      * resolves to the host computer's "localhost" port.
      */
     val BASE_URL = if (USE_LOCALHOST) {
-        "http://10.0.2.2:8080/api/"
+        "http://10.0.2.2:8080/"
     } else {
         "https://wc26.adelash.dev/api/"
     }
