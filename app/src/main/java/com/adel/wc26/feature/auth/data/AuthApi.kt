@@ -3,9 +3,11 @@ package com.adel.wc26.feature.auth.data
 import com.adel.wc26.feature.auth.data.dto.AuthResponse
 import com.adel.wc26.feature.auth.data.dto.LoginRequest
 import com.adel.wc26.feature.auth.data.dto.RegisterRequest
+import com.adel.wc26.feature.auth.data.dto.UpdateProfileRequest
 import com.adel.wc26.feature.profile.data.dto.UserDto
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 
 /**
@@ -26,4 +28,7 @@ interface AuthApi {
 
     @GET("auth/me")
     suspend fun me(): UserDto
+
+    @PATCH("auth/me")
+    suspend fun updateProfile(@Body body: UpdateProfileRequest): UserDto
 }

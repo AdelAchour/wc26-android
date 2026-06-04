@@ -48,4 +48,7 @@ interface UserRepository {
 
     /** A page of posts the given user has liked. */
     suspend fun getUserLikes(userId: Long, cursor: String?): DataResult<CursorPage<Post>>
+
+    /** Update the signed-in user's avatar url (preset URI or standard URL). */
+    suspend fun updateAvatar(avatarUrl: String): DataResult<UserProfile>
 }

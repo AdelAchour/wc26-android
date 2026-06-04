@@ -47,6 +47,7 @@ fun ProfileScreen(
     onAuthorClick: (Long) -> Unit,
     onMatchClick: (Long) -> Unit,
     onSignIn: () -> Unit,
+    onEditAvatarClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
@@ -69,6 +70,7 @@ fun ProfileScreen(
         onMatchClick = onMatchClick,
         onLikeClick = viewModel::toggleLike,
         onDeleteClick = { postToDelete = it },
+        onEditAvatarClick = onEditAvatarClick,
         modifier = modifier,
     )
 
@@ -116,6 +118,7 @@ fun ProfileContent(
     onMatchClick: (Long) -> Unit,
     onLikeClick: (Post) -> Unit,
     onDeleteClick: (Post) -> Unit,
+    onEditAvatarClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val emptyMessage = when (state.selectedTab) {
@@ -143,6 +146,7 @@ fun ProfileContent(
                     username = state.profile.username,
                     avatarUrl = state.profile.avatarUrl,
                     joinedAtIso = state.profile.joinedAt,
+                    onAvatarClick = onEditAvatarClick,
                 )
             }
 

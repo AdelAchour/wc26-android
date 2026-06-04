@@ -62,4 +62,7 @@ object Destinations {
     /** The admin edit screen for a match. */
     @Serializable
     data class MatchEdit(val matchId: Long)
+
+    @Serializable
+    data object AvatarPicker
 }

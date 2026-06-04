@@ -5,6 +5,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,6 +31,8 @@ import com.adel.wc26.feature.matches.ui.edit.MatchEditScreen
 import com.adel.wc26.feature.posts.ui.feed.FeedScreen
 import com.adel.wc26.feature.posts.ui.composer.PostComposerScreen
 import com.adel.wc26.feature.posts.ui.detail.PostDetailScreen
+import com.adel.wc26.feature.profile.ui.AvatarPickerScreen
+import com.adel.wc26.feature.profile.ui.ProfileViewModel
 
 /**
  * The app's navigation host.
@@ -210,6 +213,19 @@ fun WC26NavHost(
                     onSignIn = {
                         navController.navigate(Destinations.Login)
                     },
+                    onEditAvatarClick = {
+                        navController.navigate(Destinations.AvatarPicker)
+                    },
+                )
+            }
+            composable<Destinations.AvatarPicker> { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Destinations.Profile)
+                }
+                val profileViewModel: ProfileViewModel = hiltViewModel(parentEntry)
+                AvatarPickerScreen(
+                    onBack = { navController.popBackStack() },
+                    viewModel = profileViewModel,
                 )
             }
             composable<Destinations.Settings> {

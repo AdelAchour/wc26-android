@@ -27,3 +27,9 @@ data class AuthResponse(
     val username: String,
     val displayName: String,
 )
+
+/** Request body for PATCH /auth/me. */
+@Serializable
+data class UpdateProfileRequest(
+    val avatarUrl: String,
+)

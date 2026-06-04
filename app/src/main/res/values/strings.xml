@@ -173,4 +173,20 @@
     <string name="admin_edit_match_save">Save Changes</string>
     <string name="admin_edit_match_success">Match updated successfully</string>
 
+    <!-- Avatar Picker -->
+    <string name="avatar_picker_title">Choose Avatar</string>
+    <string name="avatar_picker_save">Save Avatar</string>
+    <string name="avatar_picker_saving">Saving…</string>
+    <string name="avatar_picker_preview_label">Current Preview</string>
+    <string name="avatar_picker_success_update">Avatar updated successfully</string>
+
+    <!-- Avatar Preset Labels -->
+    <string name="avatar_label_soccer_ball">The Classic Ball</string>
+    <string name="avatar_label_trophy">Golden Trophy</string>
+    <string name="avatar_label_referee">The Whistle</string>
+    <string name="avatar_label_jersey_red">Red Jersey</string>
+    <string name="avatar_label_jersey_blue">Blue Jersey</string>
+    <string name="avatar_label_jersey_yellow">Yellow Jersey</string>
+    <string name="avatar_label_stadium">The Pitch</string>
+
 </resources>

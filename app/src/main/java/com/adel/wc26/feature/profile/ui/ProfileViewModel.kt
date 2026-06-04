@@ -48,6 +48,8 @@ data class ProfileUiState(
     val profile: UserProfile? = null,
     val error: AppError? = null,
     val selectedTab: ProfileTab = ProfileTab.POSTS,
+    val isUpdatingAvatar: Boolean = false,
+    val avatarError: AppError? = null,
 )
 
 @HiltViewModel
@@ -104,6 +106,33 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    fun updateAvatar(avatarUrl: String, onSuccess: () -> Unit = {}) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isUpdatingAvatar = true, avatarError = null) }
+
+            when (val result = userRepository.updateAvatar(avatarUrl)) {
+                is DataResult.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            isUpdatingAvatar = false,
+                            profile = result.data,
+                            avatarError = null
+                        )
+                    }
+                    onSuccess()
+                }
+                is DataResult.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            isUpdatingAvatar = false,
+                            avatarError = result.error
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     fun onTabSelected(tab: ProfileTab) {
         _uiState.update { it.copy(selectedTab = tab) }
     }
@@ -137,6 +166,17 @@ class ProfileViewModel @Inject constructor(
                 .combine(postDeletionManager.deletedPostIds) { pagingData, deletedIds ->
                     pagingData.filter { post -> post.id !in deletedIds }
                 }
+                // Combine with the profile state to dynamically update own posts' avatars
+                .combine(_uiState) { pagingData, uiState ->
+                    val currentAvatar = uiState.profile?.avatarUrl
+                    pagingData.map { post ->
+                        if (post.author.id == userId && post.author.avatarUrl != currentAvatar) {
+                            post.copy(author = post.author.copy(avatarUrl = currentAvatar))
+                        } else {
+                            post
+                        }
+                    }
+                }
         }
         if (_likes == null) {
             val rawLikes = Pager(
@@ -160,6 +200,17 @@ class ProfileViewModel @Inject constructor(
             }
                 .combine(postDeletionManager.deletedPostIds) { pagingData, deletedIds ->
                     pagingData.filter { post -> post.id !in deletedIds }
+                }
+                // Combine with the profile state to dynamically update own posts' avatars
+                .combine(_uiState) { pagingData, uiState ->
+                    val currentAvatar = uiState.profile?.avatarUrl
+                    pagingData.map { post ->
+                        if (post.author.id == userId && post.author.avatarUrl != currentAvatar) {
+                            post.copy(author = post.author.copy(avatarUrl = currentAvatar))
+                        } else {
+                            post
+                        }
+                    }
                 }
         }
     }

@@ -6,6 +6,7 @@ import com.adel.wc26.core.result.CursorPage
 import com.adel.wc26.core.result.DataResult
 import com.adel.wc26.core.result.map
 import com.adel.wc26.feature.auth.data.AuthApi
+import com.adel.wc26.feature.auth.data.dto.UpdateProfileRequest
 import com.adel.wc26.feature.posts.data.toDomain
 import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.profile.domain.PublicProfile
@@ -34,6 +35,15 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun getMyProfile(): DataResult<UserProfile> =
         apiCall { authApi.me() }.map { dto ->
+            val domain = dto.toDomain()
+            tokenStore.saveRole(domain.role.value)
+            domain
+        }
+
+    override suspend fun updateAvatar(avatarUrl: String): DataResult<UserProfile> =
+        apiCall {
+            authApi.updateProfile(body = UpdateProfileRequest(avatarUrl = avatarUrl))
+        }.map { dto ->
             val domain = dto.toDomain()
             tokenStore.saveRole(domain.role.value)
             domain
