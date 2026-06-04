@@ -40,9 +40,19 @@ class UserRepositoryImpl @Inject constructor(
             domain
         }
 
-    override suspend fun updateAvatar(avatarUrl: String): DataResult<UserProfile> =
+    override suspend fun updateProfile(
+        displayName: String?,
+        avatarUrl: String?,
+        bio: String?
+    ): DataResult<UserProfile> =
         apiCall {
-            authApi.updateProfile(body = UpdateProfileRequest(avatarUrl = avatarUrl))
+            authApi.updateProfile(
+                UpdateProfileRequest(
+                    displayName = displayName,
+                    avatarUrl = avatarUrl,
+                    bio = bio
+                )
+            )
         }.map { dto ->
             val domain = dto.toDomain()
             tokenStore.saveRole(domain.role.value)

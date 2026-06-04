@@ -48,8 +48,8 @@ data class ProfileUiState(
     val profile: UserProfile? = null,
     val error: AppError? = null,
     val selectedTab: ProfileTab = ProfileTab.POSTS,
-    val isUpdatingAvatar: Boolean = false,
-    val avatarError: AppError? = null,
+    val isSavingProfile: Boolean = false,
+    val profileError: AppError? = null,
 )
 
 @HiltViewModel
@@ -108,15 +108,15 @@ class ProfileViewModel @Inject constructor(
 
     fun updateAvatar(avatarUrl: String, onSuccess: () -> Unit = {}) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isUpdatingAvatar = true, avatarError = null) }
+            _uiState.update { it.copy(isSavingProfile = true, profileError = null) }
 
-            when (val result = userRepository.updateAvatar(avatarUrl)) {
+            when (val result = userRepository.updateProfile(avatarUrl = avatarUrl)) {
                 is DataResult.Success -> {
                     _uiState.update {
                         it.copy(
-                            isUpdatingAvatar = false,
+                            isSavingProfile = false,
                             profile = result.data,
-                            avatarError = null
+                            profileError = null
                         )
                     }
                     onSuccess()
@@ -124,8 +124,45 @@ class ProfileViewModel @Inject constructor(
                 is DataResult.Error -> {
                     _uiState.update {
                         it.copy(
-                            isUpdatingAvatar = false,
-                            avatarError = result.error
+                            isSavingProfile = false,
+                            profileError = result.error
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun updateProfileInfo(displayName: String, bio: String, onSuccess: () -> Unit) {
+        val trimmedName = displayName.trim()
+        val trimmedBio = bio.trim()
+
+        if (trimmedName.length !in 2..50 || trimmedBio.length > 100) {
+            _uiState.update { it.copy(profileError = AppError.BadRequest) }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSavingProfile = true, profileError = null) }
+
+            val bioPayload = trimmedBio.ifEmpty { "" }
+
+            when (val result = userRepository.updateProfile(displayName = trimmedName, bio = bioPayload)) {
+                is DataResult.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            isSavingProfile = false,
+                            profile = result.data,
+                            profileError = null
+                        )
+                    }
+                    onSuccess()
+                }
+                is DataResult.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            isSavingProfile = false,
+                            profileError = result.error
                         )
                     }
                 }
@@ -166,12 +203,24 @@ class ProfileViewModel @Inject constructor(
                 .combine(postDeletionManager.deletedPostIds) { pagingData, deletedIds ->
                     pagingData.filter { post -> post.id !in deletedIds }
                 }
-                // Combine with the profile state to dynamically update own posts' avatars
+                // Combine with the profile state to dynamically update own posts' avatars and display names
                 .combine(_uiState) { pagingData, uiState ->
                     val currentAvatar = uiState.profile?.avatarUrl
+                    val currentName = uiState.profile?.displayName
                     pagingData.map { post ->
-                        if (post.author.id == userId && post.author.avatarUrl != currentAvatar) {
-                            post.copy(author = post.author.copy(avatarUrl = currentAvatar))
+                        if (post.author.id == userId) {
+                            val authorChanged = post.author.avatarUrl != currentAvatar ||
+                                    post.author.displayName != currentName
+                            if (authorChanged) {
+                                post.copy(
+                                    author = post.author.copy(
+                                        avatarUrl = currentAvatar,
+                                        displayName = currentName ?: post.author.displayName
+                                    )
+                                )
+                            } else {
+                                post
+                            }
                         } else {
                             post
                         }
@@ -201,12 +250,24 @@ class ProfileViewModel @Inject constructor(
                 .combine(postDeletionManager.deletedPostIds) { pagingData, deletedIds ->
                     pagingData.filter { post -> post.id !in deletedIds }
                 }
-                // Combine with the profile state to dynamically update own posts' avatars
+                // Combine with the profile state to dynamically update own posts' avatars and display names
                 .combine(_uiState) { pagingData, uiState ->
                     val currentAvatar = uiState.profile?.avatarUrl
+                    val currentName = uiState.profile?.displayName
                     pagingData.map { post ->
-                        if (post.author.id == userId && post.author.avatarUrl != currentAvatar) {
-                            post.copy(author = post.author.copy(avatarUrl = currentAvatar))
+                        if (post.author.id == userId) {
+                            val authorChanged = post.author.avatarUrl != currentAvatar ||
+                                    post.author.displayName != currentName
+                            if (authorChanged) {
+                                post.copy(
+                                    author = post.author.copy(
+                                        avatarUrl = currentAvatar,
+                                        displayName = currentName ?: post.author.displayName
+                                    )
+                                )
+                            } else {
+                                post
+                            }
                         } else {
                             post
                         }

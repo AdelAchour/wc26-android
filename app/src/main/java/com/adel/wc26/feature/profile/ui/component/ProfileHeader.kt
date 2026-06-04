@@ -1,7 +1,5 @@
 package com.adel.wc26.feature.profile.ui.component
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,13 +23,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.adel.wc26.R
 import com.adel.wc26.core.designsystem.component.WC26Avatar
+import com.adel.wc26.core.designsystem.component.WC26SecondaryButton // <-- Add this import
 import com.adel.wc26.core.designsystem.theme.Spacing
 import com.adel.wc26.core.designsystem.theme.WC26Theme
 import com.adel.wc26.core.util.WC26DateTime
 
 /**
  * The identity block at the top of a profile — avatar, display name,
- * @username, joined date. Shared by the own-profile and public-profile
+ * @username, joined date, and bio. Shared by the own-profile and public-profile
  * screens so both look identical.
  */
 @Composable
@@ -41,7 +40,9 @@ fun ProfileHeader(
     avatarUrl: String?,
     joinedAtIso: String,
     modifier: Modifier = Modifier,
+    bio: String? = null,
     onAvatarClick: (() -> Unit)? = null,
+    onEditProfileClick: (() -> Unit)? = null,
 ) {
     Column(
         modifier = modifier
@@ -88,6 +89,18 @@ fun ProfileHeader(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
+        // Center bio text under username
+        if (!bio.isNullOrBlank()) {
+            Spacer(Modifier.height(Spacing.sm))
+            Text(
+                text = bio,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                modifier = Modifier.padding(horizontal = Spacing.lg)
+            )
+        }
+
         Spacer(Modifier.height(Spacing.sm))
 
         Text(
@@ -98,6 +111,15 @@ fun ProfileHeader(
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+
+        // Edit Profile secondary button
+        if (onEditProfileClick != null) {
+            Spacer(Modifier.height(Spacing.md))
+            WC26SecondaryButton(
+                text = stringResource(R.string.edit_profile),
+                onClick = onEditProfileClick
+            )
+        }
     }
 }
 
@@ -109,8 +131,10 @@ private fun ProfileHeaderPreview() {
             displayName = "Adel",
             username = "adel",
             avatarUrl = null,
+            bio = "Loving the World Cup vibes! ⚽🏆",
             joinedAtIso = "2026-05-01T10:00:00Z",
-            onAvatarClick = {}
+            onAvatarClick = {},
+            onEditProfileClick = {}
         )
     }
 }

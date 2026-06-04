@@ -2,7 +2,10 @@ package com.adel.wc26.feature.profile.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
@@ -28,10 +31,20 @@ import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.posts.ui.component.postsThread
 import com.adel.wc26.feature.profile.ui.component.ProfileHeader
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.ui.tooling.preview.Preview
+import com.adel.wc26.core.designsystem.component.WC26TextField
+import com.adel.wc26.core.designsystem.theme.WC26Theme
+import com.adel.wc26.core.result.AppError
+import com.adel.wc26.feature.profile.domain.UserProfile
+import com.adel.wc26.feature.profile.domain.UserRole
 
 /**
  * Profile tab — stateful entry point. The signed-in user's own profile:
@@ -57,6 +70,7 @@ fun ProfileScreen(
     val likes = viewModel.likes?.collectAsLazyPagingItems()
 
     var postToDelete by remember { mutableStateOf<Post?>(null) }
+    var showEditProfileSheet by remember { mutableStateOf(false) }
 
     ProfileContent(
         state = state,
@@ -71,8 +85,24 @@ fun ProfileScreen(
         onLikeClick = viewModel::toggleLike,
         onDeleteClick = { postToDelete = it },
         onEditAvatarClick = onEditAvatarClick,
+        onEditProfileClick = { showEditProfileSheet = true },
         modifier = modifier,
     )
+
+    // Render Edit Profile bottom sheet when active
+    if (showEditProfileSheet && state.profile != null) {
+        EditProfileBottomSheet(
+            profile = state.profile!!,
+            isSaving = state.isSavingProfile,
+            profileError = state.profileError,
+            onDismiss = { showEditProfileSheet = false },
+            onSave = { displayName, bio ->
+                viewModel.updateProfileInfo(displayName, bio) {
+                    showEditProfileSheet = false
+                }
+            }
+        )
+    }
 
     if (postToDelete != null) {
         AlertDialog(
@@ -119,6 +149,7 @@ fun ProfileContent(
     onLikeClick: (Post) -> Unit,
     onDeleteClick: (Post) -> Unit,
     onEditAvatarClick: () -> Unit,
+    onEditProfileClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val emptyMessage = when (state.selectedTab) {
@@ -145,8 +176,10 @@ fun ProfileContent(
                     displayName = state.profile.displayName,
                     username = state.profile.username,
                     avatarUrl = state.profile.avatarUrl,
+                    bio = state.profile.bio,
                     joinedAtIso = state.profile.joinedAt,
                     onAvatarClick = onEditAvatarClick,
+                    onEditProfileClick = onEditProfileClick,
                 )
             }
 
@@ -211,6 +244,124 @@ private fun LoggedOutProfile(
         WC26PrimaryButton(
             text = stringResource(R.string.profile_sign_in),
             onClick = onSignIn,
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EditProfileBottomSheet(
+    profile: UserProfile,
+    isSaving: Boolean,
+    profileError: AppError?,
+    onDismiss: () -> Unit,
+    onSave: (String, String) -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var localDisplayName by remember { mutableStateOf(profile.displayName) }
+    var localBio by remember { mutableStateOf(profile.bio ?: "") }
+
+    val isNameValid = localDisplayName.trim().length in 2..50
+    val isBioValid = localBio.trim().length <= 100
+
+    // Save button enabled rules
+    val canSave = isNameValid && isBioValid && !isSaving &&
+            (localDisplayName != profile.displayName || localBio != (profile.bio ?: ""))
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        dragHandle = { androidx.compose.material3.BottomSheetDefaults.DragHandle() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.lg)
+                .padding(bottom = Spacing.xxl),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md)
+        ) {
+            Text(
+                text = stringResource(R.string.edit_profile),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+
+            // Display Name TextField
+            WC26TextField(
+                value = localDisplayName,
+                onValueChange = { localDisplayName = it },
+                label = stringResource(R.string.field_display_name),
+                singleLine = true,
+                errorText = if (localDisplayName.isNotEmpty() && !isNameValid) {
+                    stringResource(R.string.validation_display_name_rules)
+                } else null
+            )
+
+            // Bio TextField + Counter
+            Column {
+                WC26TextField(
+                    value = localBio,
+                    onValueChange = { if (it.length <= 120) localBio = it }, // soft typing limit, hard validation limit
+                    label = "Bio",
+                    singleLine = false,
+                    errorText = if (localBio.isNotEmpty() && !isBioValid) stringResource(R.string.validation_display_bio_rules) else null
+                )
+
+                Spacer(Modifier.height(Spacing.xs))
+                Text(
+                    text = "${localBio.length}/100",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (isBioValid) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.error
+                    },
+                    modifier = Modifier.align(Alignment.End)
+                )
+            }
+
+            // Save Error Feedback
+            if (profileError != null) {
+                Text(
+                    text = stringResource(profileError.toStringRes()),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            Spacer(Modifier.height(Spacing.md))
+
+            // Save Button
+            WC26PrimaryButton(
+                text = "Save Changes",
+                onClick = { onSave(localDisplayName, localBio) },
+                enabled = canSave,
+                loading = isSaving,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun EditProfileBottomSheetPreview() {
+    WC26Theme {
+        EditProfileBottomSheet(
+            profile = UserProfile(
+                id = 1,
+                email = "",
+                username = "",
+                displayName = "",
+                avatarUrl = "",
+                role = UserRole.USER,
+                bio = "",
+                joinedAt = ""
+            ),
+            isSaving = false,
+            profileError = null,
+            onDismiss = {},
+            onSave = { _, _ -> }
         )
     }
 }

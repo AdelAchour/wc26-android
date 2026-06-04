@@ -71,19 +71,19 @@ fun AvatarPickerScreen(
     val updateSuccessMsg = stringResource(R.string.avatar_picker_success_update)
     // Trigger toast and pop backstack on success
     var wasUpdating by remember { mutableStateOf(false) }
-    LaunchedEffect(state.isUpdatingAvatar) {
-        if (wasUpdating && !state.isUpdatingAvatar) {
-            if (state.avatarError == null) {
+    LaunchedEffect(state.isSavingProfile) {
+        if (wasUpdating && !state.isSavingProfile) {
+            if (state.profileError == null) {
                 Toast.makeText(context, updateSuccessMsg, Toast.LENGTH_SHORT).show()
                 onBack()
             }
         }
-        wasUpdating = state.isUpdatingAvatar
+        wasUpdating = state.isSavingProfile
     }
 
     // Show error toast if saving fails
-    LaunchedEffect(state.avatarError) {
-        state.avatarError?.let {
+    LaunchedEffect(state.profileError) {
+        state.profileError?.let {
             Toast.makeText(context, context.getString(it.toStringRes()), Toast.LENGTH_SHORT).show()
         }
     }
@@ -91,7 +91,7 @@ fun AvatarPickerScreen(
     AvatarPickerContent(
         displayName = state.profile?.displayName ?: "User",
         currentAvatarUrl = state.profile?.avatarUrl,
-        isUpdatingAvatar = state.isUpdatingAvatar,
+        isUpdatingAvatar = state.isSavingProfile,
         onBack = onBack,
         onSaveAvatar = { newPresetUrl ->
             viewModel.updateAvatar(newPresetUrl)

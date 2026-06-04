@@ -17,6 +17,7 @@ fun UserDto.toDomain(): UserProfile = UserProfile(
     username = username,
     displayName = displayName,
     avatarUrl = avatarUrl,
+    bio = bio,
     role = UserRole.fromString(role),
     joinedAt = createdAt,
 )
@@ -26,5 +27,6 @@ fun UserPublicDto.toDomain(): PublicProfile = PublicProfile(
     username = username,
     displayName = displayName,
     avatarUrl = avatarUrl,
+    bio = bio,
     joinedAt = createdAt,
 )

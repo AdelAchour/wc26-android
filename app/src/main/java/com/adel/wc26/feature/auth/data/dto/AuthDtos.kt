@@ -31,5 +31,7 @@ data class AuthResponse(
 /** Request body for PATCH /auth/me. */
 @Serializable
 data class UpdateProfileRequest(
-    val avatarUrl: String,
+    val displayName: String? = null,
+    val avatarUrl: String? = null,
+    val bio: String? = null,
 )

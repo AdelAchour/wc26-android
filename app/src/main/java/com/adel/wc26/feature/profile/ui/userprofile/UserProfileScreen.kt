@@ -152,6 +152,7 @@ fun UserProfileContent(
                     displayName = state.profile.displayName,
                     username = state.profile.username,
                     avatarUrl = state.profile.avatarUrl,
+                    bio = state.profile.bio,
                     joinedAtIso = state.profile.joinedAt,
                 )
                 HorizontalDivider()

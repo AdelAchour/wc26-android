@@ -15,6 +15,7 @@ data class UserProfile(
     val displayName: String,
     val avatarUrl: String?,
     val role: UserRole,
+    val bio: String?,
     val joinedAt: String,
 )
 
@@ -27,6 +28,7 @@ data class PublicProfile(
     val username: String,
     val displayName: String,
     val avatarUrl: String?,
+    val bio: String?,
     val joinedAt: String,
 )
 
@@ -49,6 +51,10 @@ interface UserRepository {
     /** A page of posts the given user has liked. */
     suspend fun getUserLikes(userId: Long, cursor: String?): DataResult<CursorPage<Post>>
 
-    /** Update the signed-in user's avatar url (preset URI or standard URL). */
-    suspend fun updateAvatar(avatarUrl: String): DataResult<UserProfile>
+    /** Update the signed-in user's profile details. */
+    suspend fun updateProfile(
+        displayName: String? = null,
+        avatarUrl: String? = null,
+        bio: String? = null
+    ): DataResult<UserProfile>
 }

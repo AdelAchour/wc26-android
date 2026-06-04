@@ -29,6 +29,8 @@
     <string name="validation_password_too_short">Password must be at least 8 characters</string>
     <string name="validation_display_name_required">Display name is required</string>
     <string name="validation_display_name_too_long">Display name is too long</string>
+    <string name="validation_display_name_rules">Display name must be between 2 and 50 characters</string>
+    <string name="validation_display_bio_rules">Bio cannot exceed 100 characters</string>
 
     <!-- Shared field labels -->
     <string name="field_email">Email</string>
@@ -153,6 +155,7 @@
 
     <!-- Shared profile header -->
     <string name="profile_joined_on">Joined %1$s</string>
+    <string name="edit_profile">Edit Profile</string>
 
     <!-- Public user profile -->
     <string name="user_profile_title">Profile</string>
