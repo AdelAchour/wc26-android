@@ -53,4 +53,5 @@ object TeamCodes {
     )
 
     fun fromTeamName(name: String): String? = nameToCode[name]
+    fun getCountries(): List<String> = nameToCode.keys.toList().sorted()
 }

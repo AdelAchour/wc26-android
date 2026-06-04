@@ -20,9 +20,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.adel.wc26.R
 import com.adel.wc26.core.designsystem.component.LiveBadge
+import com.adel.wc26.core.designsystem.component.TeamFlag
 import com.adel.wc26.core.designsystem.component.TeamNameWithFlag
 import com.adel.wc26.core.designsystem.theme.Spacing
 import com.adel.wc26.core.designsystem.theme.WC26Theme
@@ -109,11 +111,17 @@ fun MatchCard(
             Spacer(Modifier.padding(top = Spacing.md))
 
             // --- Venue footer ---
-            Text(
-                text = match.venue,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = match.venue,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(modifier = Modifier.width(Spacing.xs))
+                TeamFlag(code = match.countryCode, size = DpSize(16.dp, 11.dp))
+            }
         }
     }
 }

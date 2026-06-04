@@ -48,6 +48,7 @@ import com.adel.wc26.feature.matches.domain.model.MatchStatus
 import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.posts.ui.component.postsThread
 import android.widget.Toast
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.mutableStateOf
@@ -324,10 +325,16 @@ private fun MatchHeader(match: Match) {
         }
 
         Spacer(Modifier.height(Spacing.sm))
-        Text(
-            text = match.venue,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TeamFlag(code = match.countryCode, size = DpSize(16.dp, 11.dp))
+            Spacer(modifier = Modifier.width(Spacing.xs))
+            Text(
+                text = match.venue,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }

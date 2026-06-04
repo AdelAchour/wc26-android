@@ -37,5 +37,7 @@ interface MatchRepository {
         homeScore: Int?,
         awayScore: Int?,
         status: MatchStatus?,
+        homeTeam: String? = null,
+        awayTeam: String? = null,
     ): DataResult<Match>
 }

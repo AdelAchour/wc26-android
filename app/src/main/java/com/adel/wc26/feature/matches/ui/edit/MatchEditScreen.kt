@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -27,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -34,9 +37,12 @@ import com.adel.wc26.R
 import com.adel.wc26.core.designsystem.component.WC26ErrorState
 import com.adel.wc26.core.designsystem.component.WC26LoadingState
 import com.adel.wc26.core.designsystem.component.WC26PrimaryButton
+import com.adel.wc26.core.designsystem.component.TeamFlag
+import com.adel.wc26.core.designsystem.component.TeamNameWithFlag
 import com.adel.wc26.core.designsystem.theme.Spacing
 import com.adel.wc26.core.designsystem.theme.WC26Theme
 import com.adel.wc26.core.ui.toStringRes
+import com.adel.wc26.core.util.TeamCodes
 import com.adel.wc26.feature.matches.domain.model.Match
 import com.adel.wc26.feature.matches.domain.model.MatchStatus
 import java.time.Instant
@@ -98,11 +104,15 @@ fun MatchEditScreen(
                     updateScores = state.updateScores,
                     homeScore = state.homeScore,
                     awayScore = state.awayScore,
+                    homeTeam = state.homeTeam,
+                    awayTeam = state.awayTeam,
                     saving = state.saving,
                     onStatusSelected = viewModel::onStatusSelected,
                     onUpdateScoresToggled = viewModel::onUpdateScoresToggled,
                     onHomeScoreChanged = viewModel::onHomeScoreChanged,
                     onAwayScoreChanged = viewModel::onAwayScoreChanged,
+                    onHomeTeamChanged = viewModel::onHomeTeamChanged,
+                    onAwayTeamChanged = viewModel::onAwayTeamChanged,
                     onSave = viewModel::saveChanges,
                     modifier = innerModifier,
                 )
@@ -111,6 +121,7 @@ fun MatchEditScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MatchEditContent(
     match: Match,
@@ -118,14 +129,25 @@ private fun MatchEditContent(
     updateScores: Boolean,
     homeScore: Int,
     awayScore: Int,
+    homeTeam: String?,
+    awayTeam: String?,
     saving: Boolean,
     onStatusSelected: (MatchStatus) -> Unit,
     onUpdateScoresToggled: (Boolean) -> Unit,
     onHomeScoreChanged: (Int) -> Unit,
     onAwayScoreChanged: (Int) -> Unit,
+    onHomeTeamChanged: (String?) -> Unit,
+    onAwayTeamChanged: (String?) -> Unit,
     onSave: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var showHomeTeamPicker by remember { mutableStateOf(false) }
+    var showAwayTeamPicker by remember { mutableStateOf(false) }
+
+    val isEditable = remember(match.stage) {
+        !match.stage.startsWith("Group", ignoreCase = true)
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -161,20 +183,20 @@ private fun MatchEditContent(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(
-                        text = match.homeTeam,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier.weight(1f)
+                    TeamNameWithFlag(
+                        name = homeTeam ?: match.homeTeam,
+                        code = TeamCodes.fromTeamName(homeTeam ?: ""),
+                        isHome = true,
+                        modifier = Modifier.weight(1f),
+                        onClick = if (isEditable) { { showHomeTeamPicker = true } } else null
                     )
                     ScoreOrVs(match = match)
-                    Text(
-                        text = match.awayTeam,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Start,
-                        modifier = Modifier.weight(1f)
+                    TeamNameWithFlag(
+                        name = awayTeam ?: match.awayTeam,
+                        code = TeamCodes.fromTeamName(awayTeam ?: ""),
+                        isHome = false,
+                        modifier = Modifier.weight(1f),
+                        onClick = if (isEditable) { { showAwayTeamPicker = true } } else null
                     )
                 }
             }
@@ -252,7 +274,7 @@ private fun MatchEditContent(
                     Switch(
                         checked = updateScores,
                         onCheckedChange = onUpdateScoresToggled,
-                        enabled = selectedStatus != MatchStatus.SCHEDULED // <-- Disable switch for SCHEDULED
+                        enabled = selectedStatus != MatchStatus.SCHEDULED
                     )
                 }
 
@@ -265,16 +287,15 @@ private fun MatchEditContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         ScoreStepper(
-                            teamName = match.homeTeam,
+                            teamName = homeTeam ?: "TBD",
                             score = homeScore,
                             onScoreChanged = onHomeScoreChanged
                         )
 
                         VerticalDivider(modifier.fillMaxHeight())
 
-
                         ScoreStepper(
-                            teamName = match.awayTeam,
+                            teamName = awayTeam ?: "TBD",
                             score = awayScore,
                             onScoreChanged = onAwayScoreChanged
                         )
@@ -286,8 +307,17 @@ private fun MatchEditContent(
         Spacer(modifier = Modifier.weight(1f))
 
         // Save Button logic check
+        val initialHomeTeam = remember(match.homeTeam) {
+            if (TeamCodes.fromTeamName(match.homeTeam) != null) match.homeTeam else null
+        }
+        val initialAwayTeam = remember(match.awayTeam) {
+            if (TeamCodes.fromTeamName(match.awayTeam) != null) match.awayTeam else null
+        }
+
         val hasChanges = selectedStatus != match.status ||
-                (updateScores && (homeScore != (match.homeScore ?: -1) || awayScore != (match.awayScore ?: -1)))
+                (updateScores && (homeScore != (match.homeScore ?: -1) || awayScore != (match.awayScore ?: -1))) ||
+                homeTeam != initialHomeTeam ||
+                awayTeam != initialAwayTeam
 
         WC26PrimaryButton(
             text = stringResource(R.string.admin_edit_match_save),
@@ -296,6 +326,114 @@ private fun MatchEditContent(
             loading = saving,
             modifier = Modifier.fillMaxWidth()
         )
+    }
+
+    if (showHomeTeamPicker) {
+        TeamPickerBottomSheet(
+            onDismissRequest = { showHomeTeamPicker = false },
+            onTeamSelected = { team ->
+                onHomeTeamChanged(team)
+                showHomeTeamPicker = false
+            },
+        )
+    }
+
+    if (showAwayTeamPicker) {
+        TeamPickerBottomSheet(
+            onDismissRequest = { showAwayTeamPicker = false },
+            onTeamSelected = { team ->
+                onAwayTeamChanged(team)
+                showAwayTeamPicker = false
+            },
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TeamPickerBottomSheet(
+    onDismissRequest: () -> Unit,
+    onTeamSelected: (String?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var searchQuery by remember { mutableStateOf("") }
+    val countries = remember { TeamCodes.getCountries() }
+    val filteredCountries = remember(searchQuery) {
+        countries.filter { it.contains(searchQuery, ignoreCase = true) }
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        modifier = modifier,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = Spacing.xl)
+        ) {
+            Text(
+                text = "Select Team",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.md)
+            )
+
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = { Text("Search country...") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (searchQuery.isEmpty()) {
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onTeamSelected(null) }
+                                .padding(vertical = Spacing.md, horizontal = Spacing.lg),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            TeamFlag(code = null, size = DpSize(24.dp, 16.dp))
+                            Spacer(modifier = Modifier.width(Spacing.md))
+                            Text(
+                                text = "TBD (Clear Selection)",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                    }
+                }
+
+                items(filteredCountries) { country ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onTeamSelected(country) }
+                            .padding(vertical = Spacing.md, horizontal = Spacing.lg),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TeamFlag(code = TeamCodes.fromTeamName(country), size = DpSize(24.dp, 16.dp))
+                        Spacer(modifier = Modifier.width(Spacing.md))
+                        Text(
+                            text = country,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -393,7 +531,8 @@ private fun ScoreStepper(
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
             maxLines = 1,
-            modifier = Modifier.widthIn(max = 120.dp)
+            modifier = Modifier
+                .widthIn(max = 120.dp)
                 .padding(bottom = Spacing.md)
         )
         Row(
@@ -453,7 +592,7 @@ private fun previewMatch() = Match(
     homeScore = 2,
     awayScore = 1,
     homeTeamCode = "es",
-    awayTeamCode = "de"
+    awayTeamCode = "de",
 )
 
 @Preview(showBackground = true)
@@ -466,12 +605,27 @@ private fun MatchEditContentPreview() {
             updateScores = true,
             homeScore = 1,
             awayScore = 2,
+            homeTeam = "Spain",
+            awayTeam = "Germany",
             saving = false,
             onStatusSelected = {},
             onUpdateScoresToggled = {},
             onHomeScoreChanged = {},
             onAwayScoreChanged = {},
+            onHomeTeamChanged = {},
+            onAwayTeamChanged = {},
             onSave = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TeamPickerBottomSheetPreview() {
+    WC26Theme {
+        TeamPickerBottomSheet(
+            onDismissRequest = {},
+            onTeamSelected = {}
         )
     }
 }

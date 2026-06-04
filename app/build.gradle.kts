@@ -30,6 +30,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Inject the production URL into release builds
+            buildConfigField("String", "BASE_URL", "\"https://wc26.adelash.dev/api/\"")
+        }
+        debug {
+            // Inject the localhost loopback URL into debug builds
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8080/\"")
         }
     }
     compileOptions {

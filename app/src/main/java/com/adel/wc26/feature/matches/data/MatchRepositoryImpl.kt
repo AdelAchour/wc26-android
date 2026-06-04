@@ -47,6 +47,8 @@ class MatchRepositoryImpl @Inject constructor(
         homeScore: Int?,
         awayScore: Int?,
         status: MatchStatus?,
+        homeTeam: String?,
+        awayTeam: String?,
     ): DataResult<Match> =
         apiCall {
             matchApi.updateMatch(
@@ -55,6 +57,8 @@ class MatchRepositoryImpl @Inject constructor(
                     homeScore = homeScore,
                     awayScore = awayScore,
                     status = status?.value,
+                    homeTeam = homeTeam,
+                    awayTeam = awayTeam,
                 )
             )
         }.map { dto ->

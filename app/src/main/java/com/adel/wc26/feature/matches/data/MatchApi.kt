@@ -44,4 +44,6 @@ data class MatchUpdateRequest(
     val homeScore: Int? = null,
     val awayScore: Int? = null,
     val status: String? = null,
+    val homeTeam: String? = null,
+    val awayTeam: String? = null,
 )

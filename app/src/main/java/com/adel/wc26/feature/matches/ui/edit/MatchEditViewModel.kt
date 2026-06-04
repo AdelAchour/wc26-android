@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.adel.wc26.core.result.AppError
 import com.adel.wc26.core.result.DataResult
+import com.adel.wc26.core.util.TeamCodes
 import com.adel.wc26.feature.matches.domain.MatchRepository
 import com.adel.wc26.feature.matches.domain.model.Match
 import com.adel.wc26.feature.matches.domain.model.MatchStatus
@@ -28,6 +29,8 @@ data class MatchEditUiState(
     val updateScores: Boolean = false,
     val homeScore: Int = 0,
     val awayScore: Int = 0,
+    val homeTeam: String? = null,
+    val awayTeam: String? = null,
 )
 
 @HiltViewModel
@@ -60,6 +63,8 @@ class MatchEditViewModel @Inject constructor(
                             updateScores = false,
                             homeScore = match.homeScore ?: 0,
                             awayScore = match.awayScore ?: 0,
+                            homeTeam = if (TeamCodes.fromTeamName(match.homeTeam) != null) match.homeTeam else null,
+                            awayTeam = if (TeamCodes.fromTeamName(match.awayTeam) != null) match.awayTeam else null,
                         )
                     }
                 }
@@ -118,27 +123,36 @@ class MatchEditViewModel @Inject constructor(
         }
     }
 
+    fun onHomeTeamChanged(team: String?) {
+        _uiState.update { it.copy(homeTeam = team) }
+    }
+    fun onAwayTeamChanged(team: String?) {
+        _uiState.update { it.copy(awayTeam = team) }
+    }
+
     fun saveChanges() {
         val state = _uiState.value
         val match = state.match ?: return
-
         val statusToUpdate = if (state.selectedStatus != match.status) state.selectedStatus else null
-
         val (homeScoreToUpdate, awayScoreToUpdate) = if (state.updateScores) {
             Pair(state.homeScore, state.awayScore)
         } else {
             Pair(null, null)
         }
+        val initialHomeTeam = if (TeamCodes.fromTeamName(match.homeTeam) != null) match.homeTeam else null
+        val initialAwayTeam = if (TeamCodes.fromTeamName(match.awayTeam) != null) match.awayTeam else null
+        val homeTeamToUpdate = if (state.homeTeam != initialHomeTeam) state.homeTeam else null
+        val awayTeamToUpdate = if (state.awayTeam != initialAwayTeam) state.awayTeam else null
 
         // Detect if changes actually occurred
         val statusChanged = statusToUpdate != null
         val scoresChanged = state.updateScores && (state.homeScore != (match.homeScore ?: -1) || state.awayScore != (match.awayScore ?: -1))
+        val teamChanged = state.homeTeam != initialHomeTeam || state.awayTeam != initialAwayTeam
 
-        if (!statusChanged && !scoresChanged) {
+        if (!statusChanged && !scoresChanged && !teamChanged) {
             _uiState.update { it.copy(success = true) }
             return
         }
-
         viewModelScope.launch {
             _uiState.update { it.copy(saving = true, error = null) }
             val result = matchRepository.updateMatch(
@@ -146,6 +160,8 @@ class MatchEditViewModel @Inject constructor(
                 homeScore = homeScoreToUpdate,
                 awayScore = awayScoreToUpdate,
                 status = statusToUpdate,
+                homeTeam = homeTeamToUpdate,
+                awayTeam = awayTeamToUpdate,
             )
             when (result) {
                 is DataResult.Success -> {
