@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.adel.wc26.R
 import com.adel.wc26.core.designsystem.component.LiveBadge
+import com.adel.wc26.core.designsystem.component.TeamNameWithFlag
 import com.adel.wc26.core.designsystem.theme.Spacing
 import com.adel.wc26.core.designsystem.theme.WC26Theme
 import com.adel.wc26.core.util.WC26DateTime
@@ -90,15 +91,17 @@ fun MatchCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                TeamName(
+                TeamNameWithFlag(
                     name = match.homeTeam,
-                    align = TextAlign.Start,
+                    code = match.homeTeamCode,
+                    isHome = true,
                     modifier = Modifier.weight(1f),
                 )
                 ScoreOrVs(match = match)
-                TeamName(
+                TeamNameWithFlag(
                     name = match.awayTeam,
-                    align = TextAlign.End,
+                    code = match.awayTeamCode,
+                    isHome = false,
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -174,6 +177,8 @@ private fun sampleMatch(
     status = status,
     homeScore = home,
     awayScore = away,
+    homeTeamCode = "ca",
+    awayTeamCode = "mx",
 )
 
 @Preview(showBackground = true)

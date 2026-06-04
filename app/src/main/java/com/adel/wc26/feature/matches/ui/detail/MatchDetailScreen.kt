@@ -58,6 +58,8 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.ui.unit.DpSize
+import com.adel.wc26.core.designsystem.component.TeamFlag
 
 /**
  * Match detail — stateful entry point.
@@ -256,17 +258,25 @@ private fun MatchHeader(match: Match) {
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Top,
         ) {
-            Text(
-                text = match.homeTeam,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
+            Column(
                 modifier = Modifier.weight(1f),
-            )
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                TeamFlag(code = match.homeTeamCode, size = DpSize(40.dp, 28.dp))
+                Spacer(Modifier.height(Spacing.xs))
+                Text(
+                    text = match.homeTeam,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                )
+            }
             Box(
-                modifier = Modifier.padding(horizontal = Spacing.md),
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(horizontal = Spacing.md),
                 contentAlignment = Alignment.Center,
             ) {
                 if (match.hasScore) {
@@ -283,13 +293,19 @@ private fun MatchHeader(match: Match) {
                     )
                 }
             }
-            Text(
-                text = match.awayTeam,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
+            Column(
                 modifier = Modifier.weight(1f),
-            )
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                TeamFlag(code = match.awayTeamCode, size = DpSize(40.dp, 28.dp))
+                Spacer(Modifier.height(Spacing.xs))
+                Text(
+                    text = match.awayTeam,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                )
+            }
         }
 
         Spacer(Modifier.height(Spacing.md))

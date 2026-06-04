@@ -30,4 +30,6 @@ fun MatchDto.toDomain(): Match = Match(
     status = MatchStatus.fromString(status),
     homeScore = homeScore?.toInt(),
     awayScore = awayScore?.toInt(),
+    homeTeamCode = homeTeamCode,
+    awayTeamCode = awayTeamCode,
 )

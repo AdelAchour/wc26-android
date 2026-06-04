@@ -38,6 +38,8 @@ data class Match(
     val status: MatchStatus,
     val homeScore: Int?,
     val awayScore: Int?,
+    val homeTeamCode: String?,
+    val awayTeamCode: String?,
 ) {
     /** True when both scores are present — i.e. there's a result to show. */
     val hasScore: Boolean

@@ -451,7 +451,9 @@ private fun previewMatch() = Match(
     kickoffAt = Instant.parse("2026-11-27T19:00:00Z"),
     status = MatchStatus.SCHEDULED,
     homeScore = 2,
-    awayScore = 1
+    awayScore = 1,
+    homeTeamCode = "es",
+    awayTeamCode = "de"
 )
 
 @Preview(showBackground = true)

@@ -23,4 +23,6 @@ data class MatchDto(
     val status: String,
     val homeScore: Short? = null,
     val awayScore: Short? = null,
+    val homeTeamCode: String? = null,
+    val awayTeamCode: String? = null,
 )

@@ -164,18 +164,21 @@ private fun previewMatches(): List<Match> = listOf(
         stage = "Group A", venue = "BMO Field, Toronto", countryCode = "CA",
         kickoffAt = Instant.parse("2026-06-14T19:00:00Z"),
         status = MatchStatus.SCHEDULED, homeScore = null, awayScore = null,
+        homeTeamCode = "ca", awayTeamCode = "mx",
     ),
     Match(
-        id = 2, gameNumber = 2, homeTeam = "USA", awayTeam = "Wales",
+        id = 2, gameNumber = 2, homeTeam = "USA", awayTeam = "France",
         stage = "Group B", venue = "SoFi Stadium, Los Angeles", countryCode = "US",
         kickoffAt = Instant.parse("2026-06-14T22:00:00Z"),
         status = MatchStatus.LIVE, homeScore = 1, awayScore = 1,
+        homeTeamCode = "us", awayTeamCode = "fr",
     ),
     Match(
         id = 3, gameNumber = 3, homeTeam = "Argentina", awayTeam = "Brazil",
         stage = "Group C", venue = "Estadio Azteca, Mexico City", countryCode = "MX",
         kickoffAt = Instant.parse("2026-06-13T20:00:00Z"),
         status = MatchStatus.FINISHED, homeScore = 2, awayScore = 0,
+        homeTeamCode = "ar", awayTeamCode = "br",
     ),
 )
 
