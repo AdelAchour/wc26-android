@@ -200,4 +200,15 @@
     <string name="maintenance_description">WC26 is currently undergoing scheduled maintenance. We will be back online shortly. Thank you for your patience!</string>
     <string name="maintenance_action_retry">Retry Connection</string>
     <string name="force_update_version_info">Required version: %1$d\nInstalled version: %2$d</string>
+
+    <!-- Notifications -->
+    <string name="notifications_title">Notifications</string>
+    <string name="notifications_empty_title">All quiet here</string>
+    <string name="notifications_empty_desc">We\'ll let you know when other users interact with your content.</string>
+    <string name="notifications_action_mark_all_read">Mark all as read</string>
+    <string name="notifications_liked_post">%1$s liked your post</string>
+    <string name="notifications_replied_post">%1$s replied to your post</string>
+    <string name="notifications_liked_comment">%1$s liked your comment</string>
+    <string name="notifications_error_mark_read">Failed to update notification status.</string>
+    <string name="notifications_error_mark_all_read">Failed to mark all notifications as read.</string>
 </resources>

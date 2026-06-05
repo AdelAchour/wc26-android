@@ -4,7 +4,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -18,7 +21,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.NavDestination.Companion.hierarchy
 
 /**
- * The four top-level tabs shown in the bottom navigation bar.
+ * The five top-level tabs shown in the bottom navigation bar.
  * Each pairs a label + icon with its type-safe destination.
  */
 enum class TopLevelTab(
@@ -28,19 +31,20 @@ enum class TopLevelTab(
 ) {
     MATCHES("Matches", Icons.Outlined.DateRange, Destinations.Matches()),
     FEED("Feed", Icons.Outlined.Home, Destinations.Feed),
+    NOTIFICATIONS("Notifications", Icons.Outlined.Notifications, Destinations.Notifications),
     PROFILE("Profile", Icons.Outlined.AccountCircle, Destinations.Profile),
     SETTINGS("Settings", Icons.Outlined.Settings, Destinations.Settings),
 }
 
 /**
- * The bottom navigation bar. Rendered only on top-level tab destinations
- * (see WC26NavHost — it's hidden on detail screens).
- *
- * Tab switching uses launchSingleTop + popUpTo(start) so tabs don't stack
- * endlessly on the back stack, and saves/restores each tab's own state.
+ * The bottom navigation bar. Rendered only on top-level tab destinations.
  */
 @Composable
-fun WC26BottomBar(navController: NavHostController) {
+fun WC26BottomBar(
+    navController: NavHostController,
+    unreadCount: Int,
+    onTabSelected: (TopLevelTab) -> Unit,
+) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
 
@@ -54,16 +58,29 @@ fun WC26BottomBar(navController: NavHostController) {
                 selected = selected,
                 onClick = {
                     navController.navigate(tab.route) {
-                        // Pop up to the start destination to avoid building
-                        // a deep stack of tabs.
                         popUpTo(navController.graph.startDestinationId) {
                             saveState = true
                         }
                         launchSingleTop = true
                         restoreState = true
                     }
+                    onTabSelected(tab)
                 },
-                icon = { Icon(tab.icon, contentDescription = tab.label) },
+                icon = {
+                    if (tab == TopLevelTab.NOTIFICATIONS && unreadCount > 0) {
+                        BadgedBox(
+                            badge = {
+                                Badge {
+                                    Text(if (unreadCount > 99) "99+" else unreadCount.toString())
+                                }
+                            }
+                        ) {
+                            Icon(tab.icon, contentDescription = tab.label)
+                        }
+                    } else {
+                        Icon(tab.icon, contentDescription = tab.label)
+                    }
+                },
                 label = { Text(tab.label) },
             )
         }

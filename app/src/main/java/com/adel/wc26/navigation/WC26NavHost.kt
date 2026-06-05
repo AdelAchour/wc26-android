@@ -3,11 +3,16 @@ package com.adel.wc26.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -35,9 +40,12 @@ import com.adel.wc26.feature.profile.ui.AvatarPickerScreen
 import com.adel.wc26.feature.profile.ui.ProfileViewModel
 import com.adel.wc26.core.network.AppStatus
 import com.adel.wc26.core.network.AppStatusManager
+import com.adel.wc26.feature.notifications.data.NotificationsManager
+import com.adel.wc26.feature.notifications.ui.NotificationsScreen
 import com.adel.wc26.feature.status.ui.ForceUpdateScreen
 import com.adel.wc26.feature.status.ui.MaintenanceScreen
 import com.adel.wc26.feature.status.ui.MaintenanceViewModel
+import kotlinx.coroutines.launch
 
 /**
  * The app's navigation host.
@@ -55,6 +63,7 @@ import com.adel.wc26.feature.status.ui.MaintenanceViewModel
 fun WC26NavHost(
     tokenStore: TokenStore,
     appStatusManager: AppStatusManager,
+    notificationsManager: NotificationsManager,
     modifier: Modifier = Modifier,
 ) {
     val navController = rememberNavController()
@@ -107,7 +116,36 @@ fun WC26NavHost(
         }
     }
 
-    // Which destinations show the bottom bar — the four tabs only.
+    // Fetch unread count initially on login/logout changes
+    LaunchedEffect(isLoggedIn) {
+        if (isLoggedIn) {
+            notificationsManager.refreshUnreadCount()
+        } else {
+            notificationsManager.clearCount()
+        }
+    }
+
+    // Lifecycle observer to refresh unread count whenever app resumes (foregrounded)
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val coroutineScope = rememberCoroutineScope()
+    DisposableEffect(lifecycleOwner, isLoggedIn) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && isLoggedIn) {
+                coroutineScope.launch {
+                    notificationsManager.refreshUnreadCount()
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    // Read count from manager to display badge in bottom bar
+    val unreadCount by notificationsManager.unreadCount.collectAsStateWithLifecycle()
+
+    // Which destinations show the bottom bar
     val backStackEntry by navController.currentBackStackEntryAsState()
     val showBottomBar = TopLevelTab.entries.any { tab ->
         val dest = backStackEntry?.destination
@@ -125,7 +163,17 @@ fun WC26NavHost(
         modifier = modifier,
         bottomBar = {
             if (showBottomBar) {
-                WC26BottomBar(navController)
+                WC26BottomBar(
+                    navController = navController,
+                    unreadCount = unreadCount,
+                    onTabSelected = { tab ->
+                        if (isLoggedIn) {
+                            coroutineScope.launch {
+                                notificationsManager.refreshUnreadCount()
+                            }
+                        }
+                    }
+                )
             }
         },
     ) { innerPadding ->
@@ -229,6 +277,16 @@ fun WC26NavHost(
                     },
                     onComposeClick = {
                         navController.navigate(Destinations.Matches(isPickerMode = true))
+                    },
+                    onSignInPrompt = {
+                        navController.navigate(Destinations.Login)
+                    },
+                )
+            }
+            composable<Destinations.Notifications> {
+                NotificationsScreen(
+                    onNotificationClick = { postId ->
+                        navController.navigate(Destinations.PostDetail(postId))
                     },
                     onSignInPrompt = {
                         navController.navigate(Destinations.Login)

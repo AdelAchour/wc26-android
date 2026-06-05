@@ -12,6 +12,7 @@ import com.adel.wc26.navigation.WC26NavHost
 import dagger.hilt.android.AndroidEntryPoint
 import com.adel.wc26.core.datastore.TokenStore
 import com.adel.wc26.core.network.AppStatusManager
+import com.adel.wc26.feature.notifications.data.NotificationsManager
 import javax.inject.Inject
 
 /**
@@ -24,6 +25,8 @@ class MainActivity : ComponentActivity() {
     lateinit var tokenStore: TokenStore
     @Inject
     lateinit var appStatusManager: AppStatusManager
+    @Inject
+    lateinit var notificationsManager: NotificationsManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,7 +38,8 @@ class MainActivity : ComponentActivity() {
                 ) {
                     WC26NavHost(
                         tokenStore = tokenStore,
-                        appStatusManager = appStatusManager
+                        appStatusManager = appStatusManager,
+                        notificationsManager = notificationsManager
                     )
                 }
             }
