@@ -19,6 +19,12 @@ object Destinations {
     @Serializable
     data object Splash
 
+    @Serializable
+    data class ForceUpdate(val updateUrl: String, val minVersion: Int)
+
+    @Serializable
+    data object Maintenance
+
     // --- Auth flow ---
     @Serializable
     data object Welcome

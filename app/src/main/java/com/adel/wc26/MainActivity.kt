@@ -11,6 +11,7 @@ import com.adel.wc26.core.designsystem.theme.WC26Theme
 import com.adel.wc26.navigation.WC26NavHost
 import dagger.hilt.android.AndroidEntryPoint
 import com.adel.wc26.core.datastore.TokenStore
+import com.adel.wc26.core.network.AppStatusManager
 import javax.inject.Inject
 
 /**
@@ -21,6 +22,8 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var tokenStore: TokenStore
+    @Inject
+    lateinit var appStatusManager: AppStatusManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +33,10 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                 ) {
-                    WC26NavHost(tokenStore = tokenStore)
+                    WC26NavHost(
+                        tokenStore = tokenStore,
+                        appStatusManager = appStatusManager
+                    )
                 }
             }
         }

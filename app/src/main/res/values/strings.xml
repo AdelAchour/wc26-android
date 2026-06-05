@@ -192,4 +192,12 @@
     <string name="avatar_label_jersey_yellow">Yellow Jersey</string>
     <string name="avatar_label_stadium">The Pitch</string>
 
+    <!-- Force Update & Maintenance Mode -->
+    <string name="force_update_title">Update Required</string>
+    <string name="force_update_description">You are using an outdated version of WC26. Please update to the latest version to continue using the application.</string>
+    <string name="force_update_action">Update Now</string>
+    <string name="maintenance_title">Under Maintenance</string>
+    <string name="maintenance_description">WC26 is currently undergoing scheduled maintenance. We will be back online shortly. Thank you for your patience!</string>
+    <string name="maintenance_action_retry">Retry Connection</string>
+    <string name="force_update_version_info">Required version: %1$d\nInstalled version: %2$d</string>
 </resources>

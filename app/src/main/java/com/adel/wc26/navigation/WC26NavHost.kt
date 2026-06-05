@@ -33,6 +33,11 @@ import com.adel.wc26.feature.posts.ui.composer.PostComposerScreen
 import com.adel.wc26.feature.posts.ui.detail.PostDetailScreen
 import com.adel.wc26.feature.profile.ui.AvatarPickerScreen
 import com.adel.wc26.feature.profile.ui.ProfileViewModel
+import com.adel.wc26.core.network.AppStatus
+import com.adel.wc26.core.network.AppStatusManager
+import com.adel.wc26.feature.status.ui.ForceUpdateScreen
+import com.adel.wc26.feature.status.ui.MaintenanceScreen
+import com.adel.wc26.feature.status.ui.MaintenanceViewModel
 
 /**
  * The app's navigation host.
@@ -49,13 +54,44 @@ import com.adel.wc26.feature.profile.ui.ProfileViewModel
 @Composable
 fun WC26NavHost(
     tokenStore: TokenStore,
+    appStatusManager: AppStatusManager,
     modifier: Modifier = Modifier,
 ) {
     val navController = rememberNavController()
 
-    // 1. Reactively observe the authentication status flow
+    // Observe app blocking status
+    val appStatus by appStatusManager.appStatus.collectAsStateWithLifecycle()
+    LaunchedEffect(appStatus) {
+        when (appStatus) {
+            is AppStatus.ForceUpdate -> {
+                navController.navigate(Destinations.ForceUpdate(
+                    updateUrl = (appStatus as AppStatus.ForceUpdate).updateUrl,
+                    minVersion = (appStatus as AppStatus.ForceUpdate).minVersion
+                )) {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
+            is AppStatus.Maintenance -> {
+                navController.navigate(Destinations.Maintenance) {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
+            is AppStatus.Normal -> {
+                val currentDest = navController.currentBackStackEntry?.destination
+                val isCurrentlyBlocked = currentDest?.hasRoute(Destinations.Maintenance::class) == true ||
+                        currentDest?.hasRoute(Destinations.ForceUpdate::class) == true
+                if (isCurrentlyBlocked) {
+                    navController.navigate(Destinations.Splash) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            }
+        }
+    }
+
+    // Reactively observe the authentication status flow
     val isLoggedIn by tokenStore.isLoggedInFlow.collectAsStateWithLifecycle(initialValue = true)
-    // 2. Automatically navigate to Welcome if the session is evicted mid-use
+    // Automatically navigate to Welcome if the session is evicted mid-use
     LaunchedEffect(isLoggedIn) {
         if (!isLoggedIn) {
             val currentDest = navController.currentBackStackEntry?.destination
@@ -311,6 +347,15 @@ fun WC26NavHost(
             composable<Destinations.Likers> { backStack ->
                 val args = backStack.toRoute<Destinations.Likers>()
                 PlaceholderScreen(title = "Likers · post #${args.postId}")
+            }
+            // --- Blocker routes ---
+            composable<Destinations.ForceUpdate> { backStackEntry ->
+                val args = backStackEntry.toRoute<Destinations.ForceUpdate>()
+                ForceUpdateScreen(updateUrl = args.updateUrl, minVersion = args.minVersion)
+            }
+            composable<Destinations.Maintenance> {
+                val maintenanceViewModel: MaintenanceViewModel = hiltViewModel()
+                MaintenanceScreen(viewModel = maintenanceViewModel)
             }
         }
     }

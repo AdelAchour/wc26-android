@@ -2,6 +2,7 @@ package com.adel.wc26.core.network.di
 
 import com.adel.wc26.core.network.ApiConstants
 import com.adel.wc26.core.network.AuthInterceptor
+import com.adel.wc26.core.network.SystemApi
 import com.adel.wc26.feature.auth.data.AuthApi
 import com.adel.wc26.feature.matches.data.MatchApi
 import com.adel.wc26.feature.posts.data.comment.CommentApi
@@ -24,8 +25,6 @@ import javax.inject.Singleton
  * Provides the network stack: JSON serializer, OkHttp client (with the
  * auth interceptor and logging), Retrofit, and every API service.
  *
- * Everything is @Singleton — one shared client and one Retrofit instance
- * for the whole app.
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -34,9 +33,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideJson(): Json = Json {
-        // The backend may add fields over time; don't crash on unknowns.
         ignoreUnknownKeys = true
-        // Treat an absent JSON key as the property's default value.
         explicitNulls = false
     }
 
@@ -68,6 +65,11 @@ object NetworkModule {
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()
     }
+
+    @Provides
+    @Singleton
+    fun provideSystemApi(retrofit: Retrofit): SystemApi =
+        retrofit.create(SystemApi::class.java)
 
     @Provides
     @Singleton
