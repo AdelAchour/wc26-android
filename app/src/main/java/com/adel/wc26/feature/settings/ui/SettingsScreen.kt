@@ -28,12 +28,24 @@ import com.adel.wc26.R
 import com.adel.wc26.core.designsystem.component.WC26SecondaryButton
 import com.adel.wc26.core.designsystem.theme.Spacing
 import com.adel.wc26.core.designsystem.theme.WC26Theme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
 
 /**
  * Settings tab — stateful entry point.
  */
+/**
+ * Settings tab — stateful entry point.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
+    onBack: () -> Unit,
     onLoggedOut: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
@@ -44,11 +56,29 @@ fun SettingsScreen(
         if (state.loggedOut) onLoggedOut()
     }
 
-    SettingsContent(
-        state = state,
-        onLogout = viewModel::logout,
+    // 2. Wrap in Scaffold and TopAppBar
+    Scaffold(
         modifier = modifier,
-    )
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.settings_title)) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.action_back),
+                        )
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        SettingsContent(
+            state = state,
+            onLogout = viewModel::logout,
+            modifier = Modifier.padding(padding),
+        )
+    }
 }
 
 /**
@@ -68,13 +98,6 @@ fun SettingsContent(
             .fillMaxSize()
             .padding(Spacing.xl),
     ) {
-        Text(
-            text = stringResource(R.string.settings_title),
-            style = MaterialTheme.typography.displaySmall,
-        )
-
-        Spacer(Modifier.height(Spacing.xl))
-
         // Account section — only when signed in.
         if (state.loggedIn) {
             Text(

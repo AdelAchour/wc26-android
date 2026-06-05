@@ -1,6 +1,7 @@
 package com.adel.wc26.feature.profile.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -32,6 +35,8 @@ import com.adel.wc26.feature.posts.ui.component.postsThread
 import com.adel.wc26.feature.profile.ui.component.ProfileHeader
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,6 +66,7 @@ fun ProfileScreen(
     onMatchClick: (Long) -> Unit,
     onSignIn: () -> Unit,
     onEditAvatarClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
@@ -86,6 +92,7 @@ fun ProfileScreen(
         onDeleteClick = { postToDelete = it },
         onEditAvatarClick = onEditAvatarClick,
         onEditProfileClick = { showEditProfileSheet = true },
+        onSettingsClick = onSettingsClick,
         modifier = modifier,
     )
 
@@ -150,6 +157,7 @@ fun ProfileContent(
     onDeleteClick: (Post) -> Unit,
     onEditAvatarClick: () -> Unit,
     onEditProfileClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val emptyMessage = when (state.selectedTab) {
@@ -171,16 +179,32 @@ fun ProfileContent(
         state.profile != null -> LazyColumn(
             modifier = modifier.fillMaxSize(),
         ) {
+
             item {
-                ProfileHeader(
-                    displayName = state.profile.displayName,
-                    username = state.profile.username,
-                    avatarUrl = state.profile.avatarUrl,
-                    bio = state.profile.bio,
-                    joinedAtIso = state.profile.joinedAt,
-                    onAvatarClick = onEditAvatarClick,
-                    onEditProfileClick = onEditProfileClick,
-                )
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    ProfileHeader(
+                        displayName = state.profile.displayName,
+                        username = state.profile.username,
+                        avatarUrl = state.profile.avatarUrl,
+                        bio = state.profile.bio,
+                        joinedAtIso = state.profile.joinedAt,
+                        onAvatarClick = onEditAvatarClick,
+                        onEditProfileClick = onEditProfileClick,
+                    )
+
+                    IconButton(
+                        onClick = onSettingsClick,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(Spacing.md)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Settings,
+                            contentDescription = "Settings",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
             }
 
             item {

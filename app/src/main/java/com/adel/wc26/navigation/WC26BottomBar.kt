@@ -5,7 +5,6 @@ import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
@@ -33,7 +32,6 @@ enum class TopLevelTab(
     FEED("Feed", Icons.Outlined.Home, Destinations.Feed),
     NOTIFICATIONS("Notifications", Icons.Outlined.Notifications, Destinations.Notifications),
     PROFILE("Profile", Icons.Outlined.AccountCircle, Destinations.Profile),
-    SETTINGS("Settings", Icons.Outlined.Settings, Destinations.Settings),
 }
 
 /**

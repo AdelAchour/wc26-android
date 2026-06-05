@@ -310,6 +310,9 @@ fun WC26NavHost(
                     onEditAvatarClick = {
                         navController.navigate(Destinations.AvatarPicker)
                     },
+                    onSettingsClick = {
+                        navController.navigate(Destinations.Settings)
+                    },
                 )
             }
             composable<Destinations.AvatarPicker> { backStackEntry ->
@@ -324,6 +327,7 @@ fun WC26NavHost(
             }
             composable<Destinations.Settings> {
                 SettingsScreen(
+                    onBack = { navController.popBackStack() },
                     onLoggedOut = {
                         navController.navigate(Destinations.Welcome) {
                             // Clear everything — fresh start at Welcome.
