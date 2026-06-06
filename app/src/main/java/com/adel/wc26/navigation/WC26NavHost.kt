@@ -44,6 +44,7 @@ import com.adel.wc26.feature.profile.ui.AvatarPickerScreen
 import com.adel.wc26.feature.profile.ui.ProfileViewModel
 import com.adel.wc26.core.network.AppStatus
 import com.adel.wc26.core.network.AppStatusManager
+import com.adel.wc26.feature.auth.ui.splash.SplashScreen
 import com.adel.wc26.feature.notifications.data.NotificationsManager
 import com.adel.wc26.feature.notifications.ui.NotificationsScreen
 import com.adel.wc26.feature.status.ui.ForceUpdateScreen
@@ -210,7 +211,7 @@ fun WC26NavHost(
                     }
                 }
                 // Splash shows nothing meaningful — routing is near-instant.
-                PlaceholderScreen(title = "WC26")
+                SplashScreen()
             }
 
             // --- Auth flow (bottom bar hidden) ---
