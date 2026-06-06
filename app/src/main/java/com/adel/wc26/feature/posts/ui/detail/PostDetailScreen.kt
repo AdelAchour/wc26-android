@@ -1,6 +1,5 @@
 package com.adel.wc26.feature.posts.ui.detail
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,7 +14,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -39,7 +37,6 @@ import com.adel.wc26.core.designsystem.component.WC26ErrorState
 import com.adel.wc26.core.designsystem.component.WC26LoadingState
 import com.adel.wc26.core.designsystem.theme.Spacing
 import com.adel.wc26.core.ui.toStringRes
-import com.adel.wc26.feature.posts.ui.component.PostCard
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.mutableStateOf
@@ -53,18 +50,17 @@ import com.adel.wc26.feature.posts.domain.comment.Comment
 import com.adel.wc26.feature.posts.ui.component.DetailedPostCard
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.tooling.preview.Preview
+import com.adel.wc26.core.designsystem.component.WC26PrimaryButton
 import com.adel.wc26.core.designsystem.theme.WC26Theme
 
 
@@ -327,7 +323,7 @@ private fun CommentComposerBar(
 
     Surface(
         color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 0.dp, // Removes Material 3 tint overlay that makes it look dark
+        tonalElevation = 0.dp,
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -426,21 +422,19 @@ private fun CommentComposerBar(
 @Composable
 private fun SignInToCommentBar(onSignIn: () -> Unit) {
     Surface(
-        tonalElevation = 3.dp,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onSignIn),
+        color = MaterialTheme.colorScheme.surface,
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.lg),
-            horizontalArrangement = Arrangement.Center,
-        ) {
-            Text(
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // A light modern divider at the top of the composer bar
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+            )
+
+            WC26PrimaryButton(
                 text = stringResource(R.string.post_detail_sign_in_to_comment),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.secondary,
+                onClick = onSignIn,
+                modifier = Modifier.fillMaxWidth().padding(Spacing.md),
             )
         }
     }
@@ -448,7 +442,7 @@ private fun SignInToCommentBar(onSignIn: () -> Unit) {
 
 @Preview(showBackground = true)
 @Composable
-fun PlaceholderScreenPreview() {
+fun CommentComposerBarPreview() {
     WC26Theme {
         CommentComposerBar(
             input = "",
@@ -458,5 +452,13 @@ fun PlaceholderScreenPreview() {
             onInputChange = {},
             onSend = {},
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SignInToCommentBarPreview() {
+    WC26Theme {
+        SignInToCommentBar(onSignIn = {})
     }
 }
