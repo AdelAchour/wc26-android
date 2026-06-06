@@ -5,9 +5,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -20,6 +23,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import com.adel.wc26.core.datastore.TokenStore
 import com.adel.wc26.feature.auth.ui.splash.SplashRoute
@@ -99,13 +103,14 @@ fun WC26NavHost(
     }
 
     // Reactively observe the authentication status flow
-    val isLoggedIn by tokenStore.isLoggedInFlow.collectAsStateWithLifecycle(initialValue = true)
-    // Automatically navigate to Welcome if the session is evicted mid-use
-    LaunchedEffect(isLoggedIn) {
-        if (!isLoggedIn) {
-            val currentDest = navController.currentBackStackEntry?.destination
+    val isLoggedIn by tokenStore.isLoggedInFlow.collectAsState(initial = false)
+    // Tracks the last verified state to identify transitions
+    var previousIsLoggedIn by remember { mutableStateOf<Boolean?>(null) }
 
-            // Check if we are currently inside the auth flow. If yes, do not redirect.
+    // Automatically navigate to Welcome ONLY if the session is evicted/changed mid-use (true -> false)
+    LaunchedEffect(isLoggedIn) {
+        if (previousIsLoggedIn == true && !isLoggedIn) {
+            val currentDest = navController.currentBackStackEntry?.destination
             val inAuthFlow = isInAuthFlow(currentDest)
             if (!inAuthFlow) {
                 // Clear the back stack and force-navigate to Welcome
@@ -114,6 +119,7 @@ fun WC26NavHost(
                 }
             }
         }
+        previousIsLoggedIn = isLoggedIn
     }
 
     // Fetch unread count initially on login/logout changes
@@ -378,7 +384,16 @@ fun WC26NavHost(
                     },
                 )
             }
-            composable<Destinations.PostDetail> {
+            composable<Destinations.PostDetail>(
+                deepLinks = listOf(
+                    navDeepLink<Destinations.PostDetail>(
+                        basePath = "https://wc26.adelash.dev/posts"
+                    ),
+                    navDeepLink<Destinations.PostDetail>(
+                        basePath = "wc26://posts"
+                    )
+                )
+            ) {
                 PostDetailScreen(
                     onBack = { navController.popBackStack() },
                     onAuthorClick = { userId ->

@@ -27,6 +27,7 @@ class AuthInterceptor @Inject constructor(
 
         // Inject the X-App-Version header to all outgoing requests
         val request = chain.request().newBuilder()
+            .header("User-Agent", "WC26-Android/${BuildConfig.VERSION_NAME}")
             .addHeader("X-App-Version", BuildConfig.VERSION_CODE.toString())
             .apply {
                 if (token != null) {
