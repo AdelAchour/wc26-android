@@ -70,7 +70,6 @@
     <string name="settings_account">Account</string>
     <string name="settings_logout">Log out</string>
     <string name="settings_about">About</string>
-    <string name="settings_app_name">WC26</string>
     <string name="settings_version">Version %1$s</string>
     <string name="settings_logout_confirm_title">Log out?</string>
     <string name="settings_logout_confirm_desc">You\'ll need to log in again to post, like, or comment.</string>

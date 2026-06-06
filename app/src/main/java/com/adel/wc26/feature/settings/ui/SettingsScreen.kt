@@ -124,7 +124,7 @@ fun SettingsContent(
         )
         Spacer(Modifier.height(Spacing.sm))
         Text(
-            text = stringResource(R.string.settings_app_name),
+            text = stringResource(R.string.app_name),
             style = MaterialTheme.typography.bodyLarge,
         )
         Text(

@@ -47,9 +47,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
 import android.widget.Toast
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.ui.platform.LocalContext
 import com.adel.wc26.feature.posts.domain.comment.Comment
 import com.adel.wc26.feature.posts.ui.component.DetailedPostCard
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.tooling.preview.Preview
+import com.adel.wc26.core.designsystem.theme.WC26Theme
 
 
 /**
@@ -280,57 +296,127 @@ private fun CommentComposerBar(
     onInputChange: (String) -> Unit,
     onSend: () -> Unit,
 ) {
+    // Rotates from -90 degrees (looking left) to 0 degrees (looking top)
+    val rotationAngle by animateFloatAsState(
+        targetValue = if (canSend) 0f else -90f,
+        animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
+        label = "SendButtonRotation"
+    )
+
+    // Smooth transition for the circular button background color
+    val buttonColor by animateColorAsState(
+        targetValue = if (canSend) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+        },
+        animationSpec = tween(durationMillis = 300),
+        label = "SendButtonColor"
+    )
+
+    // Smooth transition for the send icon color
+    val iconColor by animateColorAsState(
+        targetValue = if (canSend) {
+            MaterialTheme.colorScheme.onPrimary
+        } else {
+            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+        },
+        animationSpec = tween(durationMillis = 300),
+        label = "SendIconColor"
+    )
+
     Surface(
-        tonalElevation = 3.dp,
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 0.dp, // Removes Material 3 tint overlay that makes it look dark
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .imePadding()
-                .padding(Spacing.md),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            BasicTextField(
-                value = input,
-                onValueChange = onInputChange,
-                modifier = Modifier.weight(1f).padding(Spacing.sm),
-                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
-                ),
-                decorationBox = { inner ->
-                    if (input.isEmpty()) {
-                        Text(
-                            text = stringResource(R.string.post_detail_comment_hint),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    inner()
-                },
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // A light modern divider at the top of the composer bar
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
             )
 
-            // Counter shows only when getting close to the limit.
-            if (charsLeft <= 50) {
-                Text(
-                    text = charsLeft.toString(),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (charsLeft < 0) MaterialTheme.colorScheme.error
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = Spacing.xs),
-                )
-            }
-
-            IconButton(
-                onClick = onSend,
-                enabled = canSend,
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .imePadding()
+                    .padding(Spacing.lg),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.Send,
-                    contentDescription = stringResource(R.string.post_detail_send_comment),
-                    tint = if (canSend) MaterialTheme.colorScheme.secondary
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    // Rounded corner rectangle container for the text field
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(horizontal = Spacing.md, vertical = Spacing.md),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        BasicTextField(
+                            value = input,
+                            onValueChange = onInputChange,
+                            modifier = Modifier.fillMaxWidth(),
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurface,
+                            ),
+                            decorationBox = { inner ->
+                                if (input.isEmpty()) {
+                                    Text(
+                                        text = stringResource(R.string.post_detail_comment_hint),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                inner()
+                            },
+                        )
+                    }
+
+                    // Character counter placed directly below the text field
+                    if (charsLeft <= 50) {
+                        Text(
+                            text = charsLeft.toString(),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (charsLeft < 0) MaterialTheme.colorScheme.error
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = Spacing.sm, top = 2.dp),
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(Spacing.md))
+
+                // Compact circle send button on the right side
+                IconButton(
+                    onClick = onSend,
+                    enabled = canSend,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .background(
+                            color = buttonColor,
+                            shape = CircleShape
+                        )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowUpward,
+                        contentDescription = stringResource(R.string.post_detail_send_comment),
+                        tint = iconColor,
+                        modifier = Modifier
+                            .size(24.dp) // Balanced icon size
+                            .rotate(rotationAngle)
+                    )
+                }
             }
         }
     }
@@ -357,5 +443,20 @@ private fun SignInToCommentBar(onSignIn: () -> Unit) {
                 color = MaterialTheme.colorScheme.secondary,
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PlaceholderScreenPreview() {
+    WC26Theme {
+        CommentComposerBar(
+            input = "",
+            charsLeft = 55,
+            canSend = true,
+            sending = false,
+            onInputChange = {},
+            onSend = {},
+        )
     }
 }
