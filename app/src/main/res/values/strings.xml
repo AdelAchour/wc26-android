@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">WC26 Thread</string>
+    <string name="app_name">WC26 Threads</string>
 
     <!-- Shared actions -->
     <string name="action_cancel">Cancel</string>
