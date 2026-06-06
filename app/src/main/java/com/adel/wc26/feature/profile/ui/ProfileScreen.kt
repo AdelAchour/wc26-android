@@ -3,11 +3,13 @@ package com.adel.wc26.feature.profile.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
@@ -45,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.ui.tooling.preview.Preview
+import com.adel.wc26.core.designsystem.component.WC26SecondaryButton
 import com.adel.wc26.core.designsystem.component.WC26TextField
 import com.adel.wc26.core.designsystem.theme.WC26Theme
 import com.adel.wc26.core.result.AppError
@@ -166,7 +169,7 @@ fun ProfileContent(
     }
 
     when {
-        state.loggedOut -> LoggedOutProfile(onSignIn = onSignIn, modifier = modifier)
+        state.loggedOut -> LoggedOutProfile(onSignIn = onSignIn, onSettingsClick = onSettingsClick, modifier = modifier)
 
         state.loading -> WC26LoadingState(modifier = modifier)
 
@@ -246,6 +249,7 @@ fun ProfileContent(
 @Composable
 private fun LoggedOutProfile(
     onSignIn: () -> Unit,
+    onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -265,10 +269,21 @@ private fun LoggedOutProfile(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = Spacing.sm, bottom = Spacing.lg),
         )
-        WC26PrimaryButton(
-            text = stringResource(R.string.profile_sign_in),
-            onClick = onSignIn,
-        )
+        Column(
+            modifier = Modifier.width(IntrinsicSize.Max)
+        ) {
+            WC26PrimaryButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(R.string.profile_sign_in),
+                onClick = onSignIn,
+            )
+            WC26SecondaryButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(R.string.profile_go_to_settings),
+                onClick = onSettingsClick,
+                )
+
+        }
     }
 }
 

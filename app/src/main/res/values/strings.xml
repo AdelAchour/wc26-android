@@ -64,6 +64,7 @@
     <string name="profile_logged_out_title">You\'re browsing as a guest</string>
     <string name="profile_logged_out_desc">Sign in to get your own profile, post takes, and join the conversation.</string>
     <string name="profile_sign_in">Sign in</string>
+    <string name="profile_go_to_settings">Go to settings</string>
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>
@@ -73,6 +74,14 @@
     <string name="settings_version">Version %1$s</string>
     <string name="settings_logout_confirm_title">Log out?</string>
     <string name="settings_logout_confirm_desc">You\'ll need to log in again to post, like, or comment.</string>
+
+    <string name="about_section_companion_title">THE TOURNAMENT COMPANION</string>
+    <string name="about_section_companion_desc">WC26 Threads is an open-source, fan-first social companion built for the World Cup. Every match gets its own dedicated live thread, and every hot take gets its own space. Experience a tournament-long fan community centered around what matters: the football.</string>
+    <string name="about_section_craft_title">THE ARCHITECTURE &amp; CRAFT</string>
+    <string name="about_section_craft_desc">Built end-to-end as a high-fidelity portfolio piece, the project connects a modern, reactive Jetpack Compose Android client with a robust server backend. It demonstrates clean architecture standards, real-time sync, and fluid UX layouts.</string>
+    <string name="about_section_author">Built with ❤️ by Adel Achour</string>
+    <string name="about_cta_website">Explore WC26 Website</string>
+    <string name="about_cta_portfolio">Developer Portfolio &amp; Codebase</string>
 
     <!-- Relative time -->
     <string name="time_just_now">just now</string>
