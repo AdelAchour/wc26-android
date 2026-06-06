@@ -1,9 +1,12 @@
 package com.adel.wc26.navigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -173,7 +176,17 @@ fun WC26NavHost(
     Scaffold(
         modifier = modifier,
         bottomBar = {
-            if (showBottomBar) {
+            AnimatedVisibility(
+                visible = showBottomBar,
+                enter = slideInVertically(
+                    initialOffsetY = { it }, // Slides up from the bottom edge
+                    animationSpec = tween(300)
+                ) + fadeIn(animationSpec = tween(300)),
+                exit = slideOutVertically(
+                    targetOffsetY = { it }, // Slide down off the screen
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(300))
+            ) {
                 WC26BottomBar(
                     navController = navController,
                     unreadCount = unreadCount,
