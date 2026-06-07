@@ -117,11 +117,4 @@ Note : To apply this logic you need to replace `.baseUrl(ApiConstants.BASE_URL)`
 
 ---
 
-## Open Source & License
-
-This project is licensed under the **MIT License**. The codebase is open for contributions, audits, and showcase reviews.
-
-Feel free to reach out to the developer or review the [Backend Repository](https://github.com/AdelAchour/wc26-backend) for more context on the server architecture!
-
----
 Disclaimer: This project is an independent open-source fan portfolio app and is not affiliated with, authorized, or endorsed by FIFA or any official World Cup organization.*
