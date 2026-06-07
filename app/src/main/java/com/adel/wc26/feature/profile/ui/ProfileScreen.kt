@@ -46,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.adel.wc26.core.designsystem.component.WC26SecondaryButton
 import com.adel.wc26.core.designsystem.component.WC26TextField
@@ -269,6 +270,7 @@ private fun LoggedOutProfile(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = Spacing.sm, bottom = Spacing.lg),
+            textAlign = TextAlign.Center,
         )
         Column(
             modifier = Modifier.width(IntrinsicSize.Max)
