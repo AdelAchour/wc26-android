@@ -4,8 +4,9 @@
 
 Every single match of the tournament gets its own real-time discussion board, allowing fans to share their hot takes, celebrate goals, and discuss tactics.
 
+- **Google Play Store:** [play store](https://play.google.com/store/apps/details?id=com.adel.wc26")
 - **Live Web Landing Page & Demo:** [wc26.adelash.dev](https://wc26.adelash.dev/)
-- **Live API Base URL:** `https://wc26.adelash.dev/api/`
+- **Live API Base URL:** [wc26.adelash.dev/api](https://wc26.adelash.dev/api/)
 - **Backend Repository:** [wc26-backend](https://github.com/AdelAchour/wc26-backend)
 
 ---
