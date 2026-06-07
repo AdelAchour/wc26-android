@@ -393,7 +393,6 @@ fun DetailedPostCard(
                             val postUrl = "https://wc26.adelash.dev/posts/${post.id}"
                             val shareText = context.getString(
                                 R.string.post_share_template,
-                                post.content,
                                 post.author.username,
                                 postUrl
                             )
