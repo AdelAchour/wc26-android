@@ -9,17 +9,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.adel.wc26.R
 import com.adel.wc26.core.designsystem.theme.WC26Theme
 
@@ -33,13 +30,108 @@ enum class AvatarPreset(
     val drawableResId: Int,
     val labelResId: Int
 ) {
-    SOCCER_BALL("avatar_soccer_ball", R.drawable.avatar_soccer_ball, R.string.avatar_label_soccer_ball),
-    TROPHY("avatar_trophy", R.drawable.avatar_trophy, R.string.avatar_label_trophy),
-    REFEREE("avatar_referee", R.drawable.avatar_referee, R.string.avatar_label_referee),
-    JERSEY_RED("avatar_jersey_red", R.drawable.avatar_jersey_red, R.string.avatar_label_jersey_red),
-    JERSEY_BLUE("avatar_jersey_blue", R.drawable.avatar_jersey_blue, R.string.avatar_label_jersey_blue),
-    //JERSEY_YELLOW("avatar_jersey_yellow", R.drawable.avatar_jersey_yellow, R.string.avatar_label_jersey_yellow),
-    STADIUM("avatar_stadium", R.drawable.avatar_stadium, R.string.avatar_label_stadium);
+    THE_CAPTAIN(
+        "the_captain",
+        R.drawable.the_captain,
+        R.string.avatar_label_the_captain
+    ),
+
+    THE_WONDERKID(
+        "the_wonderkid",
+        R.drawable.the_wonderkid,
+        R.string.avatar_label_the_wonderkid
+    ),
+
+    THE_WALL(
+        "the_wall",
+        R.drawable.the_wall,
+        R.string.avatar_label_the_wall
+    ),
+
+    THE_WHISTLE(
+        "the_whistle",
+        R.drawable.the_whistle,
+        R.string.avatar_label_the_whistle
+    ),
+
+    THE_PITCH(
+        "the_pitch",
+        R.drawable.the_pitch,
+        R.string.avatar_label_the_pitch
+    ),
+
+    THE_GOLDEN_BOOT(
+        "the_golden_boot",
+        R.drawable.the_golden_boot,
+        R.string.avatar_label_the_golden_boot
+    ),
+
+    THE_UNDERDOG(
+        "the_underdog",
+        R.drawable.the_underdog,
+        R.string.avatar_label_the_underdog
+    ),
+
+    THE_DARK_HORSE(
+        "the_dark_horse",
+        R.drawable.the_dark_horse,
+        R.string.avatar_label_the_dark_horse
+    ),
+
+    VAR_ROBOT(
+        "the_var",
+        R.drawable.the_var,
+                R.string.avatar_label_the_var
+    ),
+
+    THE_SCOUT(
+        "the_scout",
+        R.drawable.the_scout,
+        R.string.avatar_label_the_scout
+    ),
+
+    THE_ROAR(
+        "the_roar",
+        R.drawable.the_roar,
+        R.string.avatar_label_the_roar
+    ),
+
+    THE_TROPHY_HUNTER(
+        "the_trophy_hunter",
+        R.drawable.the_trophy_hunter,
+        R.string.avatar_label_the_trophy_hunter
+    ),
+
+    THE_SUPER_SUB(
+        "the_super_sub",
+        R.drawable.the_super_sub,
+        R.string.avatar_label_the_super_sub
+    ),
+
+    THE_TACTICIAN(
+        "the_tactician",
+        R.drawable.the_tactician,
+        R.string.avatar_label_the_tactician
+    ),
+
+    THE_PENALTY_KING(
+        "the_penalty_king",
+        R.drawable.the_penalty_king,
+        R.string.avatar_label_the_penalty_king
+    ),
+
+    THE_COMMENTATOR(
+        "the_commentator",
+        R.drawable.the_commentator,
+        R.string.avatar_label_the_commentator
+    ),
+
+    THE_TRANSFER_RUMOR(
+        "the_transfer_rumor",
+        R.drawable.the_transfer_rumor,
+        R.string.avatar_label_the_Transfer_rumor
+    );
+
     companion object {
         fun fromKey(key: String): AvatarPreset? {
             return entries.find { it.key == key }
@@ -119,7 +211,7 @@ private fun WC26AvatarPreview() {
     WC26Theme {
         WC26Avatar(
             displayName = "Adel",
-            avatarUrl = "preset://avatar_soccer_ball",
+            avatarUrl = "preset://the_captain",
         )
     }
 }

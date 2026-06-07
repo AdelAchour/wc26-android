@@ -42,6 +42,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -162,7 +164,7 @@ fun AvatarPickerContent(
                 WC26Avatar(
                     displayName = displayName,
                     avatarUrl = "preset://$selectedPresetKey",
-                    size = 112.dp
+                    size = 136.dp
                 )
                 if (isUpdatingAvatar) {
                     Box(
@@ -175,6 +177,20 @@ fun AvatarPickerContent(
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                 }
+            }
+
+            val selectedPreset = remember(selectedPresetKey) {
+                AvatarPreset.fromKey(selectedPresetKey)
+            }
+            selectedPreset?.let { preset ->
+                Spacer(Modifier.height(Spacing.sm))
+                Text(
+                    text = stringResource(preset.labelResId),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center
+                )
             }
 
             Spacer(Modifier.height(Spacing.xl))
@@ -250,8 +266,9 @@ fun AvatarPickerContent(
                             } else {
                                 MaterialTheme.colorScheme.onSurface
                             },
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                            maxLines = 1
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }

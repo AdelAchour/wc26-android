@@ -42,6 +42,7 @@ fun ProfileHeader(
     modifier: Modifier = Modifier,
     bio: String? = null,
     onAvatarClick: (() -> Unit)? = null,
+    showEditIcon: Boolean = false,
     onEditProfileClick: (() -> Unit)? = null,
 ) {
     Column(
@@ -64,10 +65,10 @@ fun ProfileHeader(
             WC26Avatar(
                 displayName = displayName,
                 avatarUrl = avatarUrl,
-                size = 90.dp,
+                size = 100.dp,
             )
             // Pencil edit overlay
-            if (onAvatarClick != null) {
+            if (showEditIcon) {
                 Icon(
                     imageVector = Icons.Default.Edit,
                     contentDescription = "Edit Avatar",

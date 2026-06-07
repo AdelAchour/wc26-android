@@ -192,6 +192,7 @@ fun ProfileContent(
                         bio = state.profile.bio,
                         joinedAtIso = state.profile.joinedAt,
                         onAvatarClick = onEditAvatarClick,
+                        showEditIcon = true,
                         onEditProfileClick = onEditProfileClick,
                     )
 

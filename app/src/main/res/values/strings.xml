@@ -6,6 +6,7 @@
     <string name="action_try_again">Try again</string>
     <string name="action_back">Back</string>
     <string name="action_delete">Delete</string>
+    <string name="action_close">Close</string>
 
     <!-- Generic errors -->
     <string name="error_something_went_wrong">Something went wrong</string>
@@ -192,13 +193,23 @@
     <string name="avatar_picker_success_update">Avatar updated successfully</string>
 
     <!-- Avatar Preset Labels -->
-    <string name="avatar_label_soccer_ball">The Classic Ball</string>
-    <string name="avatar_label_trophy">Golden Trophy</string>
-    <string name="avatar_label_referee">The Whistle</string>
-    <string name="avatar_label_jersey_red">Red Jersey</string>
-    <string name="avatar_label_jersey_blue">Blue Jersey</string>
-    <string name="avatar_label_jersey_yellow">Yellow Jersey</string>
-    <string name="avatar_label_stadium">The Pitch</string>
+    <string name="avatar_label_the_captain">The Captain</string>
+    <string name="avatar_label_the_wonderkid">The Wonderkid</string>
+    <string name="avatar_label_the_wall">The Wall</string>
+    <string name="avatar_label_the_whistle">The Whistle</string>
+    <string name="avatar_label_the_pitch">The Pitch</string>
+    <string name="avatar_label_the_golden_boot">The Golden Boot</string>
+    <string name="avatar_label_the_underdog">The Underdog</string>
+    <string name="avatar_label_the_dark_horse">The Dark Horse</string>
+    <string name="avatar_label_the_var">The VAR</string>
+    <string name="avatar_label_the_scout">The Scout</string>
+    <string name="avatar_label_the_roar">The Roar</string>
+    <string name="avatar_label_the_trophy_hunter">The Trophy Hunter</string>
+    <string name="avatar_label_the_super_sub">The Super Sub</string>
+    <string name="avatar_label_the_tactician">The Tactician</string>
+    <string name="avatar_label_the_penalty_king">The Penalty King</string>
+    <string name="avatar_label_the_commentator">The Commentator</string>
+    <string name="avatar_label_the_Transfer_rumor">The Transfer Rumor</string>
 
     <!-- Force Update & Maintenance Mode -->
     <string name="force_update_title">Update Required</string>
