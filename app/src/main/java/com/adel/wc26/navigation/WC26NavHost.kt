@@ -1,5 +1,6 @@
 package com.adel.wc26.navigation
 
+import android.content.Intent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -57,6 +58,7 @@ import com.adel.wc26.feature.notifications.ui.NotificationsScreen
 import com.adel.wc26.feature.status.ui.ForceUpdateScreen
 import com.adel.wc26.feature.status.ui.MaintenanceScreen
 import com.adel.wc26.feature.status.ui.MaintenanceViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 /**
@@ -76,9 +78,19 @@ fun WC26NavHost(
     tokenStore: TokenStore,
     appStatusManager: AppStatusManager,
     notificationsManager: NotificationsManager,
+    deepLinkIntents: Flow<Intent>,
     modifier: Modifier = Modifier,
 ) {
     val navController = rememberNavController()
+
+    // Re-fire deep links for warm starts (background/foreground). The library's
+    // auto-handler only runs once per process via the deepLinkHandled flag, so we
+    // drive it ourselves here. Reuses the per-destination navDeepLink registrations.
+    LaunchedEffect(Unit) {
+        deepLinkIntents.collect { intent ->
+            navController.handleDeepLink(intent)
+        }
+    }
 
     // Observe app blocking status
     val appStatus by appStatusManager.appStatus.collectAsStateWithLifecycle()

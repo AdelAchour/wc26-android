@@ -15,6 +15,7 @@ import com.adel.wc26.core.datastore.TokenStore
 import com.adel.wc26.core.network.AppStatusManager
 import com.adel.wc26.feature.notifications.data.NotificationsManager
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 /**
  * The single Activity. Hosts the entire Compose UI and the navigation graph.
@@ -28,6 +29,8 @@ class MainActivity : ComponentActivity() {
     lateinit var appStatusManager: AppStatusManager
     @Inject
     lateinit var notificationsManager: NotificationsManager
+    // Bridges new deep-link intents into the Compose nav graph.
+    private val deepLinkIntents = MutableSharedFlow<Intent>(extraBufferCapacity = 1)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +43,8 @@ class MainActivity : ComponentActivity() {
                     WC26NavHost(
                         tokenStore = tokenStore,
                         appStatusManager = appStatusManager,
-                        notificationsManager = notificationsManager
+                        notificationsManager = notificationsManager,
+                        deepLinkIntents = deepLinkIntents,
                     )
                 }
             }
@@ -49,6 +53,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        setIntent(intent) // Required to deliver background deep links to NavController
+        setIntent(intent)
+        deepLinkIntents.tryEmit(intent)
     }
 }
