@@ -38,7 +38,7 @@ The application is engineered strictly with tools and patterns that represent **
 
 ---
 
-## 🏗️ Architecture & Clean Design
+## Architecture & Clean Design
 
 The codebase strictly adheres to **Clean Architecture** principles and the **MVVM (Model-View-ViewModel)** design pattern. It is packaged **feature-by-feature** to isolate business domains, improve build speed, and prevent bloated modules.
 
