@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -216,7 +217,8 @@ fun WC26NavHost(
         NavHost(
             navController = navController,
             startDestination = Destinations.Splash,
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier.padding(innerPadding)
+                .consumeWindowInsets(innerPadding),
             enterTransition = {
                 slideIntoContainer(
                     towards = AnimatedContentTransitionScope.SlideDirection.Left,

@@ -54,6 +54,7 @@ import com.adel.wc26.core.designsystem.theme.WC26Theme
 import com.adel.wc26.core.result.AppError
 import com.adel.wc26.feature.profile.domain.UserProfile
 import com.adel.wc26.feature.profile.domain.UserRole
+import com.adel.wc26.feature.profile.ui.component.AvatarZoomDialog
 
 /**
  * Profile tab — stateful entry point. The signed-in user's own profile:
@@ -168,6 +169,7 @@ fun ProfileContent(
         ProfileTab.POSTS -> stringResource(R.string.profile_empty_posts)
         ProfileTab.LIKES -> stringResource(R.string.profile_empty_likes)
     }
+    var showAvatarZoom by remember { mutableStateOf(false) }
 
     when {
         state.loggedOut -> LoggedOutProfile(onSignIn = onSignIn, onSettingsClick = onSettingsClick, modifier = modifier)
@@ -180,67 +182,75 @@ fun ProfileContent(
             modifier = modifier,
         )
 
-        state.profile != null -> LazyColumn(
-            modifier = modifier.fillMaxSize(),
-        ) {
+        state.profile != null -> {
+            LazyColumn(modifier = modifier.fillMaxSize()) {
+                item {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        ProfileHeader(
+                            displayName = state.profile.displayName,
+                            username = state.profile.username,
+                            avatarUrl = state.profile.avatarUrl,
+                            bio = state.profile.bio,
+                            joinedAtIso = state.profile.joinedAt,
+                            onAvatarClick = onEditAvatarClick,
+                            onAvatarLongClick = { showAvatarZoom = true },
+                            showEditIcon = true,
+                            onEditProfileClick = onEditProfileClick,
+                        )
 
-            item {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    ProfileHeader(
-                        displayName = state.profile.displayName,
-                        username = state.profile.username,
-                        avatarUrl = state.profile.avatarUrl,
-                        bio = state.profile.bio,
-                        joinedAtIso = state.profile.joinedAt,
-                        onAvatarClick = onEditAvatarClick,
-                        showEditIcon = true,
-                        onEditProfileClick = onEditProfileClick,
-                    )
+                        IconButton(
+                            onClick = onSettingsClick,
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(Spacing.md)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Settings,
+                                contentDescription = "Settings",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
 
-                    IconButton(
-                        onClick = onSettingsClick,
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(Spacing.md)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Settings,
-                            contentDescription = "Settings",
-                            tint = MaterialTheme.colorScheme.onSurface
+                item {
+                    TabRow(selectedTabIndex = state.selectedTab.ordinal) {
+                        Tab(
+                            selected = state.selectedTab == ProfileTab.POSTS,
+                            onClick = { onTabSelected(ProfileTab.POSTS) },
+                            text = { Text(stringResource(R.string.profile_tab_posts)) },
+                        )
+                        Tab(
+                            selected = state.selectedTab == ProfileTab.LIKES,
+                            onClick = { onTabSelected(ProfileTab.LIKES) },
+                            text = { Text(stringResource(R.string.profile_tab_likes)) },
                         )
                     }
                 }
-            }
 
-            item {
-                TabRow(selectedTabIndex = state.selectedTab.ordinal) {
-                    Tab(
-                        selected = state.selectedTab == ProfileTab.POSTS,
-                        onClick = { onTabSelected(ProfileTab.POSTS) },
-                        text = { Text(stringResource(R.string.profile_tab_posts)) },
-                    )
-                    Tab(
-                        selected = state.selectedTab == ProfileTab.LIKES,
-                        onClick = { onTabSelected(ProfileTab.LIKES) },
-                        text = { Text(stringResource(R.string.profile_tab_likes)) },
+                val active = when (state.selectedTab) {
+                    ProfileTab.POSTS -> posts
+                    ProfileTab.LIKES -> likes
+                }
+                if (active != null) {
+                    postsThread(
+                        posts = active,
+                        onPostClick = onPostClick,
+                        onLikeClick = onLikeClick,
+                        onAuthorClick = onAuthorClick,
+                        onMatchClick = onMatchClick,
+                        emptyMessage = emptyMessage,
+                        currentUserId = state.profile.id, // Logged in profile ID matches the current user
+                        onDeleteClick = onDeleteClick,
                     )
                 }
             }
 
-            val active = when (state.selectedTab) {
-                ProfileTab.POSTS -> posts
-                ProfileTab.LIKES -> likes
-            }
-            if (active != null) {
-                postsThread(
-                    posts = active,
-                    onPostClick = onPostClick,
-                    onLikeClick = onLikeClick,
-                    onAuthorClick = onAuthorClick,
-                    onMatchClick = onMatchClick,
-                    emptyMessage = emptyMessage,
-                    currentUserId = state.profile.id, // Logged in profile ID matches the current user
-                    onDeleteClick = onDeleteClick,
+            if (showAvatarZoom) {
+                AvatarZoomDialog(
+                    displayName = state.profile.displayName,
+                    avatarUrl = state.profile.avatarUrl,
+                    onDismiss = { showAvatarZoom = false }
                 )
             }
         }

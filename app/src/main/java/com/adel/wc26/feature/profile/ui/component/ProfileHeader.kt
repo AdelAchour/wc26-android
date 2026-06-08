@@ -1,6 +1,8 @@
 package com.adel.wc26.feature.profile.ui.component
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -33,6 +35,7 @@ import com.adel.wc26.core.util.WC26DateTime
  * @username, joined date, and bio. Shared by the own-profile and public-profile
  * screens so both look identical.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ProfileHeader(
     displayName: String,
@@ -42,21 +45,25 @@ fun ProfileHeader(
     modifier: Modifier = Modifier,
     bio: String? = null,
     onAvatarClick: (() -> Unit)? = null,
+    onAvatarLongClick: (() -> Unit)? = null,
     showEditIcon: Boolean = false,
     onEditProfileClick: (() -> Unit)? = null,
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(Spacing.xl),
+            .padding(start = Spacing.xl, end = Spacing.xl, top = Spacing.md, bottom = Spacing.xl),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(Modifier.height(Spacing.md))
 
         // Wrap avatar in an interactive box if onAvatarClick is not null
         Box(
-            modifier = if (onAvatarClick != null) {
-                Modifier.clickable { onAvatarClick() }
+            modifier = if (onAvatarClick != null || onAvatarLongClick != null) {
+                Modifier.combinedClickable(
+                    onClick = { onAvatarClick?.invoke() },
+                    onLongClick = { onAvatarLongClick?.invoke() }
+                )
             } else {
                 Modifier
             },

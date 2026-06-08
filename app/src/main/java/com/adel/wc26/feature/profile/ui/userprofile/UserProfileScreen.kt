@@ -59,6 +59,7 @@ import com.adel.wc26.core.designsystem.component.isAvatarPreset
 import com.adel.wc26.core.designsystem.component.removePresetPrefix
 import com.adel.wc26.core.designsystem.theme.WC26Theme
 import com.adel.wc26.feature.profile.domain.PublicProfile
+import com.adel.wc26.feature.profile.ui.component.AvatarZoomDialog
 
 /**
  * UserProfile — stateful entry point. The public profile of another user:
@@ -209,85 +210,6 @@ fun UserProfileContent(
                     avatarUrl = state.profile.avatarUrl,
                     onDismiss = { showAvatarZoom = false }
                 )
-            }
-        }
-    }
-}
-
-@Composable
-private fun AvatarZoomDialog(
-    displayName: String,
-    avatarUrl: String?,
-    onDismiss: () -> Unit,
-) {
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = RoundedCornerShape(Spacing.lg),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 6.dp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Spacing.md)
-        ) {
-            Column(
-                modifier = Modifier.padding(Spacing.xl),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                val preset = remember(avatarUrl) {
-                    if (avatarUrl?.isAvatarPreset() == true) {
-                        AvatarPreset.fromKey(avatarUrl.removePresetPrefix())
-                    } else {
-                        null
-                    }
-                }
-
-                if (preset != null) {
-                    Image(
-                        painter = painterResource(id = preset.drawableResId),
-                        contentDescription = stringResource(preset.labelResId),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            //.aspectRatio(1f)
-                            .clip(RoundedCornerShape(Spacing.md)),
-                        //contentScale = ContentScale.Crop
-                    )
-                    Spacer(Modifier.height(Spacing.md))
-                    Text(
-                        text = stringResource(preset.labelResId),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                } else {
-                    // Fallback to stylized letter avatar if no preset is set
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(1f)
-                            .clip(RoundedCornerShape(Spacing.md))
-                            .background(MaterialTheme.colorScheme.secondaryContainer),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = displayName.firstOrNull()?.uppercase() ?: "?",
-                            style = MaterialTheme.typography.displayLarge,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-
-                Spacer(Modifier.height(Spacing.md))
-
-                TextButton(
-                    onClick = onDismiss,
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Text(
-                        text = stringResource(R.string.action_close),
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
             }
         }
     }

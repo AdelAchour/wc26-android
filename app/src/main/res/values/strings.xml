@@ -98,7 +98,7 @@
 
     <!-- Filter labels -->
     <string name="match_filter_all">All</string>
-    <string name="match_filter_upcoming">Upcoming</string>
+    <string name="match_filter_upcoming">Next</string>
     <string name="match_filter_live">Live</string>
     <string name="match_filter_finished">Finished</string>
 

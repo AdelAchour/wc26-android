@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.annotation.StringRes
+import androidx.compose.ui.text.style.TextOverflow
 import com.adel.wc26.R
 import com.adel.wc26.core.designsystem.theme.Spacing
 import com.adel.wc26.core.designsystem.theme.WC26Theme
@@ -51,7 +52,9 @@ fun MatchFilterRow(
             ) {
                 Text(
                     text = stringResource(filter.labelRes()),
-                    style = MaterialTheme.typography.labelLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.labelMedium,
                 )
             }
         }
