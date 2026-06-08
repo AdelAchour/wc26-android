@@ -45,6 +45,12 @@ class NotificationsViewModel @Inject constructor(
         }
     }
 
+    fun refreshCount() {
+        viewModelScope.launch {
+            notificationsManager.refreshUnreadCount()
+        }
+    }
+
     fun markAsRead(notification: Notification) {
         if (notification.isRead) return
         viewModelScope.launch {

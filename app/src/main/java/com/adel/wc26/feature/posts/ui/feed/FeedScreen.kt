@@ -36,6 +36,9 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.Alignment
 
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+
 /**
  * Feed tab — stateful entry point. The global stream of all posts.
  */
@@ -112,8 +115,9 @@ fun FeedScreen(
 
 /**
  * Feed tab — stateless content. Handles the Paging refresh load states:
- * full-screen loading / error / empty, otherwise the paged list.
+ * Pull-to-refresh container wraps the lists / state screens.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedContent(
     posts: LazyPagingItems<Post>,
@@ -133,32 +137,36 @@ fun FeedContent(
             modifier = Modifier.padding(Spacing.lg),
         )
 
-        when (val refresh = posts.loadState.refresh) {
-            is LoadState.Loading -> WC26LoadingState()
+        val isRefreshing = posts.loadState.refresh is LoadState.Loading && posts.itemCount > 0
 
-            is LoadState.Error -> WC26ErrorState(
-                message = stringResource(R.string.error_unknown),
-                onRetry = { posts.retry() },
-            )
-
-            is LoadState.NotLoading -> {
-                if (posts.itemCount == 0) {
-                    WC26EmptyState(
-                        title = stringResource(R.string.feed_empty_title),
-                        description = stringResource(R.string.feed_empty_desc),
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = { posts.refresh() },
+            modifier = Modifier.fillMaxSize()
+        ) {
+            if (posts.loadState.refresh is LoadState.Loading && posts.itemCount == 0) {
+                WC26LoadingState()
+            } else if (posts.loadState.refresh is LoadState.Error && posts.itemCount == 0) {
+                WC26ErrorState(
+                    message = stringResource(R.string.error_unknown),
+                    onRetry = { posts.retry() },
+                )
+            } else if (posts.itemCount == 0) {
+                WC26EmptyState(
+                    title = stringResource(R.string.feed_empty_title),
+                    description = stringResource(R.string.feed_empty_desc),
+                )
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    postsThread(
+                        posts = posts,
+                        onPostClick = onPostClick,
+                        onLikeClick = onLikeClick,
+                        onAuthorClick = onAuthorClick,
+                        onMatchClick = onMatchClick,
+                        currentUserId = currentUserId,
+                        onDeleteClick = onDeleteClick,
                     )
-                } else {
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        postsThread(
-                            posts = posts,
-                            onPostClick = onPostClick,
-                            onLikeClick = onLikeClick,
-                            onAuthorClick = onAuthorClick,
-                            onMatchClick = onMatchClick,
-                            currentUserId = currentUserId,
-                            onDeleteClick = onDeleteClick,
-                        )
-                    }
                 }
             }
         }

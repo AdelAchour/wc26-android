@@ -50,6 +50,7 @@ data class ProfileUiState(
     val selectedTab: ProfileTab = ProfileTab.POSTS,
     val isSavingProfile: Boolean = false,
     val profileError: AppError? = null,
+    val isRefreshing: Boolean = false,
 )
 
 @HiltViewModel
@@ -84,7 +85,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun load() {
+    fun load(isRefresh: Boolean = false) {
         viewModelScope.launch {
             val loggedIn = tokenStore.getToken() != null
             if (!loggedIn) {
@@ -92,16 +93,20 @@ class ProfileViewModel @Inject constructor(
                 return@launch
             }
 
-            _uiState.update { it.copy(loading = true, error = null, loggedOut = false) }
+            if (isRefresh) {
+                _uiState.update { it.copy(isRefreshing = true) }
+            } else {
+                _uiState.update { it.copy(loading = true, error = null, loggedOut = false) }
+            }
             when (val result = userRepository.getMyProfile()) {
                 is DataResult.Success -> {
                     buildPagers(result.data.id)
                     _uiState.update {
-                        it.copy(loading = false, profile = result.data, error = null)
+                        it.copy(loading = false, profile = result.data, error = null, isRefreshing = false)
                     }
                 }
                 is DataResult.Error ->
-                    _uiState.update { it.copy(loading = false, error = result.error) }
+                    _uiState.update { it.copy(loading = false, error = result.error, isRefreshing = false) }
             }
         }
     }

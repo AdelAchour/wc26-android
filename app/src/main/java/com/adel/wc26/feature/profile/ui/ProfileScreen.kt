@@ -26,6 +26,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.LoadState
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import com.adel.wc26.R
 import com.adel.wc26.core.designsystem.component.WC26ErrorState
 import com.adel.wc26.core.designsystem.component.WC26LoadingState
@@ -89,6 +91,11 @@ fun ProfileScreen(
         likes = likes,
         onTabSelected = viewModel::onTabSelected,
         onRetry = viewModel::load,
+        onRefresh = {
+            viewModel.load(isRefresh = true)
+            posts?.refresh()
+            likes?.refresh()
+        },
         onSignIn = onSignIn,
         onPostClick = onPostClick,
         onAuthorClick = onAuthorClick,
@@ -147,6 +154,7 @@ fun ProfileScreen(
  * Profile tab — stateless content. Logged-out prompt, loading, error, or
  * the loaded profile (header + tabbed paged lists).
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileContent(
     state: ProfileUiState,
@@ -154,6 +162,7 @@ fun ProfileContent(
     likes: LazyPagingItems<Post>?,
     onTabSelected: (ProfileTab) -> Unit,
     onRetry: () -> Unit,
+    onRefresh: () -> Unit,
     onSignIn: () -> Unit,
     onPostClick: (Long) -> Unit,
     onAuthorClick: (Long) -> Unit,
@@ -183,66 +192,76 @@ fun ProfileContent(
         )
 
         state.profile != null -> {
-            LazyColumn(modifier = modifier.fillMaxSize()) {
-                item {
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        ProfileHeader(
-                            displayName = state.profile.displayName,
-                            username = state.profile.username,
-                            avatarUrl = state.profile.avatarUrl,
-                            bio = state.profile.bio,
-                            joinedAtIso = state.profile.joinedAt,
-                            onAvatarClick = onEditAvatarClick,
-                            onAvatarLongClick = { showAvatarZoom = true },
-                            showEditIcon = true,
-                            onEditProfileClick = onEditProfileClick,
-                        )
+            val postsRefreshing = posts?.let { it.loadState.refresh is LoadState.Loading && it.itemCount > 0 } ?: false
+            val likesRefreshing = likes?.let { it.loadState.refresh is LoadState.Loading && it.itemCount > 0 } ?: false
+            val isRefreshing = state.isRefreshing || postsRefreshing || likesRefreshing
 
-                        IconButton(
-                            onClick = onSettingsClick,
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(Spacing.md)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Settings,
-                                contentDescription = "Settings",
-                                tint = MaterialTheme.colorScheme.onSurface
+            PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                onRefresh = onRefresh,
+                modifier = modifier.fillMaxSize()
+            ) {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    item {
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            ProfileHeader(
+                                displayName = state.profile.displayName,
+                                username = state.profile.username,
+                                avatarUrl = state.profile.avatarUrl,
+                                bio = state.profile.bio,
+                                joinedAtIso = state.profile.joinedAt,
+                                onAvatarClick = onEditAvatarClick,
+                                onAvatarLongClick = { showAvatarZoom = true },
+                                showEditIcon = true,
+                                onEditProfileClick = onEditProfileClick,
+                            )
+
+                            IconButton(
+                                onClick = onSettingsClick,
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(Spacing.md)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Settings,
+                                    contentDescription = "Settings",
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                    }
+
+                    item {
+                        TabRow(selectedTabIndex = state.selectedTab.ordinal) {
+                            Tab(
+                                selected = state.selectedTab == ProfileTab.POSTS,
+                                onClick = { onTabSelected(ProfileTab.POSTS) },
+                                text = { Text(stringResource(R.string.profile_tab_posts)) },
+                            )
+                            Tab(
+                                selected = state.selectedTab == ProfileTab.LIKES,
+                                onClick = { onTabSelected(ProfileTab.LIKES) },
+                                text = { Text(stringResource(R.string.profile_tab_likes)) },
                             )
                         }
                     }
-                }
 
-                item {
-                    TabRow(selectedTabIndex = state.selectedTab.ordinal) {
-                        Tab(
-                            selected = state.selectedTab == ProfileTab.POSTS,
-                            onClick = { onTabSelected(ProfileTab.POSTS) },
-                            text = { Text(stringResource(R.string.profile_tab_posts)) },
-                        )
-                        Tab(
-                            selected = state.selectedTab == ProfileTab.LIKES,
-                            onClick = { onTabSelected(ProfileTab.LIKES) },
-                            text = { Text(stringResource(R.string.profile_tab_likes)) },
+                    val active = when (state.selectedTab) {
+                        ProfileTab.POSTS -> posts
+                        ProfileTab.LIKES -> likes
+                    }
+                    if (active != null) {
+                        postsThread(
+                            posts = active,
+                            onPostClick = onPostClick,
+                            onLikeClick = onLikeClick,
+                            onAuthorClick = onAuthorClick,
+                            onMatchClick = onMatchClick,
+                            emptyMessage = emptyMessage,
+                            currentUserId = state.profile.id, // Logged in profile ID matches the current user
+                            onDeleteClick = onDeleteClick,
                         )
                     }
-                }
-
-                val active = when (state.selectedTab) {
-                    ProfileTab.POSTS -> posts
-                    ProfileTab.LIKES -> likes
-                }
-                if (active != null) {
-                    postsThread(
-                        posts = active,
-                        onPostClick = onPostClick,
-                        onLikeClick = onLikeClick,
-                        onAuthorClick = onAuthorClick,
-                        onMatchClick = onMatchClick,
-                        emptyMessage = emptyMessage,
-                        currentUserId = state.profile.id, // Logged in profile ID matches the current user
-                        onDeleteClick = onDeleteClick,
-                    )
                 }
             }
 

@@ -21,6 +21,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.LoadState
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import com.adel.wc26.R
 import com.adel.wc26.core.designsystem.component.WC26ErrorState
 import com.adel.wc26.core.designsystem.component.WC26LoadingState
@@ -107,6 +109,10 @@ fun UserProfileScreen(
             posts = posts,
             currentUserId = currentUserId,
             onRetry = viewModel::loadProfile,
+            onRefresh = {
+                viewModel.loadProfile(isRefresh = true)
+                posts.refresh()
+            },
             onPostClick = onPostClick,
             onAuthorClick = onAuthorClick,
             onMatchClick = onMatchClick,
@@ -146,12 +152,14 @@ fun UserProfileScreen(
 /**
  * UserProfile — stateless content: identity header + paged posts thread.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileContent(
     state: UserProfileUiState,
     posts: LazyPagingItems<Post>,
     currentUserId: Long?,
     onRetry: () -> Unit,
+    onRefresh: () -> Unit,
     onPostClick: (Long) -> Unit,
     onAuthorClick: (Long) -> Unit,
     onMatchClick: (Long) -> Unit,
@@ -172,35 +180,43 @@ fun UserProfileContent(
         )
 
         state.profile != null -> {
-            LazyColumn(modifier = modifier.fillMaxSize()) {
-                item {
-                    ProfileHeader(
-                        displayName = state.profile.displayName,
-                        username = state.profile.username,
-                        avatarUrl = state.profile.avatarUrl,
-                        bio = state.profile.bio,
-                        joinedAtIso = state.profile.joinedAt,
-                        onAvatarClick = { showAvatarZoom = true },
-                        showEditIcon = false
-                    )
-                    HorizontalDivider()
-                    Text(
-                        text = stringResource(R.string.user_profile_posts_header),
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(Spacing.lg),
+            val isRefreshing = state.isRefreshing || (posts.loadState.refresh is LoadState.Loading && posts.itemCount > 0)
+
+            PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                onRefresh = onRefresh,
+                modifier = modifier.fillMaxSize()
+            ) {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    item {
+                        ProfileHeader(
+                            displayName = state.profile.displayName,
+                            username = state.profile.username,
+                            avatarUrl = state.profile.avatarUrl,
+                            bio = state.profile.bio,
+                            joinedAtIso = state.profile.joinedAt,
+                            onAvatarClick = { showAvatarZoom = true },
+                            showEditIcon = false
+                        )
+                        HorizontalDivider()
+                        Text(
+                            text = stringResource(R.string.user_profile_posts_header),
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(Spacing.lg),
+                        )
+                    }
+
+                    postsThread(
+                        posts = posts,
+                        onPostClick = onPostClick,
+                        onLikeClick = onLikeClick,
+                        onAuthorClick = onAuthorClick,
+                        onMatchClick = onMatchClick,
+                        emptyMessage = emptyMessage,
+                        currentUserId = currentUserId,
+                        onDeleteClick = onDeleteClick,
                     )
                 }
-
-                postsThread(
-                    posts = posts,
-                    onPostClick = onPostClick,
-                    onLikeClick = onLikeClick,
-                    onAuthorClick = onAuthorClick,
-                    onMatchClick = onMatchClick,
-                    emptyMessage = emptyMessage,
-                    currentUserId = currentUserId,
-                    onDeleteClick = onDeleteClick,
-                )
             }
 
             // Render the Zoom Dialog when active
@@ -238,6 +254,7 @@ private fun UserProfileContentPreview() {
             onMatchClick = {},
             onLikeClick = {},
             onDeleteClick = {},
+            onRefresh = {}
             )
     }
 }

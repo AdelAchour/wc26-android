@@ -262,7 +262,7 @@ private fun ScoreOrVs(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = Modifier
-            .width(80.dp)
+            .width(75.dp)
             .padding(horizontal = Spacing.sm)
     ) {
         if (isFinal) {

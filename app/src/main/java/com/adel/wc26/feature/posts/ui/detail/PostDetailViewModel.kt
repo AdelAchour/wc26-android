@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
 import javax.inject.Inject
 
 /**
@@ -44,6 +45,7 @@ data class PostDetailUiState(
     // Auth
     val isLoggedIn: Boolean = false,
     val currentUserId: Long? = null,
+    val isRefreshing: Boolean = false,
 ) {
     val canSendComment: Boolean
         get() = commentInput.isNotBlank() &&
@@ -172,6 +174,34 @@ class PostDetailViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(commentsLoading = false, commentsError = result.error)
                     }
+            }
+        }
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isRefreshing = true) }
+            val postDeferred = async { postRepository.getPost(postId) }
+            val commentsDeferred = async {
+                commentRepository.getComments(postId = postId, limit = 100, offset = 0)
+            }
+            val postResult = postDeferred.await()
+            val commentsResult = commentsDeferred.await()
+
+            _uiState.update { state ->
+                var nextState = state.copy(isRefreshing = false)
+
+                when (postResult) {
+                    is DataResult.Success -> nextState = nextState.copy(post = postResult.data, error = null)
+                    is DataResult.Error -> nextState = nextState.copy(error = postResult.error)
+                }
+
+                when (commentsResult) {
+                    is DataResult.Success -> nextState = nextState.copy(comments = commentsResult.data, commentsError = null)
+                    is DataResult.Error -> nextState = nextState.copy(commentsError = commentsResult.error)
+                }
+
+                nextState
             }
         }
     }

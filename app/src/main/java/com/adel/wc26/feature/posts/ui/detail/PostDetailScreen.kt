@@ -23,6 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -126,6 +127,7 @@ fun PostDetailScreen(
         PostDetailContent(
             state = state,
             onRetry = viewModel::loadPost,
+            onRefresh = viewModel::refresh,
             onLikeClick = viewModel::toggleLike,
             onAuthorClick = onAuthorClick,
             onMatchClick = onMatchClick,
@@ -199,13 +201,12 @@ fun PostDetailScreen(
     }
 }
 
-/**
- * Post detail — stateless content: the post header + the comments thread.
- */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PostDetailContent(
     state: PostDetailUiState,
     onRetry: () -> Unit,
+    onRefresh: () -> Unit,
     onLikeClick: () -> Unit,
     onAuthorClick: (Long) -> Unit,
     onMatchClick: (Long) -> Unit,
@@ -223,59 +224,67 @@ fun PostDetailContent(
             modifier = modifier,
         )
 
-        state.post != null -> LazyColumn(
-            modifier = modifier.fillMaxSize(),
-        ) {
-            item {
-                DetailedPostCard(
-                    post = state.post,
-                    onLikeClick = onLikeClick,
-                    onAuthorClick = { onAuthorClick(state.post.author.id) },
-                    onMatchClick = { onMatchClick(state.post.matchId) },
-                    canDelete = state.currentUserId == state.post.author.id,
-                    onDeleteClick = onDeletePostClick,
-                    onCommentClick = { /* Optional: focus comment input or no-op */ }
-                )
-                HorizontalDivider()
-                Text(
-                    text = stringResource(
-                        R.string.post_detail_comments_header,
-                        state.post.commentCount,
-                    ),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(Spacing.lg),
-                )
-            }
+        state.post != null -> {
+            PullToRefreshBox(
+                isRefreshing = state.isRefreshing,
+                onRefresh = onRefresh,
+                modifier = modifier.fillMaxSize()
+            ) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    item {
+                        DetailedPostCard(
+                            post = state.post,
+                            onLikeClick = onLikeClick,
+                            onAuthorClick = { onAuthorClick(state.post.author.id) },
+                            onMatchClick = { onMatchClick(state.post.matchId) },
+                            canDelete = state.currentUserId == state.post.author.id,
+                            onDeleteClick = onDeletePostClick,
+                            onCommentClick = { /* Optional: focus comment input or no-op */ }
+                        )
+                        HorizontalDivider()
+                        Text(
+                            text = stringResource(
+                                R.string.post_detail_comments_header,
+                                state.post.commentCount,
+                            ),
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(Spacing.lg),
+                        )
+                    }
 
-            if (state.comments.isEmpty() && !state.commentsLoading) {
-                item {
-                    Text(
-                        text = stringResource(R.string.post_detail_no_comments),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(Spacing.lg),
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            } else {
-                items(
-                    items = state.comments,
-                    key = { it.id },
-                ) { comment ->
-                    // Comment owner OR parent post owner can delete
-                    val canDelete = state.currentUserId == comment.author.id ||
-                            state.currentUserId == state.post.author.id
+                    if (state.comments.isEmpty() && !state.commentsLoading) {
+                        item {
+                            Text(
+                                text = stringResource(R.string.post_detail_no_comments),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(Spacing.lg),
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    } else {
+                        items(
+                            items = state.comments,
+                            key = { it.id },
+                        ) { comment ->
+                            // Comment owner OR parent post owner can delete
+                            val canDelete = state.currentUserId == comment.author.id ||
+                                    state.currentUserId == state.post.author.id
 
-                    CommentRow(
-                        comment = comment,
-                        onAuthorClick = { onAuthorClick(comment.author.id) },
-                        canDelete = canDelete,
-                        onDeleteClick = { onDeleteCommentClick(comment.id) },
-                        onLikeClick = { onLikeCommentClick(comment) },
-                    )
-                    HorizontalDivider()
+                            CommentRow(
+                                comment = comment,
+                                onAuthorClick = { onAuthorClick(comment.author.id) },
+                                canDelete = canDelete,
+                                onDeleteClick = { onDeleteCommentClick(comment.id) },
+                                onLikeClick = { onLikeCommentClick(comment) },
+                            )
+                            HorizontalDivider()
+                        }
+                    }
                 }
             }
         }

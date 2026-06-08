@@ -45,6 +45,7 @@ data class MatchDetailUiState(
     val error: AppError? = null,
     val isLoggedIn: Boolean = false,
     val isAdmin: Boolean = false,
+    val isRefreshing: Boolean = false,
 )
 
 @HiltViewModel
@@ -136,14 +137,18 @@ class MatchDetailViewModel @Inject constructor(
         }
     }
 
-    fun loadMatch() {
+    fun loadMatch(isRefresh: Boolean = false) {
         viewModelScope.launch {
-            _uiState.update { it.copy(loading = true, error = null) }
+            if (isRefresh) {
+                _uiState.update { it.copy(isRefreshing = true) }
+            } else {
+                _uiState.update { it.copy(loading = true, error = null) }
+            }
             when (val result = matchRepository.getMatch(matchId)) {
                 is DataResult.Success ->
-                    _uiState.update { it.copy(loading = false, match = result.data) }
+                    _uiState.update { it.copy(loading = false, match = result.data, isRefreshing = false) }
                 is DataResult.Error ->
-                    _uiState.update { it.copy(loading = false, error = result.error) }
+                    _uiState.update { it.copy(loading = false, error = result.error, isRefreshing = false) }
             }
         }
     }

@@ -44,6 +44,9 @@ import com.adel.wc26.feature.notifications.ui.component.NotificationItem
 import com.adel.wc26.feature.posts.domain.post.PostAuthor
 import kotlinx.coroutines.flow.flowOf
 
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+
 @Composable
 fun NotificationsScreen(
     onNotificationClick: (Long) -> Unit,
@@ -69,6 +72,10 @@ fun NotificationsScreen(
                 Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
             })
         },
+        onRefresh = {
+            viewModel.refreshCount()
+            notifications?.refresh()
+        },
         modifier = modifier
     )
 }
@@ -76,6 +83,7 @@ fun NotificationsScreen(
 /**
  * Stateless screen layout to enable robust Compose previews.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationsContent(
     isLoggedIn: Boolean,
@@ -83,6 +91,7 @@ fun NotificationsContent(
     onNotificationClick: (Notification) -> Unit,
     onSignInPrompt: () -> Unit,
     onMarkAllAsRead: () -> Unit,
+    onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -117,32 +126,34 @@ fun NotificationsContent(
             if (!isLoggedIn) {
                 LoggedOutNotifications(onSignIn = onSignInPrompt)
             } else if (notifications != null) {
-                when (val refresh = notifications.loadState.refresh) {
-                    is LoadState.Loading -> {
+                val isRefreshing = notifications.loadState.refresh is LoadState.Loading && notifications.itemCount > 0
+
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = onRefresh,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    if (notifications.loadState.refresh is LoadState.Loading && notifications.itemCount == 0) {
                         WC26LoadingState()
-                    }
-                    is LoadState.Error -> {
+                    } else if (notifications.loadState.refresh is LoadState.Error && notifications.itemCount == 0) {
                         WC26ErrorState(
                             message = stringResource(R.string.error_unknown),
                             onRetry = { notifications.retry() }
                         )
-                    }
-                    is LoadState.NotLoading -> {
-                        if (notifications.itemCount == 0) {
-                            WC26EmptyState(
-                                title = stringResource(R.string.notifications_empty_title),
-                                description = stringResource(R.string.notifications_empty_desc)
-                            )
-                        } else {
-                            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                                items(notifications.itemCount) { index ->
-                                    val notification = notifications[index]
-                                    if (notification != null) {
-                                        NotificationItem(
-                                            notification = notification,
-                                            onClick = { onNotificationClick(notification) }
-                                        )
-                                    }
+                    } else if (notifications.itemCount == 0) {
+                        WC26EmptyState(
+                            title = stringResource(R.string.notifications_empty_title),
+                            description = stringResource(R.string.notifications_empty_desc)
+                        )
+                    } else {
+                        LazyColumn(modifier = Modifier.fillMaxSize()) {
+                            items(notifications.itemCount) { index ->
+                                val notification = notifications[index]
+                                if (notification != null) {
+                                    NotificationItem(
+                                        notification = notification,
+                                        onClick = { onNotificationClick(notification) }
+                                    )
                                 }
                             }
                         }
@@ -195,7 +206,8 @@ private fun NotificationsContentLoggedOutPreview() {
             notifications = null,
             onNotificationClick = {},
             onSignInPrompt = {},
-            onMarkAllAsRead = {}
+            onMarkAllAsRead = {},
+            onRefresh = {}
         )
     }
 }
@@ -253,7 +265,8 @@ private fun NotificationsContentLoggedInPreview() {
             notifications = pagingItems,
             onNotificationClick = {},
             onSignInPrompt = {},
-            onMarkAllAsRead = {}
+            onMarkAllAsRead = {},
+            onRefresh = {}
         )
     }
 }

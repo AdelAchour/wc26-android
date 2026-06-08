@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
@@ -151,6 +152,10 @@ fun MatchDetailScreen(
             posts = posts,
             currentUserId = currentUserId,
             onRetryMatch = viewModel::loadMatch,
+            onRefresh = {
+                viewModel.loadMatch(isRefresh = true)
+                posts.refresh()
+            },
             onPostClick = onPostClick,
             onAuthorClick = onAuthorClick,
             onLikeClick = viewModel::toggleLike,
@@ -190,12 +195,14 @@ fun MatchDetailScreen(
  * Match detail — stateless content. Renders the match header followed by
  * the paged posts thread.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MatchDetailContent(
     state: MatchDetailUiState,
     posts: LazyPagingItems<Post>,
     currentUserId: Long?,
     onRetryMatch: () -> Unit,
+    onRefresh: () -> Unit,
     onPostClick: (Long) -> Unit,
     onAuthorClick: (Long) -> Unit,
     onLikeClick: (Post) -> Unit,
@@ -213,30 +220,40 @@ fun MatchDetailContent(
             modifier = modifier,
         )
 
-        state.match != null -> LazyColumn(
-            modifier = modifier.fillMaxSize(),
-        ) {
-            // --- Header: the match itself ---
-            item {
-                MatchHeader(match = state.match)
-                HorizontalDivider()
-                Text(
-                    text = stringResource(R.string.match_detail_thread),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(Spacing.lg),
-                )
-            }
+        state.match != null -> {
+            val isRefreshing = state.isRefreshing || (posts.loadState.refresh is LoadState.Loading && posts.itemCount > 0)
 
-            // --- The posts thread ---
-            postsThread(
-                posts = posts,
-                onPostClick = onPostClick,
-                onLikeClick = onLikeClick,
-                onAuthorClick = onAuthorClick,
-                emptyMessage = emptyMessage,
-                currentUserId = currentUserId,
-                onDeleteClick = onDeleteClick,
-            )
+            PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                onRefresh = onRefresh,
+                modifier = modifier.fillMaxSize()
+            ) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    // --- Header: the match itself ---
+                    item {
+                        MatchHeader(match = state.match)
+                        HorizontalDivider()
+                        Text(
+                            text = stringResource(R.string.match_detail_thread),
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(Spacing.lg),
+                        )
+                    }
+
+                    // --- The posts thread ---
+                    postsThread(
+                        posts = posts,
+                        onPostClick = onPostClick,
+                        onLikeClick = onLikeClick,
+                        onAuthorClick = onAuthorClick,
+                        emptyMessage = emptyMessage,
+                        currentUserId = currentUserId,
+                        onDeleteClick = onDeleteClick,
+                    )
+                }
+            }
         }
     }
 }

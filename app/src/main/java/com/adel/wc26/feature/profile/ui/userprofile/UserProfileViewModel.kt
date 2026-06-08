@@ -39,6 +39,7 @@ data class UserProfileUiState(
     val loading: Boolean = true,
     val profile: PublicProfile? = null,
     val error: AppError? = null,
+    val isRefreshing: Boolean = false,
 )
 
 @HiltViewModel
@@ -90,14 +91,18 @@ class UserProfileViewModel @Inject constructor(
         loadProfile()
     }
 
-    fun loadProfile() {
+    fun loadProfile(isRefresh: Boolean = false) {
         viewModelScope.launch {
-            _uiState.update { it.copy(loading = true, error = null) }
+            if (isRefresh) {
+                _uiState.update { it.copy(isRefreshing = true) }
+            } else {
+                _uiState.update { it.copy(loading = true, error = null) }
+            }
             when (val result = userRepository.getPublicProfile(userId)) {
                 is DataResult.Success ->
-                    _uiState.update { it.copy(loading = false, profile = result.data) }
+                    _uiState.update { it.copy(loading = false, profile = result.data, isRefreshing = false) }
                 is DataResult.Error ->
-                    _uiState.update { it.copy(loading = false, error = result.error) }
+                    _uiState.update { it.copy(loading = false, error = result.error, isRefreshing = false) }
             }
         }
     }
