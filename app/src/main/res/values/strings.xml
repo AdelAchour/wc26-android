@@ -69,6 +69,10 @@
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>
+    <string name="settings_theme_title">App Theme</string>
+    <string name="settings_theme_system">System default</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
     <string name="settings_account">Account</string>
     <string name="settings_logout">Log out</string>
     <string name="settings_about">About</string>

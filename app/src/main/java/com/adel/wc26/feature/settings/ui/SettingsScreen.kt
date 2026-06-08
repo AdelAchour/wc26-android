@@ -45,6 +45,15 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.adel.wc26.core.designsystem.component.WC26PrimaryButton
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.RadioButton
+import androidx.compose.ui.semantics.Role
+import com.adel.wc26.core.datastore.DarkThemeConfig
 
 /**
  * Settings tab — stateful entry point.
@@ -86,6 +95,7 @@ fun SettingsScreen(
         SettingsContent(
             state = state,
             onLogout = viewModel::logout,
+            onThemeChanged = viewModel::setTheme,
             modifier = Modifier.padding(padding),
         )
     }
@@ -99,9 +109,11 @@ fun SettingsScreen(
 fun SettingsContent(
     state: SettingsUiState,
     onLogout: () -> Unit,
+    onThemeChanged: (DarkThemeConfig) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showLogoutDialog by remember { mutableStateOf(false) }
+    var showThemeDialog by remember { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
 
     Column(
@@ -127,6 +139,61 @@ fun SettingsContent(
             HorizontalDivider()
             Spacer(Modifier.height(Spacing.xl))
         }
+
+        // Theme section.
+        Text(
+            text = stringResource(R.string.settings_theme_title),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(Spacing.sm))
+
+        val currentThemeLabel = when (state.themeConfig) {
+            DarkThemeConfig.FOLLOW_SYSTEM -> stringResource(R.string.settings_theme_system)
+            DarkThemeConfig.LIGHT -> stringResource(R.string.settings_theme_light)
+            DarkThemeConfig.DARK -> stringResource(R.string.settings_theme_dark)
+        }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { showThemeDialog = true },
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.15f),
+            ),
+            border = BorderStroke(
+                1.dp,
+                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f)
+            )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Spacing.md),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = stringResource(R.string.settings_theme_title),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                    )
+                    Text(
+                        text = currentThemeLabel,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Icon(
+                    imageVector = Icons.Filled.ArrowDropDown,
+                    contentDescription = null,
+                )
+            }
+        }
+
+        Spacer(Modifier.height(Spacing.xl))
+        HorizontalDivider()
+        Spacer(Modifier.height(Spacing.xl))
 
         // About section.
         Text(
@@ -288,6 +355,75 @@ fun SettingsContent(
             },
         )
     }
+
+    if (showThemeDialog) {
+        AlertDialog(
+            onDismissRequest = { showThemeDialog = false },
+            title = { Text(stringResource(R.string.settings_theme_title)) },
+            text = {
+                Column(Modifier.selectableGroup()) {
+                    ThemeOptionRow(
+                        label = stringResource(R.string.settings_theme_system),
+                        selected = state.themeConfig == DarkThemeConfig.FOLLOW_SYSTEM,
+                        onClick = {
+                            onThemeChanged(DarkThemeConfig.FOLLOW_SYSTEM)
+                            showThemeDialog = false
+                        }
+                    )
+                    ThemeOptionRow(
+                        label = stringResource(R.string.settings_theme_light),
+                        selected = state.themeConfig == DarkThemeConfig.LIGHT,
+                        onClick = {
+                            onThemeChanged(DarkThemeConfig.LIGHT)
+                            showThemeDialog = false
+                        }
+                    )
+                    ThemeOptionRow(
+                        label = stringResource(R.string.settings_theme_dark),
+                        selected = state.themeConfig == DarkThemeConfig.DARK,
+                        onClick = {
+                            onThemeChanged(DarkThemeConfig.DARK)
+                            showThemeDialog = false
+                        }
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showThemeDialog = false }) {
+                    Text(stringResource(R.string.action_close))
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun ThemeOptionRow(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .selectable(
+                selected = selected,
+                role = Role.RadioButton,
+                onClick = onClick
+            )
+            .padding(vertical = Spacing.md),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(
+            selected = selected,
+            onClick = null
+        )
+        Spacer(Modifier.width(Spacing.md))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
 }
 
 @Preview(showBackground = true)
@@ -297,6 +433,7 @@ private fun SettingsLoggedInPreview() {
         SettingsContent(
             state = SettingsUiState(loggedIn = true),
             onLogout = {},
+            onThemeChanged = {},
         )
     }
 }
@@ -308,6 +445,7 @@ private fun SettingsLoggedOutPreview() {
         SettingsContent(
             state = SettingsUiState(loggedIn = false),
             onLogout = {},
+            onThemeChanged = {},
         )
     }
 }

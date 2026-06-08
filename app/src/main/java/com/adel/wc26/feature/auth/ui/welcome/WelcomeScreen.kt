@@ -1,7 +1,6 @@
 package com.adel.wc26.feature.auth.ui.welcome
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -49,8 +48,8 @@ fun WelcomeScreen(
     ) {
         Spacer(Modifier.height(Spacing.xxxl))
 
-        // Check if the system is currently in Dark Theme
-        val isDark = isSystemInDarkTheme()
+        // Check if the app is currently in Dark Theme
+        val isDark = WC26Theme.isDark
 
         // Choose the logo dynamically based on the theme
         val logoResId = if (isDark) {

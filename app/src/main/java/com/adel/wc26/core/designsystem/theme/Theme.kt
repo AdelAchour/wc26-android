@@ -31,6 +31,8 @@ private val LocalExtendedColors = staticCompositionLocalOf {
     )
 }
 
+val LocalDarkTheme = staticCompositionLocalOf { false }
+
 /**
  * LIGHT scheme — the warm, editorial daytime identity from the website.
  * - background / surface: warm off-white
@@ -142,6 +144,7 @@ fun WC26Theme(
 
     androidx.compose.runtime.CompositionLocalProvider(
         LocalExtendedColors provides extended,
+        LocalDarkTheme provides darkTheme,
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
@@ -153,10 +156,13 @@ fun WC26Theme(
 }
 
 /**
- * Accessor for WC26's extended (non-M3) tokens.
+ * Accessor for WC26's extended (non-M3) tokens and theme mode properties.
  * Usage: WC26Theme.extended.live
  */
 object WC26Theme {
     val extended: WC26ExtendedColors
         @Composable get() = LocalExtendedColors.current
+
+    val isDark: Boolean
+        @Composable get() = LocalDarkTheme.current
 }

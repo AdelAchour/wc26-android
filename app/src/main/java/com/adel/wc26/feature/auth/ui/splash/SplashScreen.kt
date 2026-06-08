@@ -5,7 +5,6 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -29,8 +28,8 @@ import com.adel.wc26.core.designsystem.theme.WC26Theme
 fun SplashScreen(
     modifier: Modifier = Modifier
 ) {
-    // Check if the system is currently in Dark Theme
-    val isDark = isSystemInDarkTheme()
+    // Check if the app is currently in Dark Theme
+    val isDark = WC26Theme.isDark
 
     // Choose the logo dynamically based on the theme
     val logoResId = if (isDark) {

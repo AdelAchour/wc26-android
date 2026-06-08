@@ -3,6 +3,8 @@ package com.adel.wc26.feature.settings.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.adel.wc26.core.datastore.TokenStore
+import com.adel.wc26.core.datastore.ThemeStore
+import com.adel.wc26.core.datastore.DarkThemeConfig
 import com.adel.wc26.feature.auth.domain.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,12 +24,14 @@ import javax.inject.Inject
 data class SettingsUiState(
     val loggedIn: Boolean = false,
     val loggedOut: Boolean = false,
+    val themeConfig: DarkThemeConfig = DarkThemeConfig.FOLLOW_SYSTEM,
 )
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val tokenStore: TokenStore,
+    private val themeStore: ThemeStore,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -38,12 +42,23 @@ class SettingsViewModel @Inject constructor(
             val loggedIn = tokenStore.getToken() != null
             _uiState.update { it.copy(loggedIn = loggedIn) }
         }
+        viewModelScope.launch {
+            themeStore.themeFlow.collect { config ->
+                _uiState.update { it.copy(themeConfig = config) }
+            }
+        }
     }
 
     fun logout() {
         viewModelScope.launch {
             authRepository.logout()
             _uiState.update { it.copy(loggedOut = true) }
+        }
+    }
+
+    fun setTheme(config: DarkThemeConfig) {
+        viewModelScope.launch {
+            themeStore.setTheme(config)
         }
     }
 }

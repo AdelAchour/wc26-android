@@ -8,10 +8,15 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.adel.wc26.core.designsystem.theme.WC26Theme
 import com.adel.wc26.navigation.WC26NavHost
 import dagger.hilt.android.AndroidEntryPoint
 import com.adel.wc26.core.datastore.TokenStore
+import com.adel.wc26.core.datastore.ThemeStore
+import com.adel.wc26.core.datastore.DarkThemeConfig
 import com.adel.wc26.core.network.AppStatusManager
 import com.adel.wc26.feature.notifications.data.NotificationsManager
 import javax.inject.Inject
@@ -26,6 +31,8 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var tokenStore: TokenStore
     @Inject
+    lateinit var themeStore: ThemeStore
+    @Inject
     lateinit var appStatusManager: AppStatusManager
     @Inject
     lateinit var notificationsManager: NotificationsManager
@@ -36,7 +43,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            WC26Theme {
+            val themeConfig by themeStore.themeFlow.collectAsState(initial = DarkThemeConfig.FOLLOW_SYSTEM)
+            val useDarkTheme = when (themeConfig) {
+                DarkThemeConfig.FOLLOW_SYSTEM -> isSystemInDarkTheme()
+                DarkThemeConfig.LIGHT -> false
+                DarkThemeConfig.DARK -> true
+            }
+
+            WC26Theme(darkTheme = useDarkTheme) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                 ) {
