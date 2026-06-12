@@ -15,6 +15,7 @@ import com.adel.wc26.feature.posts.domain.comment.CommentRepository
 import com.adel.wc26.feature.posts.domain.like.LikeRepository
 import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.posts.domain.post.PostRepository
+import com.adel.wc26.feature.profile.domain.PublicProfile
 import com.adel.wc26.navigation.Destinations
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,6 +47,11 @@ data class PostDetailUiState(
     val isLoggedIn: Boolean = false,
     val currentUserId: Long? = null,
     val isRefreshing: Boolean = false,
+    // Post likers
+    val likers: List<PublicProfile> = emptyList(),
+    val likersLoading: Boolean = false,
+    val likersNextCursor: String? = null,
+    val likersError: AppError? = null,
 ) {
     val canSendComment: Boolean
         get() = commentInput.isNotBlank() &&
@@ -263,5 +269,56 @@ class PostDetailViewModel @Inject constructor(
 
     fun toggleLikeComment(comment: Comment) {
         commentLikeManager.toggleLike(comment, viewModelScope)
+    }
+
+    fun openPostLikes() {
+        val post = _uiState.value.post ?: return
+        val currentUserId = _uiState.value.currentUserId
+        if (currentUserId == null || currentUserId != post.author.id) return
+
+        _uiState.update {
+            it.copy(
+                likers = emptyList(),
+                likersNextCursor = null,
+                likersLoading = true,
+                likersError = null
+            )
+        }
+        loadPostLikes(postId = post.id, cursor = null)
+    }
+
+    fun loadMorePostLikes() {
+        val post = _uiState.value.post ?: return
+        val cursor = _uiState.value.likersNextCursor ?: return
+        if (_uiState.value.likersLoading) return
+
+        _uiState.update { it.copy(likersLoading = true) }
+        loadPostLikes(postId = post.id, cursor = cursor)
+    }
+
+    private fun loadPostLikes(postId: Long, cursor: String?) {
+        viewModelScope.launch {
+            val result = postRepository.getPostLikes(postId = postId, cursor = cursor)
+            _uiState.update { state ->
+                when (result) {
+                    is DataResult.Success -> {
+                        val newItems = result.data.items
+                        val updatedList = if (cursor == null) newItems else state.likers + newItems
+                        state.copy(
+                            likers = updatedList,
+                            likersNextCursor = result.data.nextCursor,
+                            likersLoading = false,
+                            likersError = null
+                        )
+                    }
+                    is DataResult.Error -> {
+                        state.copy(
+                            likersLoading = false,
+                            likersError = result.error
+                        )
+                    }
+                }
+            }
+        }
     }
 }

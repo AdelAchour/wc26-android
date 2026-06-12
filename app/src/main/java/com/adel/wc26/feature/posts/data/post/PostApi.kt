@@ -3,6 +3,7 @@ package com.adel.wc26.feature.posts.data.post
 import com.adel.wc26.core.network.dto.CursorPageDto
 import com.adel.wc26.feature.posts.data.post.dto.CreatePostRequest
 import com.adel.wc26.feature.posts.data.post.dto.PostDto
+import com.adel.wc26.feature.profile.data.dto.UserPublicDto
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -36,6 +37,13 @@ interface PostApi {
 
     @GET("posts/{id}")
     suspend fun getPost(@Path("id") id: Long): PostDto
+
+    @GET("posts/{postId}/likes")
+    suspend fun getPostLikes(
+        @Path("postId") postId: Long,
+        @Query("cursor") cursor: String? = null,
+        @Query("limit") limit: Int = 20,
+    ): CursorPageDto<UserPublicDto>
 
     @POST("matches/{matchId}/posts")
     suspend fun createPost(

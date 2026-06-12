@@ -234,4 +234,9 @@
     <string name="notifications_liked_comment">%1$s liked your comment</string>
     <string name="notifications_error_mark_read">Failed to update notification status.</string>
     <string name="notifications_error_mark_all_read">Failed to mark all notifications as read.</string>
+
+    <!-- Post Likes Bottom Sheet -->
+    <string name="post_likes_title">Liked by</string>
+    <string name="post_likes_empty">No likes yet</string>
+    <string name="post_likes_error">Failed to load likes</string>
 </resources>

@@ -1,7 +1,9 @@
 package com.adel.wc26.feature.posts.ui.component
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -237,6 +239,7 @@ fun PostCard(
  * A detailed post view designed specifically for the Post Detail screen.
  * Places the avatar and names on top, and displays content and full timestamp vertically.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DetailedPostCard(
     modifier: Modifier = Modifier,
@@ -248,6 +251,7 @@ fun DetailedPostCard(
     onDeleteClick: () -> Unit = {},
     onShareClick: (() -> Unit)? = null,
     onCommentClick: () -> Unit = {},
+    onLikeLongClick: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
 
@@ -380,6 +384,7 @@ fun DetailedPostCard(
                     liked = post.likedByCurrentUser,
                     count = post.likeCount,
                     onClick = onLikeClick,
+                    onLongClick = onLikeLongClick,
                 )
                 CommentAction(
                     count = post.commentCount,
@@ -493,15 +498,24 @@ private fun MatchThreadHeader(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LikeAction(
     liked: Boolean,
     count: Int,
     onClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable(onClick = onClick),
+        modifier = if (onLongClick != null) {
+            Modifier.combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
+        } else {
+            Modifier.clickable(onClick = onClick)
+        },
     ) {
         Icon(
             imageVector = if (liked) Icons.Filled.Favorite

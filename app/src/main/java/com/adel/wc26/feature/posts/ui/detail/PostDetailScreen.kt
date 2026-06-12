@@ -86,6 +86,7 @@ fun PostDetailScreen(
     // Dialog state management
     var showPostDeleteConfirm by remember { mutableStateOf(false) }
     var commentIdToDelete by remember { mutableStateOf<Long?>(null) }
+    var showLikersBottomSheet by remember { mutableStateOf(false) }
 
     // If the post is optimistically deleted, navigate back automatically!
     LaunchedEffect(state.post) {
@@ -134,6 +135,14 @@ fun PostDetailScreen(
             onDeletePostClick = { showPostDeleteConfirm = true },
             onDeleteCommentClick = { commentIdToDelete = it },
             onLikeCommentClick = viewModel::toggleLikeComment,
+            onLikeLongClick = if (state.currentUserId == state.post?.author?.id) {
+                {
+                    viewModel.openPostLikes()
+                    showLikersBottomSheet = true
+                }
+            } else {
+                null
+            },
             modifier = Modifier.padding(padding),
         )
 
@@ -198,6 +207,21 @@ fun PostDetailScreen(
                 }
             )
         }
+
+        if (showLikersBottomSheet) {
+            PostLikersBottomSheet(
+                likers = state.likers,
+                loading = state.likersLoading,
+                error = state.likersError,
+                nextCursor = state.likersNextCursor,
+                onDismissRequest = { showLikersBottomSheet = false },
+                onLoadMore = viewModel::loadMorePostLikes,
+                onUserClick = { userId ->
+                    showLikersBottomSheet = false
+                    onAuthorClick(userId)
+                }
+            )
+        }
     }
 }
 
@@ -214,6 +238,7 @@ fun PostDetailContent(
     onDeleteCommentClick: (Long) -> Unit,
     onLikeCommentClick: (Comment) -> Unit,
     modifier: Modifier = Modifier,
+    onLikeLongClick: (() -> Unit)? = null,
 ) {
     when {
         state.loading -> WC26LoadingState(modifier = modifier)
@@ -241,7 +266,8 @@ fun PostDetailContent(
                             onMatchClick = { onMatchClick(state.post.matchId) },
                             canDelete = state.currentUserId == state.post.author.id,
                             onDeleteClick = onDeletePostClick,
-                            onCommentClick = { /* Optional: focus comment input or no-op */ }
+                            onCommentClick = { /* Optional: focus comment input or no-op */ },
+                            onLikeLongClick = onLikeLongClick,
                         )
                         HorizontalDivider()
                         Text(

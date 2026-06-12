@@ -8,6 +8,8 @@ import com.adel.wc26.feature.posts.data.post.dto.CreatePostRequest
 import com.adel.wc26.feature.posts.data.toDomain
 import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.posts.domain.post.PostRepository
+import com.adel.wc26.feature.profile.domain.PublicProfile
+import com.adel.wc26.feature.profile.data.toDomain as toProfileDomain
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -46,6 +48,18 @@ class PostRepositoryImpl @Inject constructor(
 
     override suspend fun getPost(postId: Long): DataResult<Post> =
         apiCall { postApi.getPost(postId) }.map { it.toDomain() }
+
+    override suspend fun getPostLikes(
+        postId: Long,
+        cursor: String?,
+    ): DataResult<CursorPage<PublicProfile>> =
+        apiCall { postApi.getPostLikes(postId = postId, cursor = cursor, limit = PAGE_SIZE) }
+            .map { dto ->
+                CursorPage(
+                    items = dto.items.map { it.toProfileDomain() },
+                    nextCursor = dto.nextCursor,
+                )
+            }
 
     override suspend fun createPost(matchId: Long, content: String): DataResult<Post> =
         apiCall {

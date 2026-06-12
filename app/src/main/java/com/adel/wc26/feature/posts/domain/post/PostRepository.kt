@@ -2,6 +2,7 @@ package com.adel.wc26.feature.posts.domain.post
 
 import com.adel.wc26.core.result.CursorPage
 import com.adel.wc26.core.result.DataResult
+import com.adel.wc26.feature.profile.domain.PublicProfile
 
 /**
  * Post data. Feeds are cursor-paginated; a null cursor means "first page".
@@ -19,6 +20,9 @@ interface PostRepository {
 
     /** A single post by id. */
     suspend fun getPost(postId: Long): DataResult<Post>
+
+    /** A page of users who liked the post. */
+    suspend fun getPostLikes(postId: Long, cursor: String?): DataResult<CursorPage<PublicProfile>>
 
     /** Create a post under a match. Returns the created post. */
     suspend fun createPost(matchId: Long, content: String): DataResult<Post>
