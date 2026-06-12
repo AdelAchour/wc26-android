@@ -41,6 +41,7 @@ import com.adel.wc26.feature.posts.domain.post.PostAuthor
 fun NotificationItem(
     notification: Notification,
     onClick: () -> Unit,
+    onSenderClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val unreadBg = MaterialTheme.colorScheme.primary.copy(alpha = 0.06f)
@@ -60,7 +61,8 @@ fun NotificationItem(
         WC26Avatar(
             displayName = notification.sender.displayName,
             avatarUrl = notification.sender.avatarUrl,
-            size = 40.dp
+            size = 40.dp,
+            modifier = Modifier.clickable(onClick = onSenderClick)
         )
 
         Spacer(modifier = Modifier.width(Spacing.md))
@@ -167,7 +169,8 @@ private fun NotificationItemUnreadPreview() {
                     content = "Argentina definitely going to defend the title! 🇦🇷"
                 )
             ),
-            onClick = {}
+            onClick = {},
+            onSenderClick = {}
         )
     }
 }
@@ -195,7 +198,8 @@ private fun NotificationItemReadPreview() {
                 ),
                 comment = null
             ),
-            onClick = {}
+            onClick = {},
+            onSenderClick = {}
         )
     }
 }

@@ -350,6 +350,9 @@ fun WC26NavHost(
                     onNotificationClick = { postId ->
                         navController.navigate(Destinations.PostDetail(postId))
                     },
+                    onSenderClick = { userId ->
+                        navController.navigate(Destinations.UserProfile(userId))
+                    },
                     onSignInPrompt = {
                         navController.navigate(Destinations.Login)
                     },

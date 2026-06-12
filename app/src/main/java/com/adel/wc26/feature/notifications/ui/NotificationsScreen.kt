@@ -50,6 +50,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 @Composable
 fun NotificationsScreen(
     onNotificationClick: (Long) -> Unit,
+    onSenderClick: (Long) -> Unit,
     onSignInPrompt: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: NotificationsViewModel = hiltViewModel(),
@@ -66,6 +67,7 @@ fun NotificationsScreen(
             viewModel.markAsRead(notification)
             onNotificationClick(notification.post.id)
         },
+        onSenderClick = onSenderClick,
         onSignInPrompt = onSignInPrompt,
         onMarkAllAsRead = {
             viewModel.markAllAsRead(onFailure = {
@@ -89,6 +91,7 @@ fun NotificationsContent(
     isLoggedIn: Boolean,
     notifications: LazyPagingItems<Notification>?,
     onNotificationClick: (Notification) -> Unit,
+    onSenderClick: (Long) -> Unit,
     onSignInPrompt: () -> Unit,
     onMarkAllAsRead: () -> Unit,
     onRefresh: () -> Unit,
@@ -152,7 +155,8 @@ fun NotificationsContent(
                                 if (notification != null) {
                                     NotificationItem(
                                         notification = notification,
-                                        onClick = { onNotificationClick(notification) }
+                                        onClick = { onNotificationClick(notification) },
+                                        onSenderClick = { onSenderClick(notification.sender.id) }
                                     )
                                 }
                             }
@@ -207,7 +211,8 @@ private fun NotificationsContentLoggedOutPreview() {
             onNotificationClick = {},
             onSignInPrompt = {},
             onMarkAllAsRead = {},
-            onRefresh = {}
+            onRefresh = {},
+            onSenderClick = {}
         )
     }
 }
@@ -266,7 +271,8 @@ private fun NotificationsContentLoggedInPreview() {
             onNotificationClick = {},
             onSignInPrompt = {},
             onMarkAllAsRead = {},
-            onRefresh = {}
+            onRefresh = {},
+            onSenderClick = {}
         )
     }
 }
