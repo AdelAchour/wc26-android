@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -112,6 +113,10 @@ dependencies {
 
     // --- Coroutines ---
     implementation(libs.kotlinx.coroutines.android)
+
+    // --- Firebase Messaging ---
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
 
     // --- Test ---
     testImplementation(libs.junit)

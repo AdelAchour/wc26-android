@@ -13,3 +13,7 @@ local.properties
 *.jks
 keystore.properties
 /app/release/
+
+# Firebase configuration
+google-services.json
+/app/google-services.json
