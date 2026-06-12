@@ -1,6 +1,8 @@
 package com.adel.wc26.feature.posts.ui.detail
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -45,6 +47,7 @@ import com.adel.wc26.R
  * A single comment — avatar, author line, body. Tapping the avatar/name
  * opens the author's profile.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CommentRow(
     modifier: Modifier = Modifier,
@@ -53,6 +56,7 @@ fun CommentRow(
     canDelete: Boolean = false,
     onDeleteClick: () -> Unit = {},
     onLikeClick: () -> Unit = {},
+    onLikeLongClick: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier
@@ -151,20 +155,30 @@ fun CommentRow(
                 liked = comment.likedByCurrentUser,
                 count = comment.likeCount,
                 onClick = onLikeClick,
+                onLongClick = onLikeLongClick,
             )
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun CommentLikeAction(
     liked: Boolean,
     count: Int,
     onClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable(onClick = onClick),
+        modifier = if (onLongClick != null) {
+            Modifier.combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
+        } else {
+            Modifier.clickable(onClick = onClick)
+        },
     ) {
         Icon(
             imageVector = if (liked) Icons.Filled.Favorite

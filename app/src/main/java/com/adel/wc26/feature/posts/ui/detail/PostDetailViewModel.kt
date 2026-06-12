@@ -79,6 +79,8 @@ class PostDetailViewModel @Inject constructor(
     private val postId: Long =
         savedStateHandle.toRoute<Destinations.PostDetail>().postId
 
+    private var activeCommentIdForLikes: Long? = null
+
     private val _uiState = MutableStateFlow(PostDetailUiState())
     val uiState: StateFlow<PostDetailUiState> = _uiState.asStateFlow()
 
@@ -276,6 +278,7 @@ class PostDetailViewModel @Inject constructor(
         val currentUserId = _uiState.value.currentUserId
         if (currentUserId == null || currentUserId != post.author.id) return
 
+        activeCommentIdForLikes = null
         _uiState.update {
             it.copy(
                 likers = emptyList(),
@@ -287,19 +290,69 @@ class PostDetailViewModel @Inject constructor(
         loadPostLikes(postId = post.id, cursor = null)
     }
 
-    fun loadMorePostLikes() {
-        val post = _uiState.value.post ?: return
+    fun openCommentLikes(commentId: Long) {
+        val currentUserId = _uiState.value.currentUserId
+        val comment = _uiState.value.comments.find { it.id == commentId } ?: return
+        if (currentUserId == null || currentUserId != comment.author.id) return
+
+        activeCommentIdForLikes = commentId
+        _uiState.update {
+            it.copy(
+                likers = emptyList(),
+                likersNextCursor = null,
+                likersLoading = true,
+                likersError = null
+            )
+        }
+        loadCommentLikes(commentId = commentId, cursor = null)
+    }
+
+    fun loadMoreLikers() {
         val cursor = _uiState.value.likersNextCursor ?: return
         if (_uiState.value.likersLoading) return
 
         _uiState.update { it.copy(likersLoading = true) }
-        loadPostLikes(postId = post.id, cursor = cursor)
+        val commentId = activeCommentIdForLikes
+        if (commentId != null) {
+            loadCommentLikes(commentId = commentId, cursor = cursor)
+        } else {
+            val post = _uiState.value.post ?: return
+            loadPostLikes(postId = post.id, cursor = cursor)
+        }
     }
 
     private fun loadPostLikes(postId: Long, cursor: String?) {
         viewModelScope.launch {
             val result = postRepository.getPostLikes(postId = postId, cursor = cursor)
             _uiState.update { state ->
+                if (activeCommentIdForLikes != null || state.post?.id != postId) return@update state
+                when (result) {
+                    is DataResult.Success -> {
+                        val newItems = result.data.items
+                        val updatedList = if (cursor == null) newItems else state.likers + newItems
+                        state.copy(
+                            likers = updatedList,
+                            likersNextCursor = result.data.nextCursor,
+                            likersLoading = false,
+                            likersError = null
+                        )
+                    }
+                    is DataResult.Error -> {
+                        state.copy(
+                            likersLoading = false,
+                            likersError = result.error
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun loadCommentLikes(commentId: Long, cursor: String?) {
+        viewModelScope.launch {
+            val result = commentRepository.getCommentLikes(commentId = commentId, cursor = cursor)
+            _uiState.update { state ->
+                if (activeCommentIdForLikes != commentId) return@update state
                 when (result) {
                     is DataResult.Success -> {
                         val newItems = result.data.items

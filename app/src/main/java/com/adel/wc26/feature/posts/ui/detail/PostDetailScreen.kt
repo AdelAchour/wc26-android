@@ -143,6 +143,10 @@ fun PostDetailScreen(
             } else {
                 null
             },
+            onLikeCommentLongClick = { comment ->
+                viewModel.openCommentLikes(comment.id)
+                showLikersBottomSheet = true
+            },
             modifier = Modifier.padding(padding),
         )
 
@@ -209,13 +213,13 @@ fun PostDetailScreen(
         }
 
         if (showLikersBottomSheet) {
-            PostLikersBottomSheet(
+            LikersBottomSheet(
                 likers = state.likers,
                 loading = state.likersLoading,
                 error = state.likersError,
                 nextCursor = state.likersNextCursor,
                 onDismissRequest = { showLikersBottomSheet = false },
-                onLoadMore = viewModel::loadMorePostLikes,
+                onLoadMore = viewModel::loadMoreLikers,
                 onUserClick = { userId ->
                     showLikersBottomSheet = false
                     onAuthorClick(userId)
@@ -239,6 +243,7 @@ fun PostDetailContent(
     onLikeCommentClick: (Comment) -> Unit,
     modifier: Modifier = Modifier,
     onLikeLongClick: (() -> Unit)? = null,
+    onLikeCommentLongClick: ((Comment) -> Unit)? = null,
 ) {
     when {
         state.loading -> WC26LoadingState(modifier = modifier)
@@ -307,6 +312,11 @@ fun PostDetailContent(
                                 canDelete = canDelete,
                                 onDeleteClick = { onDeleteCommentClick(comment.id) },
                                 onLikeClick = { onLikeCommentClick(comment) },
+                                onLikeLongClick = if (onLikeCommentLongClick != null && state.currentUserId == comment.author.id) {
+                                    { onLikeCommentLongClick(comment) }
+                                } else {
+                                    null
+                                }
                             )
                             HorizontalDivider()
                         }

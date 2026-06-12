@@ -33,12 +33,12 @@ import com.adel.wc26.core.ui.toStringRes
 import com.adel.wc26.feature.profile.domain.PublicProfile
 
 /**
- * A bottom sheet presenting the list of users who have liked a post.
+ * A bottom sheet presenting the list of users who have liked a post or a comment.
  * Implements cursor-based pagination loading as the list is scrolled.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PostLikersBottomSheet(
+fun LikersBottomSheet(
     likers: List<PublicProfile>,
     loading: Boolean,
     error: AppError?,
