@@ -80,6 +80,12 @@ fun CommentRow(
                 )
                 Spacer(Modifier.width(Spacing.xs))
                 Text(
+                    text = "@${comment.author.username}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.width(Spacing.xs))
+                Text(
                     text = "· ${WC26DateTime.relative(comment.createdAt)?.format() ?: ""}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
