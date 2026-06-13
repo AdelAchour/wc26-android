@@ -239,4 +239,8 @@
     <string name="post_likes_title">Liked by</string>
     <string name="post_likes_empty">No likes yet</string>
     <string name="post_likes_error">Failed to load likes</string>
+
+    <!-- Push Notifications Channel -->
+    <string name="notification_channel_name">Push Notifications</string>
+    <string name="notification_channel_description">Notifications for likes, replies, and other content interactions.</string>
 </resources>

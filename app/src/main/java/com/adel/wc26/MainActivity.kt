@@ -1,6 +1,7 @@
 package com.adel.wc26
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -42,6 +43,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        requestNotificationPermission()
+        // Normalize a notification's postId extra into a deep-link URI before
+        // the NavHost composes and the auto-handler evaluates activity.intent.
+        intent?.applyNotificationDeepLink()
         setContent {
             val themeConfig by themeStore.themeFlow.collectAsState(initial = DarkThemeConfig.FOLLOW_SYSTEM)
             val useDarkTheme = when (themeConfig) {
@@ -67,7 +72,33 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        intent.applyNotificationDeepLink()
         setIntent(intent)
         deepLinkIntents.tryEmit(intent)
+    }
+
+    /**
+     * FCM delivers its data payload as Intent extras, not as a URI. Translate a
+     * "postId" extra into the deep-link URI the nav graph already matches, so push
+     * routing reuses the same declarative navDeepLink path as browser/app links.
+     * No-op if the intent is already a URI deep link or carries no postId.
+     */
+    private fun Intent.applyNotificationDeepLink() {
+        if (data != null) return
+        val postId = getStringExtra(EXTRA_POST_ID)?.toLongOrNull() ?: return
+        data = Uri.parse("wc26://posts/$postId")
+    }
+
+    private fun requestNotificationPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            val permission = android.Manifest.permission.POST_NOTIFICATIONS
+            if (checkSelfPermission(permission) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(permission), 101)
+            }
+        }
+    }
+
+    companion object {
+        private const val EXTRA_POST_ID = "postId"
     }
 }
