@@ -1,6 +1,13 @@
 import java.io.FileInputStream
 import java.util.Properties
 
+// Automatically generate google-services.json from template if it doesn't exist to prevent compile-time crashes
+val targetJson = file("google-services.json")
+val templateJson = file("google-services.json.template")
+if (!targetJson.exists() && templateJson.exists()) {
+    templateJson.copyTo(targetJson)
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)

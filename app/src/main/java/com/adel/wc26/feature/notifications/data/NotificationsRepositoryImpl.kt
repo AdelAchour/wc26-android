@@ -5,6 +5,7 @@ import com.adel.wc26.core.result.DataResult
 import com.adel.wc26.core.result.map
 import com.adel.wc26.feature.notifications.domain.NotificationsRepository
 import com.adel.wc26.feature.notifications.domain.Notification
+import com.adel.wc26.feature.notifications.data.dto.PushTokenRequest
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,4 +30,10 @@ class NotificationsRepositoryImpl @Inject constructor(
 
     override suspend fun markAsRead(id: Long): DataResult<Unit> =
         apiCall { notificationsApi.markAsRead(id) }
+
+    override suspend fun registerPushToken(token: String): DataResult<Unit> =
+        apiCall { notificationsApi.registerPushToken(PushTokenRequest(token)) }
+
+    override suspend fun unregisterPushToken(token: String): DataResult<Unit> =
+        apiCall { notificationsApi.unregisterPushToken(PushTokenRequest(token)) }
 }

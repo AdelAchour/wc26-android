@@ -147,6 +147,7 @@ fun WC26NavHost(
     LaunchedEffect(isLoggedIn) {
         if (isLoggedIn) {
             notificationsManager.refreshUnreadCount()
+            notificationsManager.registerCurrentToken()
         } else {
             notificationsManager.clearCount()
         }

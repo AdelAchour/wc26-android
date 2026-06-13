@@ -6,6 +6,7 @@ import com.adel.wc26.core.datastore.TokenStore
 import com.adel.wc26.core.datastore.ThemeStore
 import com.adel.wc26.core.datastore.DarkThemeConfig
 import com.adel.wc26.feature.auth.domain.AuthRepository
+import com.adel.wc26.feature.notifications.data.NotificationsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +33,7 @@ class SettingsViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val tokenStore: TokenStore,
     private val themeStore: ThemeStore,
+    private val notificationsManager: NotificationsManager,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -51,6 +53,7 @@ class SettingsViewModel @Inject constructor(
 
     fun logout() {
         viewModelScope.launch {
+            notificationsManager.unregisterCurrentToken()
             authRepository.logout()
             _uiState.update { it.copy(loggedOut = true) }
         }

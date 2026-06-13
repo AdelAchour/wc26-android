@@ -2,9 +2,13 @@ package com.adel.wc26.feature.notifications.data
 
 import com.adel.wc26.core.result.DataResult
 import com.adel.wc26.feature.notifications.domain.NotificationsRepository
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -38,5 +42,24 @@ class NotificationsManager @Inject constructor(
 
     fun clearCount() {
         _unreadCount.value = 0
+    }
+
+    suspend fun registerCurrentToken() = withContext(Dispatchers.IO) {
+        try {
+            val token = Tasks.await(FirebaseMessaging.getInstance().token)
+            repository.registerPushToken(token)
+        } catch (e: Exception) {
+            // Fails silently if Firebase is unconfigured or Play Services are missing
+        }
+    }
+
+    suspend fun unregisterCurrentToken() = withContext(Dispatchers.IO) {
+        try {
+            val token = Tasks.await(FirebaseMessaging.getInstance().token)
+            repository.unregisterPushToken(token)
+            Tasks.await(FirebaseMessaging.getInstance().deleteToken())
+        } catch (e: Exception) {
+            // Fails silently if Firebase is unconfigured or Play Services are missing
+        }
     }
 }

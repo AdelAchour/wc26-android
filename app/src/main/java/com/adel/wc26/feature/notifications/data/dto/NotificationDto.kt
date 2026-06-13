@@ -31,3 +31,8 @@ data class NotificationDto(
 data class UnreadCountDto(
     val unreadCount: Int,
 )
+
+@Serializable
+data class PushTokenRequest(
+    val pushToken: String,
+)

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1234567890",
+    "project_id": "wc26-mock",
+    "storage_bucket": "wc26-mock.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1234567890:android:mock1234567890",
+        "android_client_info": {
+          "package_name": "com.adel.wc26"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "MOCK_API_KEY_HERE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

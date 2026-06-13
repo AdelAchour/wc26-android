@@ -116,6 +116,16 @@ In `app/build.gradle.kts`, base URLs are injected based on the build types:
 
 Note : To apply this logic you need to replace `.baseUrl(ApiConstants.BASE_URL)` with `.baseUrl(BuildConfig.BASE_URL)`
 
+### Push Notifications Setup (Firebase Cloud Messaging)
+
+This application supports real-time push notifications via Firebase. To maintain compile-time safety and a smooth out-of-the-box build experience:
+* **Automated Mock Fallback**: If `app/google-services.json` is missing on build, a Gradle configuration-phase script copies a mock template (`app/google-services.json.template`) to `app/google-services.json`. The app compiles and runs out-of-the-box (push requests degrade silently).
+* **Enabling Real Push Notifications**:
+  1. Create a project in the [Firebase Console](https://console.firebase.google.com/).
+  2. Register an Android app using the package name `com.adel.wc26`.
+  3. Download your real `google-services.json` file and place it inside the `/app` folder. (This file is ignored by Git to protect your keys).
+  4. Perform a Gradle Sync and run the app. Device token registration will function automatically.
+
 ---
 
 Disclaimer: This project is an independent open-source fan portfolio app and is not affiliated with, authorized, or endorsed by FIFA or any official World Cup organization.*
