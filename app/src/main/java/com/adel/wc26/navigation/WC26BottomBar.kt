@@ -79,7 +79,13 @@ fun WC26BottomBar(
                         Icon(tab.icon, contentDescription = tab.label)
                     }
                 },
-                label = { Text(tab.label) },
+                label = {
+                    Text(
+                        text = tab.label,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    )
+                },
             )
         }
     }
