@@ -62,6 +62,9 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.ui.unit.DpSize
 import com.adel.wc26.core.designsystem.component.TeamFlag
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 /**
  * Match detail — stateful entry point.
@@ -328,18 +331,15 @@ private fun MatchHeader(match: Match) {
 
         Spacer(Modifier.height(Spacing.md))
 
-        when (match.status) {
-            MatchStatus.LIVE -> LiveBadge(label = stringResource(R.string.match_live))
-            MatchStatus.FINISHED -> Text(
-                text = stringResource(R.string.match_full_time),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            else -> Text(
-                text = WC26DateTime.dateTime(match.kickoffAt.toString()),
-                style = MaterialTheme.typography.bodyMedium,
-            )
-        }
+        MatchStatusBadge(status = match.status)
+
+        Spacer(Modifier.height(Spacing.sm))
+
+        Text(
+            text = stringResource(R.string.match_kickoff_label, WC26DateTime.dateTime(match.kickoffAt.toString())),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
 
         Spacer(Modifier.height(Spacing.sm))
         Row(
@@ -352,6 +352,50 @@ private fun MatchHeader(match: Match) {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+    }
+}
+
+@Composable
+private fun MatchStatusBadge(
+    status: MatchStatus,
+    modifier: Modifier = Modifier,
+) {
+    when (status) {
+        MatchStatus.LIVE -> {
+            LiveBadge(label = stringResource(R.string.match_live), modifier = modifier)
+        }
+        MatchStatus.FINISHED -> {
+            Row(
+                modifier = modifier
+                    .clip(RoundedCornerShape(999.dp))
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                    .padding(horizontal = Spacing.sm, vertical = Spacing.xxs),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.match_ft).uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        else -> {
+            Row(
+                modifier = modifier
+                    .clip(RoundedCornerShape(999.dp))
+                    .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f))
+                    .padding(horizontal = Spacing.sm, vertical = Spacing.xxs),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.match_upcoming).uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+            }
         }
     }
 }

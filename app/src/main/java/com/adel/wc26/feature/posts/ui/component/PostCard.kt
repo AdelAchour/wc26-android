@@ -478,8 +478,14 @@ private fun MatchThreadHeader(
                     }
                 }
                 MatchStatus.FINISHED -> {
+                    val dateStr = WC26DateTime.dateOnly(match.kickoffAt.toString())
+                    val ftText = if (match.hasScore) {
+                        "${match.homeScore} - ${match.awayScore} ${stringResource(R.string.match_ft)} · $dateStr"
+                    } else {
+                        "${stringResource(R.string.match_ft)} · $dateStr"
+                    }
                     Text(
-                        text = if (match.hasScore) "${match.homeScore} - ${match.awayScore} FT" else "FT",
+                        text = ftText,
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -487,7 +493,7 @@ private fun MatchThreadHeader(
                 }
                 else -> {
                     Text(
-                        text = "Upcoming",
+                        text = "${stringResource(R.string.match_upcoming)} · ${WC26DateTime.dateTime(match.kickoffAt.toString())}",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline,
                         fontWeight = FontWeight.Medium

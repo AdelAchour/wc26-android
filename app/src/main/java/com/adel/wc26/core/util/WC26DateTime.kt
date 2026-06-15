@@ -60,6 +60,14 @@ object WC26DateTime {
         return instant.atZone(zone).format(formatter)
     }
 
+    /** Date only — e.g. "Sat 14 Jun". */
+    fun dateOnly(iso: String): String {
+        val instant = parse(iso) ?: return ""
+        val formatter = DateTimeFormatter
+            .ofPattern("EEE d MMM", Locale.getDefault())
+        return instant.atZone(zone).format(formatter)
+    }
+
     /** Date + time — e.g. "Sat 14 Jun, 21:00". For match kickoff. */
     fun dateTime(iso: String): String {
         val instant = parse(iso) ?: return ""

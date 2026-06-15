@@ -114,6 +114,9 @@
     <string name="match_full_time">Full time</string>
     <string name="match_vs">vs</string>
     <string name="match_live">LIVE</string>
+    <string name="match_ft">FT</string>
+    <string name="match_upcoming">Upcoming</string>
+    <string name="match_kickoff_label">Kickoff: %1$s</string>
 
     <!-- Match detail -->
     <string name="match_detail_title">Match</string>

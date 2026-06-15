@@ -186,7 +186,7 @@ private fun MatchCardContent(
             when (match.status) {
                 MatchStatus.LIVE -> LiveBadge(label = stringResource(R.string.match_live))
                 MatchStatus.FINISHED -> Text(
-                    text = stringResource(R.string.match_full_time),
+                    text = "${WC26DateTime.dateOnly(match.kickoffAt.toString())} · ${stringResource(R.string.match_ft)}",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
