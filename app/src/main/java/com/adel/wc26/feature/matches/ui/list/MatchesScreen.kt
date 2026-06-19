@@ -37,6 +37,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.ui.unit.dp
 
 /**
  * Matches tab — stateful entry point. Collects the ViewModel state and
@@ -139,7 +143,12 @@ fun MatchesContent(
 
             else -> LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(Spacing.lg),
+                contentPadding = PaddingValues(
+                    start = Spacing.lg,
+                    end = Spacing.lg,
+                    top = Spacing.lg,
+                    bottom = Spacing.lg + 96.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                ),
                 verticalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
                 items(

@@ -12,8 +12,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.foundation.shape.CircleShape
+import com.adel.wc26.core.designsystem.component.StylusNote
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -139,14 +140,18 @@ fun MatchDetailScreen(
         },
         floatingActionButton = {
             state.match?.let { match ->
-                ExtendedFloatingActionButton(
-                    text = { Text(stringResource(R.string.match_detail_compose)) },
-                    icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                FloatingActionButton(
                     onClick = {
                         if (state.isLoggedIn) onComposeClick(match.id)
                         else onSignInPrompt()
                     },
-                )
+                    shape = CircleShape,
+                ) {
+                    Icon(
+                        imageVector = StylusNote,
+                        contentDescription = stringResource(R.string.match_detail_compose)
+                    )
+                }
             }
         },
     ) { padding ->
