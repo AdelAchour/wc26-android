@@ -33,8 +33,8 @@ import androidx.compose.foundation.background
  * open states are tappable — tapping opens the prediction sheet via [onPredictClick].
  * Renders nothing when the match isn't predictable / the user didn't pick.
  */
-/** Gold tint for the prediction spark — reads on both light and dark pill backgrounds. */
-private val SparkGold = Color(0xFFFFC107)
+/** Gold tint for the prediction spark — reads on both light and dark backgrounds. */
+internal val SparkGold = Color(0xFFFFC107)
 
 @Composable
 fun PredictionChip(

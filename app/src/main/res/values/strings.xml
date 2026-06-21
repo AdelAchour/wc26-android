@@ -261,6 +261,8 @@
     <string name="prediction_editable_until_kickoff">Editable until kickoff</string>
     <string name="prediction_locked">Locked</string>
     <string name="prediction_closed_missed">Predictions closed — you didn\'t pick</string>
+    <string name="prediction_closed_title">Predictions closed</string>
+    <string name="prediction_didnt_pick">You didn\'t pick</string>
     <string name="prediction_points_earned">+%1$d pts</string>
     <string name="prediction_points_zero">No points</string>
     <string name="prediction_predict_cta">Predict</string>

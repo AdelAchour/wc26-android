@@ -8,12 +8,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.outlined.SportsSoccer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -23,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -33,9 +35,10 @@ import com.adel.wc26.feature.matches.domain.model.Match
 import com.adel.wc26.feature.predictions.domain.model.Prediction
 
 /**
- * Prediction status block shown near the top of the match-detail screen.
- * Prominent accent CTA when open & unpredicted; quieter informational states
- * otherwise. Tapping (only when open) opens the prediction bottom sheet.
+ * Prediction status block near the top of the match-detail screen. Always leads
+ * with the gold spark so it reads as the prediction feature. Accent CTA when
+ * open & unpredicted; quieter informational states otherwise. Tapping (only
+ * when open) opens the prediction bottom sheet.
  */
 @Composable
 fun PredictionStrip(
@@ -50,65 +53,59 @@ fun PredictionStrip(
 
     when (phase) {
         PredictionPhase.NOT_PREDICTABLE -> Unit
-        PredictionPhase.FINISHED -> if (prediction != null) {
-            StripCard(
-                accent = false,
-                leadingIcon = null,
-                title = stringResource(R.string.prediction_your_pick, prediction.homeScore, prediction.awayScore),
-                subtitle = null,
-                trailing = { PointsPill(prediction.pointsAwarded) },
-                modifier = modifier,
-            )
-        }
-        PredictionPhase.LOCKED -> if (prediction != null) {
-            StripCard(
-                accent = false,
-                leadingIcon = Icons.Default.Lock,
-                title = stringResource(R.string.prediction_your_pick, prediction.homeScore, prediction.awayScore),
-                subtitle = stringResource(R.string.prediction_locked),
-                trailing = null,
-                modifier = modifier,
-            )
-        } else {
-            StripCard(
-                accent = false,
-                leadingIcon = Icons.Default.Lock,
-                title = stringResource(R.string.prediction_closed_missed),
-                subtitle = null,
-                trailing = null,
-                modifier = modifier,
-            )
-        }
+
         PredictionPhase.OPEN -> if (prediction != null) {
             StripCard(
                 accent = false,
-                leadingIcon = null,
                 title = stringResource(R.string.prediction_your_pick, prediction.homeScore, prediction.awayScore),
                 subtitle = stringResource(R.string.prediction_editable_until_kickoff),
-                trailing = {
-                    Icon(
-                        Icons.Default.Edit,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                },
+                trailing = { TrailingIcon(Icons.Default.Edit, MaterialTheme.colorScheme.onSurfaceVariant) },
                 onClick = onClick,
                 modifier = modifier,
             )
         } else {
             StripCard(
                 accent = true,
-                leadingIcon = Icons.Outlined.SportsSoccer,
                 title = stringResource(R.string.prediction_open_cta),
                 subtitle = stringResource(R.string.prediction_open_tap),
-                trailing = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                },
+                trailing = { TrailingIcon(Icons.AutoMirrored.Filled.KeyboardArrowRight, MaterialTheme.colorScheme.onPrimaryContainer) },
                 onClick = onClick,
+                modifier = modifier,
+            )
+        }
+
+        PredictionPhase.LOCKED -> if (prediction != null) {
+            StripCard(
+                accent = false,
+                title = stringResource(R.string.prediction_your_pick, prediction.homeScore, prediction.awayScore),
+                subtitle = stringResource(R.string.prediction_locked),
+                trailing = { TrailingIcon(Icons.Default.Lock, MaterialTheme.colorScheme.onSurfaceVariant) },
+                modifier = modifier,
+            )
+        } else {
+            StripCard(
+                accent = false,
+                title = stringResource(R.string.prediction_closed_title),
+                subtitle = stringResource(R.string.prediction_didnt_pick),
+                trailing = { TrailingIcon(Icons.Default.Lock, MaterialTheme.colorScheme.onSurfaceVariant) },
+                modifier = modifier,
+            )
+        }
+
+        PredictionPhase.FINISHED -> if (prediction != null) {
+            StripCard(
+                accent = false,
+                title = stringResource(R.string.prediction_your_pick, prediction.homeScore, prediction.awayScore),
+                subtitle = null,
+                trailing = { PointsPill(prediction.pointsAwarded) },
+                modifier = modifier,
+            )
+        } else {
+            StripCard(
+                accent = false,
+                title = stringResource(R.string.prediction_closed_title),
+                subtitle = stringResource(R.string.prediction_didnt_pick),
+                trailing = { TrailingIcon(Icons.Default.Lock, MaterialTheme.colorScheme.onSurfaceVariant) },
                 modifier = modifier,
             )
         }
@@ -118,7 +115,6 @@ fun PredictionStrip(
 @Composable
 private fun StripCard(
     accent: Boolean,
-    leadingIcon: ImageVector?,
     title: String,
     subtitle: String?,
     trailing: (@Composable () -> Unit)?,
@@ -140,6 +136,7 @@ private fun StripCard(
         modifier = modifier
             .fillMaxWidth()
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = container),
         border = if (accent) null else BorderStroke(
             1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
@@ -152,9 +149,13 @@ private fun StripCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
-            if (leadingIcon != null) {
-                Icon(leadingIcon, contentDescription = null, tint = onContainer)
-            }
+            // Always the spark — signals "this is your prediction".
+            Icon(
+                imageVector = Icons.Default.AutoAwesome,
+                contentDescription = null,
+                tint = SparkGold,
+                modifier = Modifier.size(20.dp),
+            )
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
@@ -174,6 +175,16 @@ private fun StripCard(
             trailing?.invoke()
         }
     }
+}
+
+@Composable
+private fun TrailingIcon(icon: ImageVector, tint: Color) {
+    Icon(
+        imageVector = icon,
+        contentDescription = null,
+        tint = tint,
+        modifier = Modifier.size(18.dp),
+    )
 }
 
 @Composable
