@@ -274,6 +274,11 @@
     <string name="prediction_you">You</string>
     <string name="prediction_rank">#%1$d</string>
     <string name="prediction_points_total">%1$d pts</string>
+    <string name="prediction_stats_header">Predictions</string>
+    <string name="prediction_stats_points">Points</string>
+    <string name="prediction_stats_rank">Rank</string>
+    <string name="prediction_stats_exact">Exact</string>
+    <string name="prediction_stats_none">—</string>
     <string name="prediction_score_short">%1$d–%2$d</string>
     <string name="prediction_points_short">+%1$d</string>
 </resources>

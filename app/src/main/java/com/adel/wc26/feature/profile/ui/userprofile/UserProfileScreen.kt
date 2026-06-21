@@ -30,6 +30,7 @@ import com.adel.wc26.core.designsystem.theme.Spacing
 import com.adel.wc26.core.ui.toStringRes
 import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.posts.ui.component.postsThread
+import com.adel.wc26.feature.predictions.ui.PredictionStatsCard
 import com.adel.wc26.feature.profile.ui.component.ProfileHeader
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
@@ -198,6 +199,12 @@ fun UserProfileContent(
                             onAvatarClick = { showAvatarZoom = true },
                             showEditIcon = false
                         )
+                        state.predictionStats?.let { stats ->
+                            PredictionStatsCard(
+                                stats = stats,
+                                modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+                            )
+                        }
                         HorizontalDivider()
                         Text(
                             text = stringResource(R.string.user_profile_posts_header),

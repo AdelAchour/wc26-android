@@ -16,6 +16,8 @@ import com.adel.wc26.feature.posts.data.PostDeletionManager
 import com.adel.wc26.feature.posts.data.PostLikeManager
 import com.adel.wc26.feature.posts.data.post.PostPagingSource
 import com.adel.wc26.feature.posts.domain.post.Post
+import com.adel.wc26.feature.predictions.domain.PredictionRepository
+import com.adel.wc26.feature.predictions.domain.model.PredictionStats
 import com.adel.wc26.feature.profile.domain.UserProfile
 import com.adel.wc26.feature.profile.domain.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -51,11 +53,13 @@ data class ProfileUiState(
     val isSavingProfile: Boolean = false,
     val profileError: AppError? = null,
     val isRefreshing: Boolean = false,
+    val predictionStats: PredictionStats? = null,
 )
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
+    private val predictionRepository: PredictionRepository,
     private val tokenStore: TokenStore,
     private val postLikeManager: PostLikeManager,
     private val postDeletionManager: PostDeletionManager,
@@ -104,9 +108,19 @@ class ProfileViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(loading = false, profile = result.data, error = null, isRefreshing = false)
                     }
+                    loadPredictionStats(result.data.id)
                 }
                 is DataResult.Error ->
                     _uiState.update { it.copy(loading = false, error = result.error, isRefreshing = false) }
+            }
+        }
+    }
+
+    private fun loadPredictionStats(userId: Long) {
+        viewModelScope.launch {
+            when (val result = predictionRepository.getUserStats(userId)) {
+                is DataResult.Success -> _uiState.update { it.copy(predictionStats = result.data) }
+                is DataResult.Error -> Unit // non-critical; stats block just won't show
             }
         }
     }
