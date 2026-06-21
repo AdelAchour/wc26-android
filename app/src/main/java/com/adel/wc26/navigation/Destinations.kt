@@ -43,6 +43,9 @@ object Destinations {
     data object Feed
 
     @Serializable
+    data object Predictions
+
+    @Serializable
     data object Notifications
 
     @Serializable

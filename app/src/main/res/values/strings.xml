@@ -266,6 +266,14 @@
     <string name="prediction_points_earned">+%1$d pts</string>
     <string name="prediction_points_zero">No points</string>
     <string name="prediction_predict_cta">Predict</string>
+    <string name="prediction_tab_title">Predictions</string>
+    <string name="prediction_today_header">Open today · %1$d</string>
+    <string name="prediction_today_caught_up">You\'re all caught up for today</string>
+    <string name="prediction_leaderboard_header">Leaderboard</string>
+    <string name="prediction_leaderboard_empty">No standings yet — predictions are graded as matches finish</string>
+    <string name="prediction_you">You</string>
+    <string name="prediction_rank">#%1$d</string>
+    <string name="prediction_points_total">%1$d pts</string>
     <string name="prediction_score_short">%1$d–%2$d</string>
     <string name="prediction_points_short">+%1$d</string>
 </resources>

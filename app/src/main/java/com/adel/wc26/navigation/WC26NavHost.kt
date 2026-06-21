@@ -50,6 +50,7 @@ import com.adel.wc26.feature.profile.ui.ProfileScreen
 import com.adel.wc26.feature.profile.ui.userprofile.UserProfileScreen
 import com.adel.wc26.feature.settings.ui.SettingsScreen
 import com.adel.wc26.feature.matches.ui.list.MatchesScreen
+import com.adel.wc26.feature.predictions.ui.list.PredictionsScreen
 import com.adel.wc26.feature.matches.ui.detail.MatchDetailScreen
 import com.adel.wc26.feature.matches.ui.edit.MatchEditScreen
 import com.adel.wc26.feature.posts.ui.feed.FeedScreen
@@ -363,6 +364,16 @@ fun WC26NavHost(
                     },
                     onComposeClick = {
                         navController.navigate(Destinations.Matches(isPickerMode = true))
+                    },
+                    onSignInPrompt = {
+                        navController.navigate(Destinations.Login)
+                    },
+                )
+            }
+            composable<Destinations.Predictions> {
+                PredictionsScreen(
+                    onMatchClick = { matchId ->
+                        navController.navigate(Destinations.MatchDetail(matchId))
                     },
                     onSignInPrompt = {
                         navController.navigate(Destinations.Login)

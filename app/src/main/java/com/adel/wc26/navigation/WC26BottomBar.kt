@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
+import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.SportsSoccer
 import androidx.compose.material3.Badge
@@ -46,6 +47,7 @@ enum class TopLevelTab(
 ) {
     MATCHES("Matches", Icons.Outlined.SportsSoccer, Destinations.Matches()),
     FEED("Feed", Icons.Outlined.ChatBubbleOutline, Destinations.Feed),
+    PREDICTIONS("Predictions", Icons.Outlined.EmojiEvents, Destinations.Predictions),
     NOTIFICATIONS("Notifications", Icons.Outlined.Notifications, Destinations.Notifications),
     PROFILE("Profile", Icons.Outlined.AccountCircle, Destinations.Profile),
 }
