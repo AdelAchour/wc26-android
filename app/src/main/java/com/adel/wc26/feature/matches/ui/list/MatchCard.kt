@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import java.time.Instant
 import kotlin.math.cos
 import kotlin.math.sin
@@ -242,13 +243,16 @@ private fun MatchCardContent(
                 modifier = Modifier.weight(1f, fill = false),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+
+                TeamFlag(code = match.countryCode, size = DpSize(16.dp, 11.dp))
+                Spacer(modifier = Modifier.width(Spacing.xs))
                 Text(
                     text = match.venue,
                     style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Spacer(modifier = Modifier.width(Spacing.xs))
-                TeamFlag(code = match.countryCode, size = DpSize(16.dp, 11.dp))
             }
             if (onPredictClick != null) {
                 Spacer(modifier = Modifier.width(Spacing.sm))
@@ -332,7 +336,7 @@ private fun sampleMatch(
     stage = "Group A",
     venue = "BMO Field, Toronto",
     countryCode = "CA",
-    kickoffAt = Instant.parse("2026-06-14T19:00:00Z"),
+    kickoffAt = Instant.parse("2026-07-14T19:00:00Z"),
     status = status,
     homeScore = home,
     awayScore = away,
@@ -361,9 +365,34 @@ private fun MatchCardLivePreview() {
 @Preview(showBackground = true)
 @Composable
 private fun MatchCardFinishedPreview() {
+    val pred = Prediction(
+        matchId = 1,
+        homeScore = 2,
+        awayScore = 1,
+        pointsAwarded = 5
+    )
     WC26Theme {
-        MatchCard(match = sampleMatch(MatchStatus.FINISHED, 2, 1), onClick = {},
-            modifier = Modifier.padding(Spacing.lg))
+        MatchCard(
+            match = sampleMatch(MatchStatus.FINISHED, 2, 1),
+            onClick = {},
+            prediction = pred,
+            onPredictClick = {},
+            modifier = Modifier.padding(Spacing.lg)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MatchCardOpenPredPreview() {
+    WC26Theme {
+        MatchCard(
+            match = sampleMatch(MatchStatus.SCHEDULED, 2, 1),
+            onClick = {},
+            prediction = null,
+            onPredictClick = {},
+            modifier = Modifier.padding(Spacing.lg)
+        )
     }
 }
 
