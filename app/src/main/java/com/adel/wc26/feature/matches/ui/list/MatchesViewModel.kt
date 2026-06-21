@@ -10,7 +10,6 @@ import com.adel.wc26.feature.matches.domain.MatchFilter
 import com.adel.wc26.feature.matches.domain.MatchRepository
 import com.adel.wc26.feature.matches.domain.model.Match
 import com.adel.wc26.feature.matches.domain.model.MatchStatus
-import com.adel.wc26.feature.predictions.domain.PredictionRepository
 import com.adel.wc26.feature.predictions.domain.model.Prediction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +31,6 @@ data class MatchesUiState(
     val loading: Boolean = true,
     val error: AppError? = null,
     val isLoggedIn: Boolean = false,
-    val predictions: Map<Long, Prediction> = emptyMap(),
 ) {
     /** True when a successful load returned no matches for this filter. */
     val isEmpty: Boolean
@@ -43,7 +41,6 @@ data class MatchesUiState(
 class MatchesViewModel @Inject constructor(
     private val matchRepository: MatchRepository,
     private val matchUpdateNotifier: MatchUpdateNotifier,
-    private val predictionRepository: PredictionRepository,
     private val tokenStore: TokenStore,
 ) : ViewModel() {
 
@@ -53,13 +50,14 @@ class MatchesViewModel @Inject constructor(
     init {
         load(MatchFilter.UPCOMING)
 
-        // Track login + load the user's predictions for the per-card chips.
+        // Track login; reload matches when auth changes so embedded predictions refresh.
         viewModelScope.launch {
+            var previous: Boolean? = null
             tokenStore.tokenFlow.collect { token ->
                 val loggedIn = token != null
                 _uiState.update { it.copy(isLoggedIn = loggedIn) }
-                if (loggedIn) loadPredictions()
-                else _uiState.update { it.copy(predictions = emptyMap()) }
+                if (previous != null && previous != loggedIn) load(_uiState.value.filter)
+                previous = loggedIn
             }
         }
 
@@ -100,18 +98,14 @@ class MatchesViewModel @Inject constructor(
         load(_uiState.value.filter)
     }
 
-    /** Reflect a freshly-saved prediction in the chips without a round-trip. */
+    /** Reflect a freshly-saved prediction in the matching card without a round-trip. */
     fun onPredictionSaved(prediction: Prediction) {
-        _uiState.update { it.copy(predictions = it.predictions + (prediction.matchId to prediction)) }
-    }
-
-    private fun loadPredictions() {
-        viewModelScope.launch {
-            when (val result = predictionRepository.getMyPredictions()) {
-                is DataResult.Success ->
-                    _uiState.update { it.copy(predictions = result.data.associateBy { p -> p.matchId }) }
-                is DataResult.Error -> Unit // non-critical; chips just won't show picks
-            }
+        _uiState.update { state ->
+            state.copy(
+                matches = state.matches.map { m ->
+                    if (m.id == prediction.matchId) m.copy(prediction = prediction) else m
+                }
+            )
         }
     }
 

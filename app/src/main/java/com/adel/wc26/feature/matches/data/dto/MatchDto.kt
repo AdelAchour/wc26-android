@@ -1,5 +1,6 @@
 package com.adel.wc26.feature.matches.data.dto
 
+import com.adel.wc26.feature.predictions.data.dto.PredictionDto
 import kotlinx.serialization.Serializable
 
 /**
@@ -25,4 +26,5 @@ data class MatchDto(
     val awayScore: Short? = null,
     val homeTeamCode: String? = null,
     val awayTeamCode: String? = null,
+    val prediction: PredictionDto? = null,
 )

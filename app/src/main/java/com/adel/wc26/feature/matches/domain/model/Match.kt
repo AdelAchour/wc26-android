@@ -1,5 +1,6 @@
 package com.adel.wc26.feature.matches.domain.model
 
+import com.adel.wc26.feature.predictions.domain.model.Prediction
 import java.time.Instant
 
 /**
@@ -40,6 +41,8 @@ data class Match(
     val awayScore: Int?,
     val homeTeamCode: String?,
     val awayTeamCode: String?,
+    /** The signed-in user's prediction for this match, embedded by the API when authenticated. */
+    val prediction: Prediction? = null,
 ) {
     /** True when both scores are present — i.e. there's a result to show. */
     val hasScore: Boolean

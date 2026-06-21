@@ -72,7 +72,6 @@ fun MatchesScreen(
         onMatchClick = onMatchClick,
         isPickerMode = isPickerMode,
         onBackClick = onBackClick,
-        predictions = state.predictions,
         // No predict chips in picker mode (it's for choosing a match to post about).
         onPredictClick = if (isPickerMode) null else { match ->
             if (state.isLoggedIn) sheetMatch = match else onSignInPrompt()
@@ -83,7 +82,7 @@ fun MatchesScreen(
     sheetMatch?.let { match ->
         PredictionBottomSheet(
             match = match,
-            existing = state.predictions[match.id],
+            existing = match.prediction,
             onDismiss = { sheetMatch = null },
             onSaved = {
                 viewModel.onPredictionSaved(it)
@@ -106,7 +105,6 @@ fun MatchesContent(
     modifier: Modifier = Modifier,
     isPickerMode: Boolean = false,
     onBackClick: () -> Unit = {},
-    predictions: Map<Long, Prediction> = emptyMap(),
     onPredictClick: ((Match) -> Unit)? = null,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -185,7 +183,7 @@ fun MatchesContent(
                     MatchCard(
                         match = match,
                         onClick = { onMatchClick(match.id) },
-                        prediction = predictions[match.id],
+                        prediction = match.prediction,
                         onPredictClick = onPredictClick?.let { cb -> { cb(match) } },
                     )
                 }

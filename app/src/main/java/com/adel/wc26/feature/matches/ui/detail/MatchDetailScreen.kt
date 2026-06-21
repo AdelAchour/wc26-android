@@ -172,7 +172,7 @@ fun MatchDetailScreen(
             onAuthorClick = onAuthorClick,
             onLikeClick = viewModel::toggleLike,
             onDeleteClick = { postToDelete = it },
-            prediction = state.prediction,
+            prediction = state.match?.prediction,
             onPredictClick = {
                 if (state.isLoggedIn) showPredictionSheet = true else onSignInPrompt()
             },
@@ -209,7 +209,7 @@ fun MatchDetailScreen(
             state.match?.let { match ->
                 PredictionBottomSheet(
                     match = match,
-                    existing = state.prediction,
+                    existing = match.prediction,
                     onDismiss = { showPredictionSheet = false },
                     onSaved = {
                         viewModel.onPredictionSaved(it)

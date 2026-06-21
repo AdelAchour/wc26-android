@@ -15,7 +15,6 @@ import com.adel.wc26.feature.matches.domain.model.Match
 import com.adel.wc26.feature.posts.data.post.PostPagingSource
 import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.posts.domain.post.PostRepository
-import com.adel.wc26.feature.predictions.domain.PredictionRepository
 import com.adel.wc26.feature.predictions.domain.model.Prediction
 import com.adel.wc26.navigation.Destinations
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -48,7 +47,6 @@ data class MatchDetailUiState(
     val isLoggedIn: Boolean = false,
     val isAdmin: Boolean = false,
     val isRefreshing: Boolean = false,
-    val prediction: Prediction? = null,
 )
 
 @HiltViewModel
@@ -61,7 +59,6 @@ class MatchDetailViewModel @Inject constructor(
     private val postCreationNotifier: PostCreationNotifier,
     private val tokenStore: TokenStore,
     private val matchUpdateNotifier: MatchUpdateNotifier,
-    private val predictionRepository: PredictionRepository,
 ) : ViewModel() {
 
     // Expose the current user's ID for showing delete actions
@@ -122,7 +119,6 @@ class MatchDetailViewModel @Inject constructor(
             }
         }
         loadMatch()
-        loadPrediction()
 
         // Listen for new posts and refresh if they belong to this match
         viewModelScope.launch {
@@ -158,20 +154,9 @@ class MatchDetailViewModel @Inject constructor(
         }
     }
 
-    private fun loadPrediction() {
-        viewModelScope.launch {
-            if (tokenStore.getUserId() == null) return@launch
-            when (val result = predictionRepository.getMyPredictions()) {
-                is DataResult.Success ->
-                    _uiState.update { state -> state.copy(prediction = result.data.find { it.matchId == matchId }) }
-                is DataResult.Error -> Unit // non-critical; leave prediction null
-            }
-        }
-    }
-
     /** Called after the bottom sheet saves, to reflect the new pick immediately. */
     fun onPredictionSaved(prediction: Prediction) {
-        _uiState.update { it.copy(prediction = prediction) }
+        _uiState.update { it.copy(match = it.match?.copy(prediction = prediction)) }
     }
 
     fun toggleLike(post: Post) {

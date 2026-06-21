@@ -3,6 +3,7 @@ package com.adel.wc26.feature.matches.data
 import com.adel.wc26.feature.matches.data.dto.MatchDto
 import com.adel.wc26.feature.matches.domain.model.Match
 import com.adel.wc26.feature.matches.domain.model.MatchStatus
+import com.adel.wc26.feature.predictions.data.toDomain
 import java.time.Instant
 import java.time.OffsetDateTime
 
@@ -32,4 +33,5 @@ fun MatchDto.toDomain(): Match = Match(
     awayScore = awayScore?.toInt(),
     homeTeamCode = homeTeamCode,
     awayTeamCode = awayTeamCode,
+    prediction = prediction?.toDomain(),
 )
