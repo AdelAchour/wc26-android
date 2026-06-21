@@ -15,7 +15,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -44,6 +48,7 @@ import com.adel.wc26.feature.matches.ui.list.MatchCard
 import com.adel.wc26.feature.predictions.domain.model.LeaderboardEntry
 import com.adel.wc26.feature.predictions.domain.model.MyRank
 import com.adel.wc26.feature.predictions.ui.PredictionBottomSheet
+import com.adel.wc26.feature.predictions.ui.PredictionRulesSheet
 
 /**
  * Predictions tab — today's open picks + the leaderboard.
@@ -59,13 +64,27 @@ fun PredictionsScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var sheetMatch by remember { mutableStateOf<Match?>(null) }
+    var showRules by remember { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxSize()) {
-        Text(
-            text = stringResource(R.string.prediction_tab_title),
-            style = MaterialTheme.typography.displaySmall,
-            modifier = Modifier.padding(start = Spacing.lg, end = Spacing.lg, top = Spacing.lg, bottom = Spacing.md),
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = Spacing.lg, end = Spacing.sm, top = Spacing.lg, bottom = Spacing.md),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(R.string.prediction_tab_title),
+                style = MaterialTheme.typography.displaySmall,
+                modifier = Modifier.weight(1f),
+            )
+            IconButton(onClick = { showRules = true }) {
+                Icon(
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = stringResource(R.string.prediction_rules_open),
+                )
+            }
+        }
 
         when {
             state.loading -> WC26LoadingState(modifier = Modifier.fillMaxSize())
@@ -140,6 +159,10 @@ fun PredictionsScreen(
             onDismiss = { sheetMatch = null },
             onSaved = { sheetMatch = null },
         )
+    }
+
+    if (showRules) {
+        PredictionRulesSheet(onDismiss = { showRules = false })
     }
 }
 

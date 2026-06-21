@@ -279,6 +279,19 @@
     <string name="prediction_stats_rank">Rank</string>
     <string name="prediction_stats_exact">Exact</string>
     <string name="prediction_stats_none">—</string>
+    <!-- Rules -->
+    <string name="prediction_rules_open">How predictions work</string>
+    <string name="prediction_rules_title">How predictions work</string>
+    <string name="prediction_rules_predict_title">Make your pick</string>
+    <string name="prediction_rules_predict_body">Predict a score for any upcoming match. Change it as often as you like — right up until kickoff.</string>
+    <string name="prediction_rules_lock_title">Locks at kickoff</string>
+    <string name="prediction_rules_lock_body">When the match kicks off, your prediction locks and can\'t be changed.</string>
+    <string name="prediction_rules_scoring_title">Scoring</string>
+    <string name="prediction_rules_scoring_body">Once the match finishes, your prediction is graded:\n• 5 pts — exact score\n• 3 pts — correct result (win, draw or loss)\n• 0 pts — anything else</string>
+    <string name="prediction_rules_et_title">Extra time &amp; penalties</string>
+    <string name="prediction_rules_et_body">Knockout matches are graded on the score at the end of play — extra time counts, penalty shootouts don\'t. A match decided on penalties counts as a draw.</string>
+    <string name="prediction_rules_leaderboard_title">Leaderboard</string>
+    <string name="prediction_rules_leaderboard_body">Points add up across every match. The leaderboard ranks players by total points; ties are broken by who has more exact scores.</string>
     <string name="prediction_score_short">%1$d–%2$d</string>
     <string name="prediction_points_short">+%1$d</string>
 </resources>
