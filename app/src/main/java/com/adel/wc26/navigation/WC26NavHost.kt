@@ -441,7 +441,16 @@ fun WC26NavHost(
             }
 
             // --- Detail screens (bottom bar hidden) ---
-            composable<Destinations.MatchDetail> {
+            composable<Destinations.MatchDetail>(
+                deepLinks = listOf(
+                    navDeepLink<Destinations.MatchDetail>(
+                        basePath = "https://wc26.adelash.dev/matches"
+                    ),
+                    navDeepLink<Destinations.MatchDetail>(
+                        basePath = "wc26://matches"
+                    )
+                )
+            ) {
                 MatchDetailScreen(
                     onBack = { navController.popBackStack() },
                     onPostClick = { postId ->

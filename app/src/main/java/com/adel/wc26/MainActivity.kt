@@ -85,8 +85,13 @@ class MainActivity : ComponentActivity() {
      */
     private fun Intent.applyNotificationDeepLink() {
         if (data != null) return
-        val postId = getStringExtra(EXTRA_POST_ID)?.toLongOrNull() ?: return
-        data = Uri.parse("wc26://posts/$postId")
+        getStringExtra(EXTRA_POST_ID)?.toLongOrNull()?.let {
+            data = Uri.parse("wc26://posts/$it")
+            return
+        }
+        getStringExtra(EXTRA_MATCH_ID)?.toLongOrNull()?.let {
+            data = Uri.parse("wc26://matches/$it")
+        }
     }
 
     private fun requestNotificationPermission() {
@@ -100,5 +105,6 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         private const val EXTRA_POST_ID = "postId"
+        private const val EXTRA_MATCH_ID = "matchId"
     }
 }
