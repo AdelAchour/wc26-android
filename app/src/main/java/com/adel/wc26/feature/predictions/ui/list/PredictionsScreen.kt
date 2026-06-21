@@ -1,9 +1,11 @@
 package com.adel.wc26.feature.predictions.ui.list
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -50,6 +53,7 @@ import com.adel.wc26.feature.predictions.ui.PredictionBottomSheet
 fun PredictionsScreen(
     onMatchClick: (Long) -> Unit,
     onSignInPrompt: () -> Unit,
+    onUserClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: PredictionsViewModel = hiltViewModel(),
 ) {
@@ -121,7 +125,7 @@ fun PredictionsScreen(
                         }
                     } else {
                         items(state.leaderboard, key = { it.user.id }) { entry ->
-                            LeaderboardRow(entry)
+                            LeaderboardRow(entry, onClick = { onUserClick(entry.user.id) })
                         }
                     }
                 }
@@ -187,11 +191,12 @@ private fun YourRankRow(me: MyRank) {
 }
 
 @Composable
-private fun LeaderboardRow(entry: LeaderboardEntry) {
+private fun LeaderboardRow(entry: LeaderboardEntry, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = Spacing.xs),
+            .clickable(onClick = onClick)
+            .padding(vertical = Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
@@ -200,6 +205,9 @@ private fun LeaderboardRow(entry: LeaderboardEntry) {
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.End,
+            // Fixed width keeps avatars aligned regardless of #1 vs #100.
+            modifier = Modifier.width(40.dp),
         )
         WC26Avatar(displayName = entry.user.displayName, avatarUrl = entry.user.avatarUrl, size = 36.dp)
         Text(

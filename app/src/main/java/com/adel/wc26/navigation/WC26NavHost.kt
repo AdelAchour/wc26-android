@@ -378,6 +378,9 @@ fun WC26NavHost(
                     onSignInPrompt = {
                         navController.navigate(Destinations.Login)
                     },
+                    onUserClick = { userId ->
+                        navController.navigate(Destinations.UserProfile(userId))
+                    },
                 )
             }
             composable<Destinations.Notifications> {
