@@ -6,8 +6,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -380,7 +385,10 @@ private fun CommentComposerBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .imePadding()
+                    // Float above the system nav bar (3-button/gesture) when the
+                    // keyboard is closed, and above the keyboard when it's open.
+                    // union() takes the larger inset so the two never stack.
+                    .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
                     .padding(Spacing.lg),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -479,7 +487,10 @@ private fun SignInToCommentBar(onSignIn: () -> Unit) {
             WC26PrimaryButton(
                 text = stringResource(R.string.post_detail_sign_in_to_comment),
                 onClick = onSignIn,
-                modifier = Modifier.fillMaxWidth().padding(Spacing.md),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(Spacing.md),
             )
         }
     }
