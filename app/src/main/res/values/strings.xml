@@ -279,6 +279,11 @@
     <string name="prediction_stats_rank">Rank</string>
     <string name="prediction_stats_exact">Exact</string>
     <string name="prediction_stats_none">—</string>
+    <!-- History -->
+    <string name="prediction_history_open">Prediction history</string>
+    <string name="prediction_history_title">Prediction history</string>
+    <string name="prediction_history_empty">No finished predictions yet</string>
+    <string name="prediction_history_row">Pick %1$d–%2$d · Final %3$d–%4$d</string>
     <!-- Rules -->
     <string name="prediction_rules_open">How predictions work</string>
     <string name="prediction_rules_title">How predictions work</string>

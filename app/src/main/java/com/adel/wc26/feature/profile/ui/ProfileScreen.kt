@@ -43,6 +43,7 @@ import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.posts.ui.component.postsThread
 import com.adel.wc26.feature.profile.ui.component.ProfileHeader
 import com.adel.wc26.feature.predictions.ui.PredictionStatsCard
+import com.adel.wc26.feature.predictions.ui.history.PredictionHistorySheet
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -90,6 +91,7 @@ fun ProfileScreen(
 
     var postToDelete by remember { mutableStateOf<Post?>(null) }
     var showEditProfileSheet by remember { mutableStateOf(false) }
+    var showHistory by remember { mutableStateOf(false) }
 
     ProfileContent(
         state = state,
@@ -111,6 +113,7 @@ fun ProfileScreen(
         onEditAvatarClick = onEditAvatarClick,
         onEditProfileClick = { showEditProfileSheet = true },
         onSettingsClick = onSettingsClick,
+        onHistoryClick = { showHistory = true },
         modifier = modifier,
     )
 
@@ -154,6 +157,12 @@ fun ProfileScreen(
             }
         )
     }
+
+    if (showHistory) {
+        state.profile?.let { profile ->
+            PredictionHistorySheet(userId = profile.id, onDismiss = { showHistory = false })
+        }
+    }
 }
 
 /**
@@ -178,6 +187,7 @@ fun ProfileContent(
     onEditAvatarClick: () -> Unit,
     onEditProfileClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    onHistoryClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val emptyMessage = when (state.selectedTab) {
@@ -246,6 +256,7 @@ fun ProfileContent(
                         item {
                             PredictionStatsCard(
                                 stats = stats,
+                                onHistoryClick = onHistoryClick,
                                 modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.sm),
                             )
                         }

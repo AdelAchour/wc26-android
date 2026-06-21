@@ -3,6 +3,8 @@ package com.adel.wc26.feature.predictions.data
 import com.adel.wc26.core.network.apiCall
 import com.adel.wc26.core.result.DataResult
 import com.adel.wc26.core.result.map
+import com.adel.wc26.feature.matches.data.toDomain
+import com.adel.wc26.feature.matches.domain.model.Match
 import com.adel.wc26.feature.predictions.data.dto.UpsertPredictionRequest
 import com.adel.wc26.feature.predictions.domain.PredictionRepository
 import com.adel.wc26.feature.predictions.domain.model.LeaderboardPage
@@ -33,4 +35,7 @@ class PredictionRepositoryImpl @Inject constructor(
 
     override suspend fun getUserStats(userId: Long): DataResult<PredictionStats> =
         apiCall { api.getUserStats(userId) }.map { it.toDomain() }
+
+    override suspend fun getUserPredictionHistory(userId: Long): DataResult<List<Match>> =
+        apiCall { api.getUserPredictionHistory(userId) }.map { list -> list.map { it.toDomain() } }
 }

@@ -1,6 +1,7 @@
 package com.adel.wc26.feature.predictions.domain
 
 import com.adel.wc26.core.result.DataResult
+import com.adel.wc26.feature.matches.domain.model.Match
 import com.adel.wc26.feature.predictions.domain.model.LeaderboardPage
 import com.adel.wc26.feature.predictions.domain.model.Prediction
 import com.adel.wc26.feature.predictions.domain.model.PredictionStats
@@ -22,4 +23,7 @@ interface PredictionRepository {
 
     /** A user's prediction stats for their profile. */
     suspend fun getUserStats(userId: Long): DataResult<PredictionStats>
+
+    /** A user's prediction history — finished matches (each carrying their prediction). */
+    suspend fun getUserPredictionHistory(userId: Long): DataResult<List<Match>>
 }

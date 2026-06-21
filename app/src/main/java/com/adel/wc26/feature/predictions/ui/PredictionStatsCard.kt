@@ -4,13 +4,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,14 +35,16 @@ import com.adel.wc26.feature.predictions.domain.model.PredictionStats
 fun PredictionStatsCard(
     stats: PredictionStats,
     modifier: Modifier = Modifier,
+    onHistoryClick: (() -> Unit)? = null,
 ) {
     if (stats.predictionsCount == 0) return
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-            modifier = Modifier.padding(bottom = Spacing.sm),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = Spacing.sm),
         ) {
             Icon(
                 imageVector = Icons.Default.AutoAwesome,
@@ -46,11 +52,23 @@ fun PredictionStatsCard(
                 tint = SparkGold,
                 modifier = Modifier.size(18.dp),
             )
+            Spacer(Modifier.width(Spacing.xs))
             Text(
                 text = stringResource(R.string.prediction_stats_header),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.weight(1f),
             )
+            if (onHistoryClick != null) {
+                IconButton(onClick = onHistoryClick, modifier = Modifier.size(32.dp)) {
+                    Icon(
+                        imageVector = Icons.Outlined.History,
+                        contentDescription = stringResource(R.string.prediction_history_open),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
+            }
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {

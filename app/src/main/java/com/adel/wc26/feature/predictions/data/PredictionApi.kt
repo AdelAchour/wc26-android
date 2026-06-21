@@ -1,5 +1,6 @@
 package com.adel.wc26.feature.predictions.data
 
+import com.adel.wc26.feature.matches.data.dto.MatchDto
 import com.adel.wc26.feature.predictions.data.dto.LeaderboardResponseDto
 import com.adel.wc26.feature.predictions.data.dto.PredictionDto
 import com.adel.wc26.feature.predictions.data.dto.PredictionStatsDto
@@ -37,4 +38,8 @@ interface PredictionApi {
 
     @GET("users/{id}/prediction-stats")
     suspend fun getUserStats(@Path("id") userId: Long): PredictionStatsDto
+
+    /** A user's prediction history — finished matches with their prediction embedded. */
+    @GET("users/{id}/predictions")
+    suspend fun getUserPredictionHistory(@Path("id") userId: Long): List<MatchDto>
 }

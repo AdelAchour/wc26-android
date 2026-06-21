@@ -31,6 +31,7 @@ import com.adel.wc26.core.ui.toStringRes
 import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.posts.ui.component.postsThread
 import com.adel.wc26.feature.predictions.ui.PredictionStatsCard
+import com.adel.wc26.feature.predictions.ui.history.PredictionHistorySheet
 import com.adel.wc26.feature.profile.ui.component.ProfileHeader
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
@@ -83,6 +84,7 @@ fun UserProfileScreen(
     val currentUserId by viewModel.currentUserId.collectAsStateWithLifecycle(initialValue = null)
 
     var postToDelete by remember { mutableStateOf<Post?>(null) }
+    var showHistory by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier,
@@ -119,6 +121,7 @@ fun UserProfileScreen(
             onMatchClick = onMatchClick,
             onLikeClick = viewModel::toggleLike,
             onDeleteClick = { postToDelete = it },
+            onHistoryClick = { showHistory = true },
             modifier = Modifier.padding(padding),
         )
 
@@ -147,6 +150,12 @@ fun UserProfileScreen(
                 }
             )
         }
+
+        if (showHistory) {
+            state.profile?.let { profile ->
+                PredictionHistorySheet(userId = profile.id, onDismiss = { showHistory = false })
+            }
+        }
     }
 }
 
@@ -166,6 +175,7 @@ fun UserProfileContent(
     onMatchClick: (Long) -> Unit,
     onLikeClick: (Post) -> Unit,
     onDeleteClick: (Post) -> Unit,
+    onHistoryClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val emptyMessage = stringResource(R.string.profile_empty_posts)
@@ -202,6 +212,7 @@ fun UserProfileContent(
                         state.predictionStats?.let { stats ->
                             PredictionStatsCard(
                                 stats = stats,
+                                onHistoryClick = onHistoryClick,
                                 modifier = Modifier.padding(horizontal = Spacing.lg, vertical = Spacing.sm),
                             )
                         }
@@ -261,6 +272,7 @@ private fun UserProfileContentPreview() {
             onMatchClick = {},
             onLikeClick = {},
             onDeleteClick = {},
+            onHistoryClick = {},
             onRefresh = {}
             )
     }
