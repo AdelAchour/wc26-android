@@ -33,6 +33,9 @@ import androidx.compose.foundation.background
  * open states are tappable — tapping opens the prediction sheet via [onPredictClick].
  * Renders nothing when the match isn't predictable / the user didn't pick.
  */
+/** Gold tint for the prediction spark — reads on both light and dark pill backgrounds. */
+private val SparkGold = Color(0xFFFFC107)
+
 @Composable
 fun PredictionChip(
     match: Match,
@@ -86,7 +89,7 @@ fun PredictionChip(
                     text = stringResource(R.string.prediction_points_short, points),
                     background = scheme.tertiaryContainer,
                     foreground = scheme.onTertiaryContainer,
-                    leadingIcon = null,
+                    leadingIcon = Icons.Default.AutoAwesome,
                     onClick = null,
                     modifier = modifier,
                 )
@@ -95,7 +98,7 @@ fun PredictionChip(
                     text = stringResource(R.string.prediction_score_short, prediction.homeScore, prediction.awayScore),
                     background = scheme.surfaceVariant.copy(alpha = 0.5f),
                     foreground = scheme.onSurfaceVariant,
-                    leadingIcon = null,
+                    leadingIcon = Icons.Default.AutoAwesome,
                     onClick = null,
                     modifier = modifier,
                 )
@@ -126,7 +129,7 @@ private fun Pill(
             Icon(
                 imageVector = leadingIcon,
                 contentDescription = null,
-                tint = foreground,
+                tint = SparkGold,
                 modifier = Modifier.size(14.dp),
             )
         }
