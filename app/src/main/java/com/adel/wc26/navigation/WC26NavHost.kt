@@ -345,6 +345,9 @@ fun WC26NavHost(
                             navController.navigate(Destinations.MatchDetail(matchId))
                         }
                     },
+                    onSignInPrompt = {
+                        navController.navigate(Destinations.Login)
+                    },
                 )
             }
             composable<Destinations.Feed> {

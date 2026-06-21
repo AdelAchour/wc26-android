@@ -31,6 +31,8 @@ import com.adel.wc26.core.designsystem.theme.WC26Theme
 import com.adel.wc26.core.util.WC26DateTime
 import com.adel.wc26.feature.matches.domain.model.Match
 import com.adel.wc26.feature.matches.domain.model.MatchStatus
+import com.adel.wc26.feature.predictions.domain.model.Prediction
+import com.adel.wc26.feature.predictions.ui.PredictionChip
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -63,12 +65,14 @@ fun MatchCard(
     match: Match,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    prediction: Prediction? = null,
+    onPredictClick: (() -> Unit)? = null,
 ) {
     val isFinal = match.stage.equals("Final", ignoreCase = true)
     if (isFinal) {
-        FinalMatchCard(match = match, onClick = onClick, modifier = modifier)
+        FinalMatchCard(match = match, onClick = onClick, modifier = modifier, prediction = prediction, onPredictClick = onPredictClick)
     } else {
-        NormalMatchCard(match = match, onClick = onClick, modifier = modifier)
+        NormalMatchCard(match = match, onClick = onClick, modifier = modifier, prediction = prediction, onPredictClick = onPredictClick)
     }
 }
 
@@ -77,6 +81,8 @@ private fun NormalMatchCard(
     match: Match,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    prediction: Prediction? = null,
+    onPredictClick: (() -> Unit)? = null,
 ) {
     Card(
         modifier = modifier
@@ -90,7 +96,7 @@ private fun NormalMatchCard(
             MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
         )
     ) {
-        MatchCardContent(match = match, isFinal = false)
+        MatchCardContent(match = match, isFinal = false, prediction = prediction, onPredictClick = onPredictClick)
     }
 }
 
@@ -99,6 +105,8 @@ private fun FinalMatchCard(
     match: Match,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    prediction: Prediction? = null,
+    onPredictClick: (() -> Unit)? = null,
 ) {
     // Infinite transition for the rotating light effect
     val infiniteTransition = rememberInfiniteTransition(label = "goldBorderTransition")
@@ -161,7 +169,7 @@ private fun FinalMatchCard(
             MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
         )
     ) {
-        MatchCardContent(match = match, isFinal = true)
+        MatchCardContent(match = match, isFinal = true, prediction = prediction, onPredictClick = onPredictClick)
     }
 }
 
@@ -169,6 +177,8 @@ private fun FinalMatchCard(
 private fun MatchCardContent(
     match: Match,
     isFinal: Boolean,
+    prediction: Prediction? = null,
+    onPredictClick: (() -> Unit)? = null,
 ) {
     Column(modifier = Modifier.padding(Spacing.lg)) {
 
@@ -222,17 +232,32 @@ private fun MatchCardContent(
 
         Spacer(Modifier.padding(top = Spacing.md))
 
-        // --- Venue footer ---
+        // --- Venue footer + prediction chip ---
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = match.venue,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(modifier = Modifier.width(Spacing.xs))
-            TeamFlag(code = match.countryCode, size = DpSize(16.dp, 11.dp))
+            Row(
+                modifier = Modifier.weight(1f, fill = false),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = match.venue,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(modifier = Modifier.width(Spacing.xs))
+                TeamFlag(code = match.countryCode, size = DpSize(16.dp, 11.dp))
+            }
+            if (onPredictClick != null) {
+                Spacer(modifier = Modifier.width(Spacing.sm))
+                PredictionChip(
+                    match = match,
+                    prediction = prediction,
+                    onPredictClick = onPredictClick,
+                )
+            }
         }
     }
 }

@@ -14,6 +14,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,6 +31,8 @@ import com.adel.wc26.core.ui.toStringRes
 import com.adel.wc26.feature.matches.domain.MatchFilter
 import com.adel.wc26.feature.matches.domain.model.Match
 import com.adel.wc26.feature.matches.domain.model.MatchStatus
+import com.adel.wc26.feature.predictions.domain.model.Prediction
+import com.adel.wc26.feature.predictions.ui.PredictionBottomSheet
 import java.time.Instant
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -55,8 +60,11 @@ fun MatchesScreen(
     viewModel: MatchesViewModel = hiltViewModel(),
     isPickerMode: Boolean = false,
     onBackClick: () -> Unit = {},
+    onSignInPrompt: () -> Unit = {},
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    var sheetMatch by remember { mutableStateOf<Match?>(null) }
+
     MatchesContent(
         state = state,
         onFilterSelected = viewModel::onFilterSelected,
@@ -64,8 +72,25 @@ fun MatchesScreen(
         onMatchClick = onMatchClick,
         isPickerMode = isPickerMode,
         onBackClick = onBackClick,
+        predictions = state.predictions,
+        // No predict chips in picker mode (it's for choosing a match to post about).
+        onPredictClick = if (isPickerMode) null else { match ->
+            if (state.isLoggedIn) sheetMatch = match else onSignInPrompt()
+        },
         modifier = modifier,
     )
+
+    sheetMatch?.let { match ->
+        PredictionBottomSheet(
+            match = match,
+            existing = state.predictions[match.id],
+            onDismiss = { sheetMatch = null },
+            onSaved = {
+                viewModel.onPredictionSaved(it)
+                sheetMatch = null
+            },
+        )
+    }
 }
 
 /**
@@ -81,6 +106,8 @@ fun MatchesContent(
     modifier: Modifier = Modifier,
     isPickerMode: Boolean = false,
     onBackClick: () -> Unit = {},
+    predictions: Map<Long, Prediction> = emptyMap(),
+    onPredictClick: ((Match) -> Unit)? = null,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
 
@@ -158,6 +185,8 @@ fun MatchesContent(
                     MatchCard(
                         match = match,
                         onClick = { onMatchClick(match.id) },
+                        prediction = predictions[match.id],
+                        onPredictClick = onPredictClick?.let { cb -> { cb(match) } },
                     )
                 }
             }

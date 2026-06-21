@@ -263,4 +263,7 @@
     <string name="prediction_closed_missed">Predictions closed — you didn\'t pick</string>
     <string name="prediction_points_earned">+%1$d pts</string>
     <string name="prediction_points_zero">No points</string>
+    <string name="prediction_predict_cta">Predict</string>
+    <string name="prediction_score_short">%1$d–%2$d</string>
+    <string name="prediction_points_short">+%1$d</string>
 </resources>

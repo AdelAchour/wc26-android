@@ -2,6 +2,7 @@ package com.adel.wc26.feature.matches.ui.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.adel.wc26.core.datastore.TokenStore
 import com.adel.wc26.core.result.AppError
 import com.adel.wc26.core.result.DataResult
 import com.adel.wc26.feature.matches.data.MatchUpdateNotifier
@@ -9,6 +10,8 @@ import com.adel.wc26.feature.matches.domain.MatchFilter
 import com.adel.wc26.feature.matches.domain.MatchRepository
 import com.adel.wc26.feature.matches.domain.model.Match
 import com.adel.wc26.feature.matches.domain.model.MatchStatus
+import com.adel.wc26.feature.predictions.domain.PredictionRepository
+import com.adel.wc26.feature.predictions.domain.model.Prediction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +31,8 @@ data class MatchesUiState(
     val matches: List<Match> = emptyList(),
     val loading: Boolean = true,
     val error: AppError? = null,
+    val isLoggedIn: Boolean = false,
+    val predictions: Map<Long, Prediction> = emptyMap(),
 ) {
     /** True when a successful load returned no matches for this filter. */
     val isEmpty: Boolean
@@ -38,6 +43,8 @@ data class MatchesUiState(
 class MatchesViewModel @Inject constructor(
     private val matchRepository: MatchRepository,
     private val matchUpdateNotifier: MatchUpdateNotifier,
+    private val predictionRepository: PredictionRepository,
+    private val tokenStore: TokenStore,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MatchesUiState())
@@ -45,6 +52,16 @@ class MatchesViewModel @Inject constructor(
 
     init {
         load(MatchFilter.UPCOMING)
+
+        // Track login + load the user's predictions for the per-card chips.
+        viewModelScope.launch {
+            tokenStore.tokenFlow.collect { token ->
+                val loggedIn = token != null
+                _uiState.update { it.copy(isLoggedIn = loggedIn) }
+                if (loggedIn) loadPredictions()
+                else _uiState.update { it.copy(predictions = emptyMap()) }
+            }
+        }
 
         // Listen for live updates and update the matching item in the list
         // Listen for live updates and update the matching item in the list
@@ -81,6 +98,21 @@ class MatchesViewModel @Inject constructor(
     /** Retry the current filter (used by the error state). */
     fun retry() {
         load(_uiState.value.filter)
+    }
+
+    /** Reflect a freshly-saved prediction in the chips without a round-trip. */
+    fun onPredictionSaved(prediction: Prediction) {
+        _uiState.update { it.copy(predictions = it.predictions + (prediction.matchId to prediction)) }
+    }
+
+    private fun loadPredictions() {
+        viewModelScope.launch {
+            when (val result = predictionRepository.getMyPredictions()) {
+                is DataResult.Success ->
+                    _uiState.update { it.copy(predictions = result.data.associateBy { p -> p.matchId }) }
+                is DataResult.Error -> Unit // non-critical; chips just won't show picks
+            }
+        }
     }
 
     private fun load(filter: MatchFilter) {
