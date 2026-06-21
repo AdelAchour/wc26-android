@@ -246,4 +246,21 @@
     <!-- Push Notifications Channel -->
     <string name="notification_channel_name">Push Notifications</string>
     <string name="notification_channel_description">Notifications for likes, replies, and other content interactions.</string>
+
+    <!-- Predictions -->
+    <string name="prediction_your_prediction">Your prediction</string>
+    <string name="prediction_locks_at">Locks at kickoff · %1$s</string>
+    <string name="prediction_submit">Submit prediction</string>
+    <string name="prediction_update">Update prediction</string>
+    <string name="prediction_rules_footnote">Editable until kickoff · extra time counts, penalties don\'t</string>
+    <string name="prediction_increase">Increase score</string>
+    <string name="prediction_decrease">Decrease score</string>
+    <string name="prediction_open_cta">Predictions open</string>
+    <string name="prediction_open_tap">Tap to make your pick</string>
+    <string name="prediction_your_pick">Your pick: %1$d–%2$d</string>
+    <string name="prediction_editable_until_kickoff">Editable until kickoff</string>
+    <string name="prediction_locked">Locked</string>
+    <string name="prediction_closed_missed">Predictions closed — you didn\'t pick</string>
+    <string name="prediction_points_earned">+%1$d pts</string>
+    <string name="prediction_points_zero">No points</string>
 </resources>

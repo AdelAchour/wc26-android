@@ -49,6 +49,9 @@ import com.adel.wc26.feature.matches.domain.model.Match
 import com.adel.wc26.feature.matches.domain.model.MatchStatus
 import com.adel.wc26.feature.posts.domain.post.Post
 import com.adel.wc26.feature.posts.ui.component.postsThread
+import com.adel.wc26.feature.predictions.domain.model.Prediction
+import com.adel.wc26.feature.predictions.ui.PredictionBottomSheet
+import com.adel.wc26.feature.predictions.ui.PredictionStrip
 import android.widget.Toast
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
@@ -91,6 +94,7 @@ fun MatchDetailScreen(
     val context = LocalContext.current
 
     var postToDelete by remember { mutableStateOf<Post?>(null) }
+    var showPredictionSheet by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier,
@@ -168,6 +172,10 @@ fun MatchDetailScreen(
             onAuthorClick = onAuthorClick,
             onLikeClick = viewModel::toggleLike,
             onDeleteClick = { postToDelete = it },
+            prediction = state.prediction,
+            onPredictClick = {
+                if (state.isLoggedIn) showPredictionSheet = true else onSignInPrompt()
+            },
             modifier = Modifier.padding(padding),
         )
 
@@ -196,6 +204,20 @@ fun MatchDetailScreen(
                 }
             )
         }
+
+        if (showPredictionSheet) {
+            state.match?.let { match ->
+                PredictionBottomSheet(
+                    match = match,
+                    existing = state.prediction,
+                    onDismiss = { showPredictionSheet = false },
+                    onSaved = {
+                        viewModel.onPredictionSaved(it)
+                        showPredictionSheet = false
+                    },
+                )
+            }
+        }
     }
 }
 
@@ -215,6 +237,8 @@ fun MatchDetailContent(
     onAuthorClick: (Long) -> Unit,
     onLikeClick: (Post) -> Unit,
     onDeleteClick: (Post) -> Unit,
+    prediction: Prediction?,
+    onPredictClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val emptyMessage = stringResource(R.string.match_detail_thread_empty)
@@ -242,6 +266,14 @@ fun MatchDetailContent(
                     // --- Header: the match itself ---
                     item {
                         MatchHeader(match = state.match)
+                        PredictionStrip(
+                            match = state.match,
+                            prediction = prediction,
+                            onClick = onPredictClick,
+                            modifier = Modifier
+                                .padding(horizontal = Spacing.lg)
+                                .padding(bottom = Spacing.md),
+                        )
                         HorizontalDivider()
                         Text(
                             text = stringResource(R.string.match_detail_thread),
