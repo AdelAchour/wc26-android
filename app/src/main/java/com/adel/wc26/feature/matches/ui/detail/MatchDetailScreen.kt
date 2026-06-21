@@ -211,10 +211,7 @@ fun MatchDetailScreen(
                     match = match,
                     existing = match.prediction,
                     onDismiss = { showPredictionSheet = false },
-                    onSaved = {
-                        viewModel.onPredictionSaved(it)
-                        showPredictionSheet = false
-                    },
+                    onSaved = { showPredictionSheet = false },
                 )
             }
         }

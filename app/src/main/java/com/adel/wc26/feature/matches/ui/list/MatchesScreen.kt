@@ -84,10 +84,7 @@ fun MatchesScreen(
             match = match,
             existing = match.prediction,
             onDismiss = { sheetMatch = null },
-            onSaved = {
-                viewModel.onPredictionSaved(it)
-                sheetMatch = null
-            },
+            onSaved = { sheetMatch = null },
         )
     }
 }

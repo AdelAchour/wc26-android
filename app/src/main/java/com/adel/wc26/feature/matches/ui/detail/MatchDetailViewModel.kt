@@ -28,6 +28,7 @@ import androidx.navigation.toRoute
 import androidx.paging.filter
 import androidx.paging.map
 import com.adel.wc26.feature.matches.data.MatchUpdateNotifier
+import com.adel.wc26.feature.predictions.data.PredictionUpdateNotifier
 import com.adel.wc26.feature.posts.data.PostCreationNotifier
 import com.adel.wc26.feature.posts.data.PostDeletionManager
 import com.adel.wc26.feature.posts.data.PostLikeManager
@@ -59,6 +60,7 @@ class MatchDetailViewModel @Inject constructor(
     private val postCreationNotifier: PostCreationNotifier,
     private val tokenStore: TokenStore,
     private val matchUpdateNotifier: MatchUpdateNotifier,
+    private val predictionUpdateNotifier: PredictionUpdateNotifier,
 ) : ViewModel() {
 
     // Expose the current user's ID for showing delete actions
@@ -119,6 +121,13 @@ class MatchDetailViewModel @Inject constructor(
             }
         }
         loadMatch()
+
+        // Reflect prediction saves from any screen (e.g. the matches list sheet).
+        viewModelScope.launch {
+            predictionUpdateNotifier.predictionUpdated.collect { prediction ->
+                if (prediction.matchId == matchId) onPredictionSaved(prediction)
+            }
+        }
 
         // Listen for new posts and refresh if they belong to this match
         viewModelScope.launch {

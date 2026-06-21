@@ -10,6 +10,7 @@ import com.adel.wc26.feature.matches.domain.MatchFilter
 import com.adel.wc26.feature.matches.domain.MatchRepository
 import com.adel.wc26.feature.matches.domain.model.Match
 import com.adel.wc26.feature.matches.domain.model.MatchStatus
+import com.adel.wc26.feature.predictions.data.PredictionUpdateNotifier
 import com.adel.wc26.feature.predictions.domain.model.Prediction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +43,7 @@ class MatchesViewModel @Inject constructor(
     private val matchRepository: MatchRepository,
     private val matchUpdateNotifier: MatchUpdateNotifier,
     private val tokenStore: TokenStore,
+    private val predictionUpdateNotifier: PredictionUpdateNotifier,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MatchesUiState())
@@ -49,6 +51,11 @@ class MatchesViewModel @Inject constructor(
 
     init {
         load(MatchFilter.UPCOMING)
+
+        // Reflect prediction saves from any screen (the sheet broadcasts them).
+        viewModelScope.launch {
+            predictionUpdateNotifier.predictionUpdated.collect { onPredictionSaved(it) }
+        }
 
         // Track login; reload matches when auth changes so embedded predictions refresh.
         viewModelScope.launch {

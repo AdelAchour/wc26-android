@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.adel.wc26.core.result.AppError
 import com.adel.wc26.core.result.DataResult
+import com.adel.wc26.feature.predictions.data.PredictionUpdateNotifier
 import com.adel.wc26.feature.predictions.domain.PredictionRepository
 import com.adel.wc26.feature.predictions.domain.model.Prediction
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PredictionSheetViewModel @Inject constructor(
     private val repository: PredictionRepository,
+    private val predictionUpdateNotifier: PredictionUpdateNotifier,
 ) : ViewModel() {
 
     data class UiState(
@@ -54,7 +56,11 @@ class PredictionSheetViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(submitting = true, error = null) }
             when (val result = repository.upsertPrediction(current.matchId, current.home, current.away)) {
-                is DataResult.Success -> _state.update { it.copy(submitting = false, saved = result.data) }
+                is DataResult.Success -> {
+                    // Broadcast so every screen showing this match updates live.
+                    predictionUpdateNotifier.notifyPredictionUpdated(result.data)
+                    _state.update { it.copy(submitting = false, saved = result.data) }
+                }
                 is DataResult.Error -> _state.update { it.copy(submitting = false, error = result.error) }
             }
         }
