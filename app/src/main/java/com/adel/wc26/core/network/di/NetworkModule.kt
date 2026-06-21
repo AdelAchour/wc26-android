@@ -8,6 +8,7 @@ import com.adel.wc26.feature.matches.data.MatchApi
 import com.adel.wc26.feature.posts.data.comment.CommentApi
 import com.adel.wc26.feature.posts.data.like.LikeApi
 import com.adel.wc26.feature.posts.data.post.PostApi
+import com.adel.wc26.feature.predictions.data.PredictionApi
 import com.adel.wc26.feature.profile.data.UserApi
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
@@ -100,4 +101,9 @@ object NetworkModule {
     @Singleton
     fun provideUserApi(retrofit: Retrofit): UserApi =
         retrofit.create(UserApi::class.java)
+
+    @Provides
+    @Singleton
+    fun providePredictionApi(retrofit: Retrofit): PredictionApi =
+        retrofit.create(PredictionApi::class.java)
 }
