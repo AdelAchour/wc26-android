@@ -7,8 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.outlined.SportsSoccer
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -54,7 +53,7 @@ fun PredictionChip(
                 text = stringResource(R.string.prediction_predict_cta),
                 background = scheme.primaryContainer,
                 foreground = scheme.onPrimaryContainer,
-                leadingIcon = Icons.Outlined.SportsSoccer,
+                leadingIcon = Icons.Default.AutoAwesome,
                 onClick = onPredictClick,
                 modifier = modifier,
             )
@@ -63,7 +62,7 @@ fun PredictionChip(
                 text = stringResource(R.string.prediction_score_short, prediction.homeScore, prediction.awayScore),
                 background = scheme.secondaryContainer,
                 foreground = scheme.onSecondaryContainer,
-                leadingIcon = Icons.Default.Check,
+                leadingIcon = Icons.Default.AutoAwesome,
                 onClick = onPredictClick,
                 modifier = modifier,
             )
@@ -74,7 +73,7 @@ fun PredictionChip(
                 text = stringResource(R.string.prediction_score_short, prediction.homeScore, prediction.awayScore),
                 background = scheme.surfaceVariant.copy(alpha = 0.5f),
                 foreground = scheme.onSurfaceVariant,
-                leadingIcon = null,
+                leadingIcon = Icons.Default.AutoAwesome,
                 onClick = null,
                 modifier = modifier,
             )
