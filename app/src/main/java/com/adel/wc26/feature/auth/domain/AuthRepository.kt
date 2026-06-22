@@ -37,4 +37,10 @@ interface AuthRepository {
 
     /** Clears the stored session. */
     suspend fun logout()
+
+    /** Requests a password reset code be sent to the given email. */
+    suspend fun forgotPassword(email: String): DataResult<String>
+
+    /** Resets the password using the emailed code. */
+    suspend fun resetPassword(email: String, code: String, newPassword: String): DataResult<String>
 }

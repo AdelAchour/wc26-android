@@ -35,6 +35,12 @@ object Destinations {
     @Serializable
     data object Register
 
+    @Serializable
+    data object ForgotPassword
+
+    @Serializable
+    data class ResetPassword(val email: String)
+
     // --- Top-level tabs (bottom nav) ---
     @Serializable
     data class Matches(val isPickerMode: Boolean = false)

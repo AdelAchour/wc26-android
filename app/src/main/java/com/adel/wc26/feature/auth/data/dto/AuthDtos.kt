@@ -35,3 +35,23 @@ data class UpdateProfileRequest(
     val avatarUrl: String? = null,
     val bio: String? = null,
 )
+
+/** Request body for POST /auth/forgot-password. */
+@Serializable
+data class ForgotPasswordRequest(val email: String)
+
+/** Request body for POST /auth/reset-password. */
+@Serializable
+data class ResetPasswordRequest(
+    val email: String,
+    val code: String,
+    val newPassword: String,
+)
+
+/** Generic success response carrying a message. */
+@Serializable
+data class MessageResponse(val message: String)
+
+/** Error response body with an error field. */
+@Serializable
+data class ErrorResponse(val error: String)

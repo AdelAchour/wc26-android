@@ -9,6 +9,7 @@ enum class ValidationError {
     UsernameRequired, UsernameFormat,
     PasswordRequired, PasswordTooShort,
     DisplayNameRequired, DisplayNameTooLong,
+    CodeRequired,
 }
 
 /**
@@ -52,6 +53,11 @@ object AuthValidation {
     fun displayNameError(displayName: String): ValidationError? = when {
         displayName.isBlank() -> ValidationError.DisplayNameRequired
         displayName.length > MAX_DISPLAY_NAME -> ValidationError.DisplayNameTooLong
+        else -> null
+    }
+
+    fun codeError(code: String): ValidationError? = when {
+        code.isBlank() -> ValidationError.CodeRequired
         else -> null
     }
 }

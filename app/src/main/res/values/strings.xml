@@ -299,4 +299,21 @@
     <string name="prediction_rules_leaderboard_body">Points add up across every match. The leaderboard ranks players by total points; ties are broken by who has more exact scores.</string>
     <string name="prediction_score_short">%1$d–%2$d</string>
     <string name="prediction_points_short">+%1$d</string>
+
+    <!-- Form Validation -->
+    <string name="validation_code_required">Code is required</string>
+
+    <!-- Forgot Password screen -->
+    <string name="forgot_password_title">Forgot password?</string>
+    <string name="forgot_password_subtitle">Enter your email and we\'ll send you a 6-digit code to reset your password.</string>
+    <string name="forgot_password_action">Send code</string>
+    <string name="forgot_password_link">Forgot password?</string>
+
+    <!-- Reset Password screen -->
+    <string name="reset_password_title">Reset password</string>
+    <string name="reset_password_info">We\'ve sent a 6-digit code to your email. Enter it below along with your new password. The code expires in 10 minutes.</string>
+    <string name="reset_password_code_label">6-digit code</string>
+    <string name="reset_password_new_password_label">New password</string>
+    <string name="reset_password_action">Reset password</string>
+    <string name="reset_password_success">Password reset successful. Please log in with your new password.</string>
 </resources>

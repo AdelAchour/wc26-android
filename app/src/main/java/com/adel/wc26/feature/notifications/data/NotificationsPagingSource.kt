@@ -26,7 +26,7 @@ class NotificationsPagingSource(
             }
             is DataResult.Error -> {
                 LoadResult.Error(
-                    result.cause ?: IllegalStateException(result.error.name)
+                    result.cause ?: IllegalStateException(result.error.toString())
                 )
             }
         }

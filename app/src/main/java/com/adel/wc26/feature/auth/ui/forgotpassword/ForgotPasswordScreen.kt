@@ -1,4 +1,4 @@
-package com.adel.wc26.feature.auth.ui.login
+package com.adel.wc26.feature.auth.ui.forgotpassword
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -16,8 +16,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -26,65 +27,64 @@ import com.adel.wc26.core.designsystem.component.WC26PrimaryButton
 import com.adel.wc26.core.designsystem.component.WC26TextField
 import com.adel.wc26.core.designsystem.theme.Spacing
 import com.adel.wc26.core.designsystem.theme.WC26Theme
+import com.adel.wc26.core.ui.toDisplayString
 import com.adel.wc26.core.ui.toStringRes
 
 /**
- * Login screen — stateful entry point. Collects the ViewModel state and
- * delegates rendering to [LoginContent].
+ * Forgot Password screen — stateful entry point. Collects the ViewModel
+ * state and delegates rendering to [ForgotPasswordContent].
  */
 @Composable
-fun LoginScreen(
-    onLoggedIn: () -> Unit,
-    onGoToRegister: () -> Unit,
-    onForgotPassword: () -> Unit,
+fun ForgotPasswordScreen(
+    onCodeSent: (email: String) -> Unit,
+    onBackToLogin: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: LoginViewModel = hiltViewModel(),
+    viewModel: ForgotPasswordViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.success) {
-        if (state.success) onLoggedIn()
+        if (state.success) onCodeSent(state.email)
     }
 
-    LoginContent(
+    ForgotPasswordContent(
         state = state,
         onEmailChange = viewModel::onEmailChange,
-        onPasswordChange = viewModel::onPasswordChange,
         onSubmit = viewModel::submit,
-        onGoToRegister = onGoToRegister,
-        onForgotPassword = onForgotPassword,
+        onBackToLogin = onBackToLogin,
         modifier = modifier,
     )
 }
 
 /**
- * Login screen — stateless content. A pure function of [LoginUiState];
- * previewable without Hilt.
+ * Forgot Password screen — stateless content. A pure function of
+ * [ForgotPasswordUiState]; previewable without Hilt.
  */
 @Composable
-fun LoginContent(
-    state: LoginUiState,
+fun ForgotPasswordContent(
+    state: ForgotPasswordUiState,
     onEmailChange: (String) -> Unit,
-    onPasswordChange: (String) -> Unit,
     onSubmit: () -> Unit,
-    onGoToRegister: () -> Unit,
-    onForgotPassword: () -> Unit,
+    onBackToLogin: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
+
     Column(
         modifier = modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(rememberScrollState()
+            )
             .padding(Spacing.xl),
     ) {
         Spacer(Modifier.height(Spacing.xl))
 
         Text(
-            text = stringResource(R.string.login_title),
+            text = stringResource(R.string.forgot_password_title),
             style = MaterialTheme.typography.displaySmall,
         )
         Text(
-            text = stringResource(R.string.login_subtitle),
+            text = stringResource(R.string.forgot_password_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = Spacing.xs),
@@ -100,41 +100,19 @@ fun LoginContent(
             errorText = state.emailError?.let { stringResource(it.toStringRes()) },
         )
 
-        Spacer(Modifier.height(Spacing.sm))
-
-        WC26TextField(
-            value = state.password,
-            onValueChange = onPasswordChange,
-            label = stringResource(R.string.field_password),
-            isPassword = true,
-            errorText = state.passwordError?.let { stringResource(it.toStringRes()) },
-        )
-
-        Spacer(Modifier.height(Spacing.xs))
-
-        TextButton(
-            onClick = onForgotPassword,
-            modifier = Modifier.align(Alignment.End),
-        ) {
-            Text(
-                text = stringResource(R.string.forgot_password_link),
-                style = MaterialTheme.typography.bodySmall,
-            )
-        }
-
         state.formError?.let { error ->
             Spacer(Modifier.height(Spacing.sm))
             Text(
-                text = stringResource(error.toStringRes()),
+                text = error.toDisplayString(context),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
             )
         }
 
-        Spacer(Modifier.height(Spacing.md))
+        Spacer(Modifier.height(Spacing.xl))
 
         WC26PrimaryButton(
-            text = stringResource(R.string.login_action),
+            text = stringResource(R.string.forgot_password_action),
             onClick = onSubmit,
             enabled = state.canSubmit,
             loading = state.loading,
@@ -147,8 +125,8 @@ fun LoginContent(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            TextButton(onClick = onGoToRegister) {
-                Text(stringResource(R.string.login_go_to_register))
+            TextButton(onClick = onBackToLogin) {
+                Text(stringResource(R.string.login_action))
             }
         }
     }
@@ -156,15 +134,13 @@ fun LoginContent(
 
 @Preview(showBackground = true)
 @Composable
-private fun LoginContentPreview() {
+private fun ForgotPasswordContentPreview() {
     WC26Theme {
-        LoginContent(
-            state = LoginUiState(email = "fan@example.com", password = "secret123"),
+        ForgotPasswordContent(
+            state = ForgotPasswordUiState(email = "fan@example.com"),
             onEmailChange = {},
-            onPasswordChange = {},
             onSubmit = {},
-            onGoToRegister = {},
-            onForgotPassword = {},
+            onBackToLogin = {},
         )
     }
 }

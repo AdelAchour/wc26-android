@@ -46,6 +46,8 @@ import com.adel.wc26.feature.auth.ui.splash.SplashViewModel
 import com.adel.wc26.feature.auth.ui.welcome.WelcomeScreen
 import com.adel.wc26.feature.auth.ui.login.LoginScreen
 import com.adel.wc26.feature.auth.ui.register.RegisterScreen
+import com.adel.wc26.feature.auth.ui.forgotpassword.ForgotPasswordScreen
+import com.adel.wc26.feature.auth.ui.resetpassword.ResetPasswordScreen
 import com.adel.wc26.feature.profile.ui.ProfileScreen
 import com.adel.wc26.feature.profile.ui.userprofile.UserProfileScreen
 import com.adel.wc26.feature.settings.ui.SettingsScreen
@@ -316,6 +318,9 @@ fun WC26NavHost(
                             launchSingleTop = true
                         }
                     },
+                    onForgotPassword = {
+                        navController.navigate(Destinations.ForgotPassword)
+                    },
                 )
             }
             composable<Destinations.Register> {
@@ -329,6 +334,28 @@ fun WC26NavHost(
                         navController.navigate(Destinations.Login) {
                             launchSingleTop = true
                         }
+                    },
+                )
+            }
+            composable<Destinations.ForgotPassword> {
+                ForgotPasswordScreen(
+                    onCodeSent = { email ->
+                        navController.navigate(Destinations.ResetPassword(email))
+                    },
+                    onBackToLogin = {
+                        navController.popBackStack()
+                    },
+                )
+            }
+            composable<Destinations.ResetPassword> {
+                ResetPasswordScreen(
+                    onPasswordReset = {
+                        navController.navigate(Destinations.Login) {
+                            popUpTo(Destinations.Login) { inclusive = true }
+                        }
+                    },
+                    onBack = {
+                        navController.popBackStack()
                     },
                 )
             }
@@ -547,4 +574,6 @@ fun WC26NavHost(
 private fun isInAuthFlow(currentDest: NavDestination?) : Boolean = currentDest?.hasRoute(Destinations.Splash::class) == true ||
         currentDest?.hasRoute(Destinations.Welcome::class) == true ||
         currentDest?.hasRoute(Destinations.Login::class) == true ||
-        currentDest?.hasRoute(Destinations.Register::class) == true
+        currentDest?.hasRoute(Destinations.Register::class) == true ||
+        currentDest?.hasRoute(Destinations.ForgotPassword::class) == true ||
+        currentDest?.hasRoute(Destinations.ResetPassword::class) == true

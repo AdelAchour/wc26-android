@@ -1,5 +1,6 @@
 package com.adel.wc26.core.ui
 
+import android.content.Context
 import androidx.annotation.StringRes
 import com.adel.wc26.R
 import com.adel.wc26.core.result.AppError
@@ -21,4 +22,16 @@ fun AppError.toStringRes(): Int = when (this) {
     AppError.BadRequest -> R.string.error_bad_request
     AppError.Server -> R.string.error_server
     AppError.Unknown -> R.string.error_unknown
+    is AppError.ServerMessage -> R.string.error_unknown
+}
+
+/**
+ * Returns a display-ready error string.
+ *
+ * For [AppError.ServerMessage] returns the raw server message directly.
+ * For all other errors, resolves to a localized string resource.
+ */
+fun AppError.toDisplayString(context: Context): String = when (this) {
+    is AppError.ServerMessage -> message
+    else -> context.getString(toStringRes())
 }

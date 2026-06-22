@@ -18,4 +18,5 @@ fun ValidationError.toStringRes(): Int = when (this) {
     ValidationError.PasswordTooShort -> R.string.validation_password_too_short
     ValidationError.DisplayNameRequired -> R.string.validation_display_name_required
     ValidationError.DisplayNameTooLong -> R.string.validation_display_name_too_long
+    ValidationError.CodeRequired -> R.string.validation_code_required
 }

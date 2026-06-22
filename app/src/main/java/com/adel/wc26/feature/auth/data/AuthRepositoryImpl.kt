@@ -2,14 +2,18 @@ package com.adel.wc26.feature.auth.data
 
 import com.adel.wc26.core.datastore.TokenStore
 import com.adel.wc26.core.network.apiCall
+import com.adel.wc26.core.network.apiCallWithServerMessage
 import com.adel.wc26.core.result.DataResult
 import com.adel.wc26.core.result.map
+import com.adel.wc26.feature.auth.data.dto.ForgotPasswordRequest
 import com.adel.wc26.feature.auth.data.dto.LoginRequest
 import com.adel.wc26.feature.auth.data.dto.RegisterRequest
+import com.adel.wc26.feature.auth.data.dto.ResetPasswordRequest
 import com.adel.wc26.feature.auth.data.dto.AuthResponse
 import com.adel.wc26.feature.auth.domain.AuthRepository
 import com.adel.wc26.feature.auth.domain.AuthUser
 import com.adel.wc26.feature.profile.domain.UserRole
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,6 +25,7 @@ import javax.inject.Singleton
 class AuthRepositoryImpl @Inject constructor(
     private val authApi: AuthApi,
     private val tokenStore: TokenStore,
+    private val json: Json,
 ) : AuthRepository {
 
     override suspend fun register(
@@ -54,6 +59,22 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun logout() {
         tokenStore.clear()
+    }
+
+    override suspend fun forgotPassword(email: String): DataResult<String> {
+        return apiCallWithServerMessage(json) {
+            authApi.forgotPassword(ForgotPasswordRequest(email))
+        }.map { it.message }
+    }
+
+    override suspend fun resetPassword(
+        email: String,
+        code: String,
+        newPassword: String,
+    ): DataResult<String> {
+        return apiCallWithServerMessage(json) {
+            authApi.resetPassword(ResetPasswordRequest(email, code, newPassword))
+        }.map { it.message }
     }
 
     /**
